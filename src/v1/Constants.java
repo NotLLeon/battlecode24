@@ -5,6 +5,18 @@ import battlecode.common.*;
 public class Constants {
 
     static RobotController rc;
+
+    static final Direction[] directions = {
+        Direction.NORTH,
+        Direction.NORTHEAST,
+        Direction.EAST,
+        Direction.SOUTHEAST,
+        Direction.SOUTH,
+        Direction.SOUTHWEST,
+        Direction.WEST,
+        Direction.NORTHWEST,
+};
+
     // weights for explore
     static int HIGH_WEIGHT_DIRECTION = 10;
     static int MID_WEIGHT_DIRECTION = 4;

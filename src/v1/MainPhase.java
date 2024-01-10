@@ -4,27 +4,15 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.TrapType;
 
 import static v1.Constants.rc;
+import static v1.Constants.directions;
 import static v1.Random.rng;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase {
-
-    /** Array containing all the possible movement directions. */
-    static final Direction[] directions = {
-        Direction.NORTH,
-        Direction.NORTHEAST,
-        Direction.EAST,
-        Direction.SOUTHEAST,
-        Direction.SOUTH,
-        Direction.SOUTHWEST,
-        Direction.WEST,
-        Direction.NORTHWEST,
-    };
 
     public static void run() throws GameActionException {
             if (rc.canPickupFlag(rc.getLocation())){
@@ -56,10 +44,10 @@ public class MainPhase {
             if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && rng.nextInt() % 37 == 1)
                 rc.build(TrapType.EXPLOSIVE, prevLoc);
             // We can also move our code into different methods or classes to better organize it!
-            updateEnemyRobots(rc);
+            updateEnemyRobots();
     }
 
-    public static void updateEnemyRobots(RobotController rc) throws GameActionException{
+    public static void updateEnemyRobots() throws GameActionException{
         // Sensing methods can be passed in a radius of -1 to automatically 
         // use the largest possible value.
         RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
