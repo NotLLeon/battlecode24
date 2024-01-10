@@ -2,20 +2,11 @@ package v1;
 
 import battlecode.common.Direction;
 
+import static v1.Constants.directions;
+
 public class Random {
 
     static java.util.Random rng = null;
-
-    static final Direction[] directions = {
-            Direction.NORTH,
-            Direction.NORTHEAST,
-            Direction.EAST,
-            Direction.SOUTHEAST,
-            Direction.SOUTH,
-            Direction.SOUTHWEST,
-            Direction.WEST,
-            Direction.NORTHWEST,
-    };
 
     static void initRandom(int seed) {
         rng = new java.util.Random(seed);
