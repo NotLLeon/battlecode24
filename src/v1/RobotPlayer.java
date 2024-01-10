@@ -68,10 +68,11 @@ public strictfp class RobotPlayer {
                     if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
                 }
                 else {
-                    if (turnCount < 200) {
+                    if (turnCount < GameConstants.SETUP_ROUNDS) {
                         // we are in setup phase
                         SetupPhase.run();
                     } else {
+                        // else run main phase logic
                         MainPhase.run();
                     }
                 }

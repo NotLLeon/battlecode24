@@ -2,6 +2,8 @@ package v1;
 
 import battlecode.common.*;
 
+import static v1.Constants.rc;
+
 public class Explore {
     static int prevlocIdx = 0;
     static int numMoves = 0;
@@ -9,7 +11,7 @@ public class Explore {
 
     static Direction prevDir;
 
-    public static MapLocation [] getAllDetectableWalls(RobotController rc) throws GameActionException {
+    public static MapLocation [] getAllDetectableWalls() throws GameActionException {
         MapLocation [] detectedAreas = rc.getAllLocationsWithinRadiusSquared(rc.getLocation(), 4);
         for (int i = 0; i < detectedAreas.length; ++i) {
             MapInfo info = rc.senseMapInfo(detectedAreas[i]);
@@ -18,7 +20,7 @@ public class Explore {
         return detectedAreas;
     }
 
-    public static Direction exploreAwayFromLoc(RobotController rc, MapLocation loc) throws GameActionException {
+    public static Direction exploreAwayFromLoc(MapLocation loc) throws GameActionException {
         MapLocation curLoc = rc.getLocation();
         Direction locDir = curLoc.directionTo(loc);
 
@@ -35,7 +37,7 @@ public class Explore {
             weights[(dirIndex+5)%8] *= Constants.HIGH_WEIGHT_DIRECTION;
             weights[(dirIndex+6)%8] *= Constants.HIGH_WEIGHT_DIRECTION;
         }
-        MapLocation [] unmoveableAreas = getAllDetectableWalls(rc);
+        MapLocation [] unmoveableAreas = getAllDetectableWalls();
         for (MapLocation wall : unmoveableAreas) {
             if (wall == null) continue;
             weights[Random.getDirectionOrderNum(curLoc.directionTo(wall))] = 0;
@@ -69,7 +71,7 @@ public class Explore {
         return Random.nextDirWeighted(weights, totalWeight);
     }
 
-    public static void exploreNewArea(RobotController rc) throws GameActionException {
+    public static void exploreNewArea() throws GameActionException {
         if (!rc.isMovementReady()) return;
 
         int numClosePrevLocs = 0;
@@ -92,7 +94,7 @@ public class Explore {
                     }
                     rc.move(dir);
                     // for empty carriers
-                    exploreNewArea(rc);
+                    exploreNewArea();
                     break;
                 }
                 dir = dir.rotateLeft();
@@ -103,7 +105,7 @@ public class Explore {
             RobotInfo [] robots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
             boolean nearbyEnemy = robots.length > 0 ? true : false;
             if (numMoves % Constants.MOVES_TO_TRACK_LOCATION == 0 || !rc.canMove(dir) || nearbyEnemy) {
-                dir = exploreAwayFromLoc(rc, getAvgLocation(prevLocs));
+                dir = exploreAwayFromLoc(getAvgLocation(prevLocs));
             }
             if(dir != Direction.CENTER) {
                 if ((++numMoves) % Constants.MOVES_TO_TRACK_LOCATION == 0) {
@@ -113,7 +115,7 @@ public class Explore {
                 }
                 prevDir = dir;
                 rc.move(dir);
-                exploreNewArea(rc);
+                exploreNewArea();
             }
         }
     }
