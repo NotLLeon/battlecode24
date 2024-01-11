@@ -4,14 +4,14 @@ import battlecode.common.*;
 
 import static v1.Constants.rc;
 import static v1.Constants.directions;
-import static v1.Constants.NUM_TRACKED_LOCATIONS;
-import static v1.Constants.HIGH_WEIGHT_DIRECTION;
-import static v1.Constants.MOVES_TO_TRACK_LOCATION;
+import static v1.Constants.EXPLORE_NUM_TRACKED_LOCATIONS;
+import static v1.Constants.EXPLORE_HIGH_WEIGHT_DIRECTION;
+import static v1.Constants.EXPLORE_MOVES_TO_TRACK_LOCATION;
 
 public class Explore {
     static int prevlocIdx = 0;
     static int numMoves = 0;
-    static MapLocation[] prevLocs = new MapLocation[NUM_TRACKED_LOCATIONS];
+    static MapLocation[] prevLocs = new MapLocation[EXPLORE_NUM_TRACKED_LOCATIONS];
 
     static Direction prevDir;
 
@@ -35,11 +35,11 @@ public class Explore {
             // Directions pointing towards loc lowest weight
             // Directions away from loc higher weight
             int dirIndex = Random.getDirectionOrderNum(locDir);
-            weights[(dirIndex+2)%8] *= HIGH_WEIGHT_DIRECTION;
-            weights[(dirIndex+3)%8] *= HIGH_WEIGHT_DIRECTION;
-            weights[(dirIndex+4)%8] *= HIGH_WEIGHT_DIRECTION;
-            weights[(dirIndex+5)%8] *= HIGH_WEIGHT_DIRECTION;
-            weights[(dirIndex+6)%8] *= HIGH_WEIGHT_DIRECTION;
+            weights[(dirIndex+2)%8] *= EXPLORE_HIGH_WEIGHT_DIRECTION;
+            weights[(dirIndex+3)%8] *= EXPLORE_HIGH_WEIGHT_DIRECTION;
+            weights[(dirIndex+4)%8] *= EXPLORE_HIGH_WEIGHT_DIRECTION;
+            weights[(dirIndex+5)%8] *= EXPLORE_HIGH_WEIGHT_DIRECTION;
+            weights[(dirIndex+6)%8] *= EXPLORE_HIGH_WEIGHT_DIRECTION;
         }
         MapLocation [] unmoveableAreas = getAllDetectableWalls();
         for (MapLocation wall : unmoveableAreas) {
@@ -59,9 +59,9 @@ public class Explore {
             weights[dirIndex] = 0;
             weights[(dirIndex+1)%8] = 0;
             weights[(dirIndex+7)%8] = 0;
-            weights[(dirIndex+3)%8] *= HIGH_WEIGHT_DIRECTION;
-            weights[(dirIndex+4)%8] *= HIGH_WEIGHT_DIRECTION;
-            weights[(dirIndex+5)%8] *= HIGH_WEIGHT_DIRECTION;
+            weights[(dirIndex+3)%8] *= EXPLORE_HIGH_WEIGHT_DIRECTION;
+            weights[(dirIndex+4)%8] *= EXPLORE_HIGH_WEIGHT_DIRECTION;
+            weights[(dirIndex+5)%8] *= EXPLORE_HIGH_WEIGHT_DIRECTION;
             break;
         }
 
@@ -83,7 +83,7 @@ public class Explore {
             if (loc != null && rc.canSenseLocation(loc)) numClosePrevLocs++;
         }
 
-        if (numClosePrevLocs == NUM_TRACKED_LOCATIONS) {
+        if (numClosePrevLocs == EXPLORE_NUM_TRACKED_LOCATIONS) {
             rc.setIndicatorString("TRAPPED");
             numMoves = 0;
         }
@@ -92,7 +92,7 @@ public class Explore {
             Direction dir = Random.nextDir();
             for (int i = 0; i < 8; ++i) {
                 if (rc.canMove(dir)) {
-                    if ((++numMoves) % MOVES_TO_TRACK_LOCATION == 0) {
+                    if ((++numMoves) % EXPLORE_MOVES_TO_TRACK_LOCATION == 0) {
                         prevLocs[prevlocIdx] = rc.getLocation();
                         prevlocIdx++;
                     }
@@ -108,14 +108,14 @@ public class Explore {
             Direction dir = prevDir;
             RobotInfo [] robots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
             boolean nearbyEnemy = robots.length > 0 ? true : false;
-            if (numMoves % MOVES_TO_TRACK_LOCATION == 0 || !rc.canMove(dir) || nearbyEnemy) {
+            if (numMoves % EXPLORE_MOVES_TO_TRACK_LOCATION == 0 || !rc.canMove(dir) || nearbyEnemy) {
                 dir = exploreAwayFromLoc(getAvgLocation(prevLocs));
             }
             if(dir != Direction.CENTER) {
-                if ((++numMoves) % MOVES_TO_TRACK_LOCATION == 0) {
+                if ((++numMoves) % EXPLORE_MOVES_TO_TRACK_LOCATION == 0) {
                     numMoves = 0;
                     prevLocs[prevlocIdx] = rc.getLocation();
-                    prevlocIdx = (prevlocIdx + 1) % NUM_TRACKED_LOCATIONS;
+                    prevlocIdx = (prevlocIdx + 1) % EXPLORE_NUM_TRACKED_LOCATIONS;
                 }
                 prevDir = dir;
                 rc.move(dir);
