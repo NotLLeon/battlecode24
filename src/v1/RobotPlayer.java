@@ -11,21 +11,10 @@ import static v1.Random.rng;
  */
 public strictfp class RobotPlayer {
 
-    /**
-     * We will use this variable to count the number of turns this robot has been alive.
-     * You can use static variables like this to save any information you want. Keep in mind that even though
-     * these variables are static, in Battlecode they aren't actually shared between your robots.
-     */
     static int turnCount = 0;
 
-    /**
-     * run() is the method that is called when a robot is instantiated in the Battlecode world.
-     * It is like the main function for your robot. If this method returns, the robot dies!
-     *
-     * @param rc  The RobotController object. You use it to perform actions from this robot, and to get
-     *            information on its current status. Essentially your portal to interacting with the world.
-     **/
-    @SuppressWarnings("unused")
+    static int curRound = 0;
+
     public static void run(RobotController rc) throws GameActionException {
         
         Constants.rc = rc;
@@ -35,6 +24,7 @@ public strictfp class RobotPlayer {
             turnCount += 1;  // We have now been alive for one more turn!
 
             try {
+                curRound = rc.getRoundNum();
                 if (!rc.isSpawned()){
                     MapLocation[] spawnLocs = rc.getAllySpawnLocations();
                     for (int i = 0; i < 100; i++) {
@@ -61,6 +51,11 @@ public strictfp class RobotPlayer {
                 e.printStackTrace();
 
             } finally {
+                // went over bytecode limit and computation took >1 turn
+                if (curRound != rc.getRoundNum()) {
+                    System.out.println("Went over bc limit");
+                }
+
                 Clock.yield();
             }
         }

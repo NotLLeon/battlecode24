@@ -18,13 +18,9 @@ public class Constants {
 };
 
     // weights for explore
-    static int HIGH_WEIGHT_DIRECTION = 10;
-    static int MID_WEIGHT_DIRECTION = 4;
-
-
-    // limits for explore
-    static int NUM_TRACKED_LOCATIONS = 10;
-
-    static int MOVES_TO_TRACK_LOCATION = 5;
+    static int EXPLORE_HIGH_WEIGHT_DIRECTION = 10;
+    static int EXPLORE_MID_WEIGHT_DIRECTION = 4;
+    static int EXPLORE_NUM_TRACKED_LOCATIONS = 10;
+    static int EXPLORE_MOVES_TO_TRACK_LOCATION = 5;
 
 }

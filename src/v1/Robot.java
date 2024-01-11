@@ -2,8 +2,7 @@ package v1;
 
 
 import battlecode.common.*;
-import v1.Pathfinding.BFS;
-import v1.Pathfinding.BugNav;
+import v1.Pathfinding.*;
 
 public abstract class Robot {
 
@@ -14,6 +13,7 @@ public abstract class Robot {
     public static void moveToRadius(RobotController rc, MapLocation dest, int radius) throws GameActionException {
         moveTo(rc, dest, false, radius);
     }
+
     public static void moveToOutsideRadius(RobotController rc, MapLocation center, int radius) throws GameActionException {
         MapLocation currLoc = rc.getLocation();
         if (currLoc.isWithinDistanceSquared(center, radius)) {
