@@ -1,16 +1,14 @@
-package v1;
+package v0;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.TrapType;
 
-import static v1.Constants.rc;
-import static v1.Constants.directions;
-import static v1.Random.nextDir;
-import static v1.Random.rng;
+import static v0.Constants.rc;
+import static v0.Random.nextDir;
+import static v0.Random.rng;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {

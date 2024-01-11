@@ -1,12 +1,12 @@
-package v1;
+package v0;
 
 import battlecode.common.*;
 
-import static v1.Constants.rc;
-import static v1.Constants.directions;
-import static v1.Constants.EXPLORE_NUM_TRACKED_LOCATIONS;
-import static v1.Constants.EXPLORE_HIGH_WEIGHT_DIRECTION;
-import static v1.Constants.EXPLORE_MOVES_TO_TRACK_LOCATION;
+import static v0.Constants.rc;
+import static v0.Constants.directions;
+import static v0.Constants.EXPLORE_NUM_TRACKED_LOCATIONS;
+import static v0.Constants.EXPLORE_HIGH_WEIGHT_DIRECTION;
+import static v0.Constants.EXPLORE_MOVES_TO_TRACK_LOCATION;
 
 public class Explore {
     static int prevlocIdx = 0;

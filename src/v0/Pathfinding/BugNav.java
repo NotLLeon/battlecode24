@@ -1,4 +1,4 @@
-package v1.Pathfinding;
+package v0.Pathfinding;
 
 import battlecode.common.*;
 

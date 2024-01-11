@@ -1,8 +1,8 @@
-package v1;
+package v0;
 
 import battlecode.common.*;
 
-import static v1.Random.rng;
+import static v0.Random.rng;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
