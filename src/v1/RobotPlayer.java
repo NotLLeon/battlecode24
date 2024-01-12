@@ -29,10 +29,19 @@ public strictfp class RobotPlayer {
 
             try {
                 curRound = rc.getRoundNum();
-                // try to spawn, if spawned on flag, become signal bot
-                if (!rc.isSpawned()) {
-                    if (spawnLoc != null) {
-                        if (rc.canSpawn(spawnLoc)) rc.spawn(spawnLoc);
+                if (!rc.isSpawned()){
+                    MapLocation[] spawnLocs = rc.getAllySpawnLocations();
+                    for (int i = 0; i < 100; i++) {
+                        MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
+                        if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
+                    }
+                }
+                else {
+                    Micro.run();
+
+                    if (turnCount < GameConstants.SETUP_ROUNDS) {
+                        // we are in setup phase
+                        SetupPhase.run();
                     } else {
                         MapLocation[] spawnLocs = rc.getAllySpawnLocations();
                         for (int i = 0; i < 100; i++) {
