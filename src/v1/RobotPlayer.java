@@ -3,6 +3,7 @@ package v1;
 import battlecode.common.*;
 
 import static v1.Random.rng;
+import static v1.Constants.Role;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
@@ -15,6 +16,10 @@ public strictfp class RobotPlayer {
 
     static int curRound = 0;
 
+    static Role role = Role.GENERAL;
+
+    static MapLocation spawnLoc = null;
+
     public static void run(RobotController rc) throws GameActionException {
         
         Constants.rc = rc;
@@ -25,21 +30,30 @@ public strictfp class RobotPlayer {
 
             try {
                 curRound = rc.getRoundNum();
-                if (!rc.isSpawned()){
+                // try to spawn, if spawned on flag, become signal bot
+                if (!rc.isSpawned()) {
                     MapLocation[] spawnLocs = rc.getAllySpawnLocations();
                     for (int i = 0; i < 100; i++) {
                         MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
                         if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
                     }
-                }
-                else {
-                    if (turnCount < GameConstants.SETUP_ROUNDS) {
-                        // we are in setup phase
-                        SetupPhase.run();
+                    FlagInfo[] flags = rc.senseNearbyFlags(0);
+                    if (flags.length > 0) {
+                        role = Role.SIGNAL;
+                        spawnLoc = rc.getLocation();
                     } else {
-                        // else run main phase logic
-                        MainPhase.run();
+                        role = Role.GENERAL;
                     }
+                }
+                
+                if (role == Role.SIGNAL) {
+                    FlagDefense.scanAndSignal();
+                } else if (turnCount < GameConstants.SETUP_ROUNDS) {
+                    // we are in setup phase
+                    SetupPhase.run();
+                } else {
+                    // else run main phase logic
+                    MainPhase.run();
                 }
 
             } catch (GameActionException e) {

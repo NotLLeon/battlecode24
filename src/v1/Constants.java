@@ -24,4 +24,9 @@ public class Constants {
     static int EXPLORE_NUM_TRACKED_LOCATIONS = 10;
     static int EXPLORE_MOVES_TO_TRACK_LOCATION = 5;
 
+    public static enum Role {
+        GENERAL,
+        SIGNAL
+    }
+
 }
