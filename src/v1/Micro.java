@@ -16,8 +16,9 @@ public class Micro {
 
     // in all micro movements, try not to move diagonally (messes up formation)
     //
-    private static RobotInfo[] allyRobots;
-    private static RobotInfo[] enemyRobots;
+    private static RobotInfo[] visibleAllyRobots;
+    private static RobotInfo[] visibleEnemyRobots;
+    private static RobotInfo[] attackableEnemyRobots;
     private static MapLocation lastLocUpdated;
     private static int lastRoundUpdated = 0;
 
@@ -32,8 +33,10 @@ public class Micro {
     }
 
     private static void senseRobots() throws GameActionException {
-        allyRobots = rc.senseNearbyRobots(-1, rc.getTeam());
-        enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+        visibleAllyRobots = rc.senseNearbyRobots(-1, rc.getTeam());
+        Team enemyTeam = rc.getTeam().opponent();
+        visibleEnemyRobots = rc.senseNearbyRobots(-1, enemyTeam);
+        attackableEnemyRobots = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, enemyTeam);
     }
 
     // TODO: decide on more factors (ex. health, number of friendly/enemy units nearby, etc...)
@@ -76,7 +79,7 @@ public class Micro {
 
         // attack lowest health enemy
         RobotInfo target = null;
-        for (RobotInfo enemy : enemyRobots) {
+        for (RobotInfo enemy : attackableEnemyRobots) {
             if (target == null || enemy.getHealth() < target.getHealth()) {
                 target = enemy;
             }
@@ -88,7 +91,6 @@ public class Micro {
         }
 
         if (target == null) return;
-
         MapLocation targetLoc = target.getLocation();
         while (rc.canAttack(targetLoc)) rc.attack(targetLoc);
 
@@ -111,7 +113,7 @@ public class Micro {
         lazySenseRobots();
 
         RobotInfo target = null;
-        for (RobotInfo ally : allyRobots) {
+        for (RobotInfo ally : visibleAllyRobots) {
             if (target == null || ally.getHealth() < target.getHealth()) {
                 target = ally;
             }
@@ -130,7 +132,7 @@ public class Micro {
         tryAttack();
         tryMoveToFlag();
         tryAttack();
-        if (enemyRobots.length > 0) {
+        if (visibleEnemyRobots.length > 0) {
             // TODO: coordinated move-in on enemy position
         } else {
             tryHeal();

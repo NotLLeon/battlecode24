@@ -1,44 +1,70 @@
 package v1;
 
-import static v1.Constants.directions;
-import static v1.Constants.rc;
+import static v1.Constants.*;
 import static v1.Random.nextDir;
 import static v1.Random.nextInt;
 import static v1.Random.rng;
 
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
-import battlecode.common.TrapType;
-import battlecode.common.MapInfo;
+import battlecode.common.*;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
 
-    static MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-    static MapLocation patrolLoc = spawnLocs[Math.abs(rng.nextInt() % spawnLocs.length)];
+//    private static MapLocation destLoc = null;
+    private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
+
+    private static void onBroadcast() throws GameActionException {
+        if (Comms.readLoc(COMMS_ENEMY_FLAGS_START_IND) != null) {
+            return;
+        }
+
+        MapLocation[] approxFlagLocs = rc.senseBroadcastFlagLocations();
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            int comms_ind = COMMS_ENEMY_FLAGS_START_IND + i;
+            Comms.writeLoc(comms_ind, approxFlagLocs[i]);
+        }
+    }
+
+    private static MapLocation getClosestFriendlySpawn() {
+        MapLocation curLoc = rc.getLocation();
+        MapLocation closestSpawn = friendlySpawnLocs[0];
+        for (int i = 1; i < friendlySpawnLocs.length; ++i) {
+            MapLocation spawn = friendlySpawnLocs[i];
+            if (curLoc.distanceSquaredTo(spawn) < curLoc.distanceSquaredTo(closestSpawn)) {
+                closestSpawn = spawn;
+            }
+        }
+        return closestSpawn;
+    }
 
     public static void run() throws GameActionException {
-        if (rc.canPickupFlag(rc.getLocation())){
-            rc.pickupFlag(rc.getLocation());
+        if (rc.getRoundNum() % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
+            onBroadcast();
         }
-        // If we are holding an enemy flag, singularly focus on moving towards
-        // an ally spawn zone to capture it!
+
         if (rc.hasFlag()){
-            moveTo(patrolLoc);
+            moveTo(getClosestFriendlySpawn());
+            return;
         }
 
-        // Move and attack randomly if no objective.
-        rc.setIndicatorDot(patrolLoc, 0, 0, 0);
-        moveToOutsideRadius(patrolLoc, 2);
+        FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
+        for (FlagInfo flag : visibleEnemyFlags) {
 
-        // if (rc.canAttack(nextLoc)){
-        //     rc.attack(nextLoc);
-        //     System.out.println("Take that! Damaged an enemy that was in our way!");
-        // }
+            // FIXME: might alternate between moving to 2 different flags
+            if (!flag.isPickedUp()) {
+                moveTo(flag.getLocation());
+                return;
+            }
+        }
+
+        // just rush whichever flag is stored first in comms
+        // TODO: mark as captured/removed and move on to next flag
+        MapLocation destFlag = Comms.readLoc(COMMS_ENEMY_FLAGS_START_IND);
+        if (destFlag == null) return;
+
+        // TODO: explore within some radius
+        if (rc.getLocation().isAdjacentTo(destFlag)) Explore.exploreNewArea();
+        else moveToAdjacent(destFlag);
 
         // Rarely attempt placing traps behind the robot.
         MapLocation prevLoc = rc.getLocation().subtract(nextDir());

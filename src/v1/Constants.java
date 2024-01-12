@@ -25,4 +25,6 @@ public class Constants {
     static int EXPLORE_NUM_TRACKED_LOCATIONS = 10;
     static int EXPLORE_MOVES_TO_TRACK_LOCATION = 5;
 
+    // Comms indices
+    static int COMMS_ENEMY_FLAGS_START_IND = 0;
 }

@@ -5,7 +5,16 @@ import static v1.Constants.rc;
 
 public class Comms {
 
-   // 0-3: CENTER OF FRIENDLY SPAWN LOCS
+    public static void writeLoc(int index, MapLocation loc) throws GameActionException {
+        rc.writeSharedArray(index, encodeLoc(loc));
+    }
+
+    public static MapLocation readLoc(int index) throws GameActionException {
+        int encoded = rc.readSharedArray(index);
+        if (encoded == 0) return null;
+
+        return decodeLoc(encoded);
+    }
 
     private static int encodeLoc(MapLocation loc) {
         return loc.x + loc.y * rc.getMapWidth() + 1;
