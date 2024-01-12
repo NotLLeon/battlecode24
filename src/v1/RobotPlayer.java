@@ -34,6 +34,8 @@ public strictfp class RobotPlayer {
                     buyUpgrade();
                 }
                 if (!rc.isSpawned()){
+                // try to spawn, if spawned on flag, become signal bot
+                if (!rc.isSpawned()) {
                     MapLocation[] spawnLocs = rc.getAllySpawnLocations();
                     for (int i = 0; i < 100; i++) {
                         MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
@@ -45,6 +47,23 @@ public strictfp class RobotPlayer {
 
                     if (turnCount < GameConstants.SETUP_ROUNDS) SetupPhase.run();
                     else MainPhase.run();
+                    FlagInfo[] flags = rc.senseNearbyFlags(0);
+                    if (flags.length > 0) {
+                        role = Role.SIGNAL;
+                        spawnLoc = rc.getLocation();
+                    } else {
+                        role = Role.GENERAL;
+                    }
+                }
+                
+                if (role == Role.SIGNAL) {
+                    FlagDefense.scanAndSignal();
+                } else if (turnCount < GameConstants.SETUP_ROUNDS) {
+                    // we are in setup phase
+                    SetupPhase.run();
+                } else {
+                    // else run main phase logic
+                    MainPhase.run();
                 }
 
             } catch (GameActionException e) {

@@ -34,4 +34,9 @@ public class Constants {
     static int COMMS_ENEMY_FLAG_LOCS_START_IND = 0;
     static int COMMS_ENEMY_FLAG_IDS_START_IND = 3;
     static int COMMS_FLAG_RECORDER = 6;
+    public static enum Role {
+        GENERAL,
+        SIGNAL
+    }
+
 }
