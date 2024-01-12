@@ -17,7 +17,6 @@ public strictfp class RobotPlayer {
     static int curRound = 0;
 
     static Role role = Role.GENERAL;
-
     static MapLocation spawnLoc = null;
 
     public static void run(RobotController rc) throws GameActionException {
@@ -37,18 +36,7 @@ public strictfp class RobotPlayer {
                         MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
                         if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
                     }
-                    FlagInfo[] flags = rc.senseNearbyFlags(0);
-                    if (flags.length > 0) {
-                        role = Role.SIGNAL;
-                        spawnLoc = rc.getLocation();
-                    } else {
-                        role = Role.GENERAL;
-                    }
-                }
-                
-                if (role == Role.SIGNAL) {
-                    FlagDefense.scanAndSignal();
-                } else if (turnCount < GameConstants.SETUP_ROUNDS) {
+                } if (turnCount < GameConstants.SETUP_ROUNDS) {
                     // we are in setup phase
                     SetupPhase.run();
                 } else {

@@ -2,9 +2,12 @@ package v1;
 
 import static v1.Constants.directions;
 import static v1.Constants.rc;
+import static v1.Constants.Role;
 import static v1.Random.nextDir;
 import static v1.Random.nextInt;
 import static v1.Random.rng;
+
+import static v1.RobotPlayer.role;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -13,6 +16,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.TrapType;
+import v1.Constants.Role;
 import battlecode.common.MapInfo;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
@@ -42,6 +46,12 @@ public class MainPhase extends Robot {
     }
 
     public static void run() throws GameActionException {
+
+        if (role == Role.SIGNAL) {
+            FlagDefense.scanAndSignal();
+            return;
+        }
+        
         if (rc.canPickupFlag(rc.getLocation())){
             rc.pickupFlag(rc.getLocation());
             rc.setIndicatorString("Holding a flag!");
