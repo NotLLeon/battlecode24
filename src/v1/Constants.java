@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public class Constants {
 
-    static RobotController rc;
+    public static RobotController rc;
 
     static final Direction[] directions = {
         Direction.NORTH,
