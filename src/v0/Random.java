@@ -1,8 +1,8 @@
-package v1;
+package v0;
 
 import battlecode.common.Direction;
 
-import static v1.Constants.directions;
+import static v0.Constants.directions;
 
 public class Random {
 
