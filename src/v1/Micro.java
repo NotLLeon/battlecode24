@@ -122,6 +122,7 @@ public class Micro {
     public static void run() throws GameActionException {
         // TODO: allow more lenient micro movement.
         //  If we want to go N but can't, moving NW or NE is prob fine
+        if (rc.hasFlag()) return;
         tryAttack();
         tryMoveToFlag();
         tryAttack();
