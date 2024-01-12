@@ -1,11 +1,32 @@
 package v1;
 
+<<<<<<< HEAD
 import static v1.Constants.*;
 import static v1.Random.*;
 
 import battlecode.common.*;
 
 import java.util.function.Function;
+=======
+import static v1.Constants.directions;
+import static v1.Constants.rc;
+import static v1.Constants.Role;
+import static v1.Random.nextDir;
+import static v1.Random.nextInt;
+import static v1.Random.rng;
+
+import static v1.RobotPlayer.role;
+
+import battlecode.common.Direction;
+import battlecode.common.GameActionException;
+import battlecode.common.GameConstants;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+import battlecode.common.TrapType;
+import v1.Constants.Role;
+import battlecode.common.MapInfo;
+>>>>>>> 4d217fa (ensure signal bot is assigned, and keep signal role)
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
@@ -48,6 +69,15 @@ public class MainPhase extends Robot {
     public static void run() throws GameActionException {
         if (rc.getRoundNum() % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
+
+        if (role == Role.SIGNAL) {
+            FlagDefense.scanAndSignal();
+            return;
+        }
+        
+        if (rc.canPickupFlag(rc.getLocation())){
+            rc.pickupFlag(rc.getLocation());
+            rc.setIndicatorString("Holding a flag!");
         }
 
         if (rc.hasFlag()){
