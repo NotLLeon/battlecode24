@@ -26,4 +26,12 @@ public class Comms {
         int y = encodedLoc / rc.getMapWidth();
         return new MapLocation(x, y);
     }
+
+    public static int read(int index) throws GameActionException {
+        return rc.readSharedArray(index);
+    }
+
+    public static void write(int index, int data) throws GameActionException {
+        rc.writeSharedArray(index, data);
+    }
 }

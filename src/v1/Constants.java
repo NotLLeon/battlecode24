@@ -27,4 +27,5 @@ public class Constants {
 
     // Comms indices
     static int COMMS_ENEMY_FLAGS_START_IND = 0;
+    static int COMMS_FLAG_RECORDER = 3;
 }
