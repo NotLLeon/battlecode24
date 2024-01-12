@@ -17,6 +17,7 @@ public class Constants {
         Direction.NORTHWEST,
 };
 
+    static int SETUP_ROUNDS = 200;
     static int NUM_FLAGS = 3;
     // weights for explore
     static int EXPLORE_HIGH_WEIGHT_DIRECTION = 10;
