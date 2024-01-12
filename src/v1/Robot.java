@@ -28,9 +28,9 @@ public abstract class Robot {
     private static void moveTo(RobotController rc, MapLocation dest, boolean adj, int radius) throws GameActionException {
         MapLocation curLoc = rc.getLocation();
         if(!rc.isMovementReady()
-                || curLoc.equals(dest)
-                || (adj && curLoc.isAdjacentTo(dest))
-                || (radius != -1 && curLoc.distanceSquaredTo(dest) <= radius)) {
+            || curLoc.equals(dest)
+            || (adj && curLoc.isAdjacentTo(dest))
+            || (radius != -1 && curLoc.distanceSquaredTo(dest) <= radius)) {
             return;
         }
 
