@@ -51,7 +51,7 @@ public class Micro {
             Team flagTeam = flag.getTeam();
 
             if (flagTeam == rc.getTeam() && flag.isPickedUp()
-                    && rc.getRoundNum() > Constants.SETUP_ROUNDS) {
+                    && rc.getRoundNum() > GameConstants.SETUP_ROUNDS) {
                 flagLoc = flag.getLocation();
                 break;
             }

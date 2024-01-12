@@ -33,6 +33,8 @@ public strictfp class RobotPlayer {
                     }
                 }
                 else {
+                    Micro.run();
+
                     if (turnCount < GameConstants.SETUP_ROUNDS) {
                         // we are in setup phase
                         SetupPhase.run();
