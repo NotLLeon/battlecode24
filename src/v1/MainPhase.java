@@ -24,7 +24,6 @@ public class MainPhase extends Robot {
     public static void run() throws GameActionException {
         if (rc.canPickupFlag(rc.getLocation())){
             rc.pickupFlag(rc.getLocation());
-            rc.setIndicatorString("Holding a flag!");
         }
         // If we are holding an enemy flag, singularly focus on moving towards
         // an ally spawn zone to capture it!

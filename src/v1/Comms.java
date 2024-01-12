@@ -1,17 +1,17 @@
 package v1;
 
 import battlecode.common.*;
-
-import java.util.HashMap;
-import java.util.HashSet;
+import static v1.Constants.rc;
 
 public class Comms {
 
-    private static int encodeLoc(RobotController rc, MapLocation loc) {
+   // 0-3: CENTER OF FRIENDLY SPAWN LOCS
+
+    private static int encodeLoc(MapLocation loc) {
         return loc.x + loc.y * rc.getMapWidth() + 1;
     }
 
-    private static MapLocation decodeLoc(RobotController rc, int encodedLoc) {
+    private static MapLocation decodeLoc(int encodedLoc) {
         encodedLoc -= 1;
         int x = encodedLoc % rc.getMapWidth();
         int y = encodedLoc / rc.getMapWidth();

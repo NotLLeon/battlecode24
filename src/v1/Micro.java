@@ -19,10 +19,12 @@ public class Micro {
     private static RobotInfo[] allyRobots;
     private static RobotInfo[] enemyRobots;
     private static MapLocation lastLocUpdated;
-    private static int lastRoundUpdated;
+    private static int lastRoundUpdated = 0;
 
     private static void lazySenseRobots() throws GameActionException {
-        if (!lastLocUpdated.equals(rc.getLocation()) || lastRoundUpdated != rc.getRoundNum()) {
+        boolean locChanged =  lastLocUpdated == null || !lastLocUpdated.equals(rc.getLocation());
+        boolean roundChanged = lastRoundUpdated != rc.getRoundNum();
+        if (locChanged || roundChanged) {
             lastLocUpdated = rc.getLocation();
             lastRoundUpdated = rc.getRoundNum();
             senseRobots();
@@ -62,9 +64,11 @@ public class Micro {
         }
         if (flagLoc == null) return;
 
-        Direction moveDir = rc.getLocation().directionTo(flagLoc);
-        if (rc.canMove(moveDir)) rc.move(moveDir);
-
+        if (rc.canPickupFlag(flagLoc)) rc.pickupFlag(flagLoc);
+        else {
+            Direction moveDir = rc.getLocation().directionTo(flagLoc);
+            if (rc.canMove(moveDir)) rc.move(moveDir);
+        }
     }
 
     private static void tryAttack() throws GameActionException {
