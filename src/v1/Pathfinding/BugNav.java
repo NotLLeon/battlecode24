@@ -2,6 +2,8 @@ package v1.Pathfinding;
 
 import battlecode.common.*;
 
+import static v1.Constants.rc;
+
 //import java.util.Arrays;
 
 public class BugNav {
@@ -66,13 +68,13 @@ public class BugNav {
         infSlope = false;
     }
 
-    private static boolean onTheMap(RobotController rc, Direction dir) {
+    private static boolean onTheMap(Direction dir) {
         MapLocation loc = rc.getLocation().add(dir);
         return rc.onTheMap(loc);
     }
 
 
-    private static boolean isPassable(RobotController rc, Direction dir, int strictness) throws GameActionException {
+    private static boolean isPassable(Direction dir, int strictness) throws GameActionException {
         MapLocation loc = rc.getLocation().add(dir);
         if(!rc.onTheMap(loc)) return false;
         return rc.canMove(dir);
@@ -85,7 +87,7 @@ public class BugNav {
     }
 
 
-    public static Direction getDir(RobotController rc, MapLocation dest) throws GameActionException {
+    public static Direction getDir(MapLocation dest) throws GameActionException {
         MapLocation curLoc = rc.getLocation();
 
         // probably stuck in same place
@@ -114,7 +116,7 @@ public class BugNav {
 
         Direction nextDir = null;
         if(!obstacle) {
-            if (isPassable(rc, dir, 0)) {
+            if (isPassable(dir, 0)) {
                 return dir;
             }
             obstacle = true;
@@ -129,7 +131,7 @@ public class BugNav {
 
             if(onLine(curLoc) && curDis < dis - 1) {
                 reset();
-                return getDir(rc, dest);
+                return getDir(dest);
             }
 
             if(curLoc.equals(collisionLoc)) {
@@ -146,14 +148,14 @@ public class BugNav {
         for(int i = 0; i < 8; ++i) {
             int strictness = 0;
             if(nextDir != traceDir) ++ strictness;
-            if(isPassable(rc, nextDir, strictness)) {
+            if(isPassable(nextDir, strictness)) {
                 traceDir = nextDir;
                 if(traceLeft) prevDir = traceDir.rotateRight().rotateRight();
                 else prevDir = traceDir.rotateLeft().rotateLeft();
-                if(!changeWallTrace && !onTheMap(rc, prevDir)) {
+                if(!changeWallTrace && !onTheMap(prevDir)) {
                     changeWallTrace = true;
                     changeTraceDir();
-                    return getDir(rc, dest);
+                    return getDir(dest);
                 }
                 return traceDir;
             } else {
