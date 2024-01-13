@@ -16,7 +16,6 @@ public class FlagRecorder {
     private static final int IND_CAPTURED = 0;
     private static final int IND_PICKED_UP = 1;
     private static final int IND_EXACT_LOC = 2;
-    private static boolean locsSet = false;
 
     private static int getFlagId(int ind) throws GameActionException {
         return Comms.read(COMMS_ENEMY_FLAG_IDS_START_IND + ind);
@@ -70,6 +69,13 @@ public class FlagRecorder {
         return bestInd;
     }
 
+    private static void foundIndExactLoc(int ind, FlagInfo flag) throws GameActionException {
+        int newEncoded = getEncodedFlagRecorder() | getMask(ind, IND_EXACT_LOC);
+        Comms.write(COMMS_FLAG_RECORDER, newEncoded);
+        Comms.writeLoc(COMMS_ENEMY_FLAG_LOCS_START_IND + ind, flag.getLocation());
+        Comms.write(COMMS_ENEMY_FLAG_IDS_START_IND + ind, flag.getID());
+    }
+
     public static boolean isCaptured(int ind) throws GameActionException {
         return isIndBitSet(ind, IND_CAPTURED);
     }
@@ -107,27 +113,22 @@ public class FlagRecorder {
     }
 
     public static void foundFlag(FlagInfo flag) throws GameActionException {
-        MapLocation flagLoc = flag.getLocation();
-
         // check if this is a duplicate report or dropped flag
-        int existingInd = getFlagIdInd(flag.getID());
+        int flagID = flag.getID();
+        int existingInd = getFlagIdInd(flagID);
         if (existingInd != -1) {
             unSetPickedUp(existingInd);
             return;
         }
 
+        MapLocation flagLoc = flag.getLocation();
         int ind = getClosestApproxLoc(flagLoc);
         if (ind == -1) return; // wtf
-        if (isExactLoc(ind)) return;
-        int newEncoded = getEncodedFlagRecorder() | getMask(ind, IND_EXACT_LOC);
-        Comms.write(COMMS_FLAG_RECORDER, newEncoded);
-        Comms.writeLoc(COMMS_ENEMY_FLAG_LOCS_START_IND + ind, flagLoc);
-        Comms.write(COMMS_ENEMY_FLAG_IDS_START_IND + ind, flag.getID());
+        foundIndExactLoc(ind, flag);
     }
 
     public static void setApproxFlagLocs() throws GameActionException {
-        if (locsSet) return;
-        locsSet = true;
+        if (Comms.readLoc(COMMS_ENEMY_FLAG_LOCS_START_IND) != null) return;
         MapLocation[] approxFlagLocs = rc.senseBroadcastFlagLocations();
         int ind = 0;
         for (; ind < approxFlagLocs.length; ++ind) {
@@ -140,8 +141,8 @@ public class FlagRecorder {
         FlagInfo[] exactFlagLocs = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : exactFlagLocs) {
             if (flag.isPickedUp()) continue;
-            Comms.writeLoc(COMMS_ENEMY_FLAG_LOCS_START_IND + ind, flag.getLocation());
-            Comms.write(COMMS_ENEMY_FLAG_IDS_START_IND + ind, flag.getID());
+            foundIndExactLoc(ind, flag);
+            ++ind;
         }
     }
 

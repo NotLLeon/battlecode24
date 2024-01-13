@@ -15,18 +15,6 @@ public class MainPhase extends Robot {
         FlagRecorder.setApproxFlagLocs();
     }
 
-    private static MapLocation getClosestFriendlySpawn() {
-        MapLocation curLoc = rc.getLocation();
-        MapLocation closestSpawn = friendlySpawnLocs[0];
-        for (int i = 1; i < friendlySpawnLocs.length; ++i) {
-            MapLocation spawn = friendlySpawnLocs[i];
-            if (curLoc.distanceSquaredTo(spawn) < curLoc.distanceSquaredTo(closestSpawn)) {
-                closestSpawn = spawn;
-            }
-        }
-        return closestSpawn;
-    }
-
     public static void run() throws GameActionException {
         if (rc.getRoundNum() % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
@@ -35,7 +23,7 @@ public class MainPhase extends Robot {
         if (rc.hasFlag()){
             if (pickedUpFlag == null) pickedUpFlag = rc.senseNearbyFlags(0)[0];
 
-            moveTo(getClosestFriendlySpawn());
+            moveTo(findClosestLoc(friendlySpawnLocs));
 
             if(!rc.hasFlag()) {
                 FlagRecorder.setCaptured(pickedUpFlag.getID());
