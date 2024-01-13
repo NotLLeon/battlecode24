@@ -33,7 +33,6 @@ public class MainPhase extends Robot {
         }
 
         if (rc.hasFlag()){
-            // does this work??
             if (pickedUpFlag == null) pickedUpFlag = rc.senseNearbyFlags(0)[0];
 
             moveTo(getClosestFriendlySpawn());

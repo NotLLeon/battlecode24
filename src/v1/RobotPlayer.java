@@ -39,13 +39,8 @@ public strictfp class RobotPlayer {
                 else {
                     Micro.run();
 
-                    if (turnCount < GameConstants.SETUP_ROUNDS) {
-                        // we are in setup phase
-                        SetupPhase.run();
-                    } else {
-                        // else run main phase logic
-                        MainPhase.run();
-                    }
+                    if (turnCount < GameConstants.SETUP_ROUNDS) SetupPhase.run();
+                    else MainPhase.run();
                 }
 
             } catch (GameActionException e) {
