@@ -5,44 +5,19 @@ import static v1.Random.*;
 
 import battlecode.common.*;
 
-import java.util.function.Function;
-
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
 
     private static final int[] FLAG_INDS = {0, 1, 2};
-    private static final int LONG_TARGET_ROUND_INTERVAL = 100; // modify based on map size?
+
+    // TODO: should be based on map size
+    private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 20;
     private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
     private static FlagInfo pickedUpFlag = null;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
-    }
-
-    @FunctionalInterface
-    public interface CheckedFunction<T, R> {
-        R apply (T t) throws GameActionException;
-    }
-
-    private static Function<Integer, Boolean> lambdaExceptionWrapper(CheckedFunction<Integer, Boolean> fn) {
-        return i -> {
-            try { return fn.apply(i); }
-            catch(GameActionException e) { return false; }
-        };
-    }
-
-    private static int[] filterFlagInds(CheckedFunction<Integer, Boolean> fn) {
-        int numRemaining = 0;
-        Function<Integer, Boolean> sfn = lambdaExceptionWrapper(fn);
-
-        // idk if this is the best way to do this
-        for (int ind : FLAG_INDS) if (sfn.apply(ind)) ++numRemaining;
-
-        int[] filtered = new int[numRemaining];
-        int i = 0;
-        for (int ind : FLAG_INDS) if (sfn.apply(ind)) filtered[i++] = ind;
-        return filtered;
     }
 
     public static void run() throws GameActionException {
@@ -68,7 +43,7 @@ public class MainPhase extends Robot {
             // if all flags are picked up, patrol default locs
             // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
             // and every SHORT_TARGET_ROUND_INTERVAL if we are patrolling
-            int[] rushFlagInds = filterFlagInds((i) -> !FlagRecorder.isPickedUp(i));
+            int[] rushFlagInds = Utils.filterIntArr(FLAG_INDS, (i) -> !FlagRecorder.isPickedUp(i));
             int interval = LONG_TARGET_ROUND_INTERVAL;
 
             // all flags are picked up, just cycle between default locs
