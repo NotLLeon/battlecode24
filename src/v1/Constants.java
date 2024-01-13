@@ -31,9 +31,13 @@ public class Constants {
     }
 
     // Comms indices
-    static int COMMS_ENEMY_FLAG_LOCS_START_IND = 0;
-    static int COMMS_ENEMY_FLAG_IDS_START_IND = 3;
+    static int COMMS_ENEMY_FLAG_LOCS_START_IND = 0; // uses 0 - 2
+    static int COMMS_ENEMY_FLAG_IDS_START_IND = 3; // uses 3 - 5
     static int COMMS_FLAG_RECORDER = 6;
+    static int COMMS_FLAG_DISTRESS_FLAGS = 7; // uses 7 - 9
+    static int COMMS_FLAG_DISTRESS_LOCS = 10; // uses 10 - 12
+
+    // role enum
     public static enum Role {
         GENERAL,
         SIGNAL

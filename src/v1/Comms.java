@@ -3,8 +3,6 @@ package v1;
 import battlecode.common.*;
 import static v1.Constants.rc;
 
-import static v1.Constants.rc;
-
 public class Comms {
 
     public static void writeLoc(int index, MapLocation loc) throws GameActionException {
@@ -35,20 +33,5 @@ public class Comms {
 
     public static void write(int index, int data) throws GameActionException {
         rc.writeSharedArray(index, data);
-    public static void setDistress(MapLocation loc) throws GameActionException {
-        rc.writeSharedArray(3, encodeLoc(loc));
-    }
-
-    public static void stopDistress() throws GameActionException {
-        rc.writeSharedArray(3, 0);
-    }
-
-    public static MapLocation readDistress() throws GameActionException {
-        int distressLoc = rc.readSharedArray(3);
-        if (distressLoc > 0) {
-            return decodeLoc(distressLoc);
-        } else {
-            return null; // is this how you do it in java
-        }
     }
 }

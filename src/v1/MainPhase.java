@@ -1,13 +1,11 @@
 package v1;
 
-<<<<<<< HEAD
 import static v1.Constants.*;
 import static v1.Random.*;
 
 import battlecode.common.*;
 
 import java.util.function.Function;
-=======
 import static v1.Constants.directions;
 import static v1.Constants.rc;
 import static v1.Constants.Role;
@@ -26,7 +24,6 @@ import battlecode.common.RobotInfo;
 import battlecode.common.TrapType;
 import v1.Constants.Role;
 import battlecode.common.MapInfo;
->>>>>>> 4d217fa (ensure signal bot is assigned, and keep signal role)
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
@@ -34,6 +31,7 @@ public class MainPhase extends Robot {
     private static final int[] FLAG_INDS = {0, 1, 2};
     private static final int LONG_TARGET_ROUND_INTERVAL = 100; // modify based on map size?
     private static final int SHORT_TARGET_ROUND_INTERVAL = 20;
+    private static final int DISTRESS_HELP_DISTANCE = 10;
     private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
     private static FlagInfo pickedUpFlag = null;
 
@@ -69,11 +67,18 @@ public class MainPhase extends Robot {
     public static void run() throws GameActionException {
         if (rc.getRoundNum() % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
-
-        if (role == Role.SIGNAL) {
-            FlagDefense.scanAndSignal();
-            return;
         }
+
+        // TODO: Experiment with this, how far away to go help, when to check for help
+        FlagDefense.scanAndSignal();
+        MapLocation distressLoc = FlagDefense.readDistress();
+        if (distressLoc != null) {
+            if (rc.getLocation().distanceSquaredTo(distressLoc) < 10) {
+                moveTo(distressLoc);
+                return;
+            }
+        }
+        
         
         if (rc.canPickupFlag(rc.getLocation())){
             rc.pickupFlag(rc.getLocation());
@@ -108,6 +113,8 @@ public class MainPhase extends Robot {
             // TODO: modify so that rushLoc doesnt change prematurely when the array changes
             int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
             MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
+
+            
 
             if (rc.getLocation().isAdjacentTo(rushLoc) && !FlagRecorder.isExactLoc(rushInd)) {
                 // TODO: only explore within some radius
