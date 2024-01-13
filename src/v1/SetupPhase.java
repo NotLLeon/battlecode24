@@ -14,6 +14,10 @@ public class SetupPhase extends Robot {
     public static void run() throws GameActionException {
         // for now just explore, naturally gather crumbs
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(-1);
+
+        // Build explosive traps on spawn points if possible
+        buildDefensiveTrap();
+
         if (crumbLocs.length > 0) {
             moveTo(crumbLocs[0]);
         } else if (exploring){

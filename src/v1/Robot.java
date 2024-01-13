@@ -33,4 +33,15 @@ public abstract class Robot {
         }
         return closest;
     }
+
+    public static void buildDefensiveTrap() throws GameActionException {
+        MapLocation[] spawns = rc.getAllySpawnLocations();
+        // Check if the robot can build an explosive trap at the location
+
+        for (MapLocation sp : spawns) {
+            if (rc.canBuild(TrapType.EXPLOSIVE, sp)) {
+                rc.build(TrapType.EXPLOSIVE, sp);
+            }
+        }
+    }
 }
