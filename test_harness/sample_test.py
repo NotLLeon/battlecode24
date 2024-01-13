@@ -5,6 +5,8 @@ Example code of how to use the test-harness. See TEST_HARNESS_README.MD for more
 '''
 if __name__ == '__main__':
     print('Starting games!')
-    retDict = runGamesMain('examplefuncsplayer',['examplefuncsplayer'], ['DefaultSmall'])
+    retDict = runGamesMain(currBot='examplefuncsplayer',
+                           botsVersusList=['examplefuncsplayer'],
+                           mapsList=['DefaultSmall'])
     gameAnalyticsInfo = getGameAnalytics(retDict)
     print(gameAnalyticsInfo)

@@ -63,8 +63,8 @@ def generateGameConfigs(currBot, otherBotsList, mapsList):
             retList.append((currMap, botA, botB, currBotLabel))
     return retList
 
-def runGamesMain(currBot, otherBotsList, mapsList):
-    gamesConfigsToRun = generateGameConfigs(currBot, otherBotsList, mapsList)
+def runGamesMain(currBot, botsVersusList, mapsList):
+    gamesConfigsToRun = generateGameConfigs(currBot, botsVersusList, mapsList)
 
     with multiprocessing.Pool() as pool:
         results = pool.map(runGames, gamesConfigsToRun)
@@ -120,7 +120,9 @@ def getGameAnalytics(gamesResDict):
 # Example of running the test harness
 if __name__ == '__main__':
     #TODO error with running multiple gradle jobs in parallel, but it still runs
-    retDict = runGamesMain('examplefuncsplayer',['examplefuncsplayer'], ['DefaultSmall'])
+    retDict = runGamesMain(currBot='examplefuncsplayer',
+                           botsVersusList=['examplefuncsplayer'],
+                           mapsList=['DefaultSmall'])
     gamesInfo = getGameAnalytics(retDict)
     print(gamesInfo)
 
