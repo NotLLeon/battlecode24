@@ -152,4 +152,17 @@ public class FlagRecorder {
     public static MapLocation getFlagLoc(int ind) throws GameActionException {
         return Comms.readLoc(ind);
     }
+
+    public static void notifyCarryingFlag(int id) throws GameActionException {
+        Comms.write(COMMS_ENEMY_FLAG_LAST_ROUND_CARRYING_START_IND + getFlagIdInd(id), rc.getRoundNum());
+    }
+
+    public static void checkFlagReturned(int ind) throws GameActionException {
+        if (isCaptured(ind)) return;
+        int lastRoundCarrying = Comms.read(COMMS_ENEMY_FLAG_LAST_ROUND_CARRYING_START_IND + ind);
+        if (lastRoundCarrying < rc.getRoundNum() - GameConstants.FLAG_DROPPED_RESET_ROUNDS - 1) {
+            unSetPickedUp(ind);
+        }
+    }
+
 }

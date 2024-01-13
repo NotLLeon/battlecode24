@@ -55,11 +55,15 @@ public class MainPhase extends Robot {
 
             moveTo(findClosestLoc(friendlySpawnLocs));
 
+            int flagId = pickedUpFlag.getID();
             if(!rc.hasFlag()) {
-                FlagRecorder.setCaptured(pickedUpFlag.getID());
+                FlagRecorder.setCaptured(flagId);
                 pickedUpFlag = null;
-            }
+            } else FlagRecorder.notifyCarryingFlag(flagId);
         } else {
+            // check if any flags have been dropped and returned
+            for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) FlagRecorder.checkFlagReturned(i);
+
             // prioritize flags that have not been picked up
             // if all have been picked up, visit noncaptured flags
             // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
