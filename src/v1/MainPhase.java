@@ -64,20 +64,19 @@ public class MainPhase extends Robot {
             // check if any flags have been dropped and returned
             for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) FlagRecorder.checkFlagReturned(i);
 
-            // prioritize flags that have not been picked up
-            // if all have been picked up, visit noncaptured flags
+            // visit a flag that hasn't been picked up
+            // if all flags are picked up, patrol default locs
             // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
-            // and every SHORT_TARGET_ROUND_INTERVAL if we are looking for noncaptured flags
+            // and every SHORT_TARGET_ROUND_INTERVAL if we are patrolling
             int[] rushFlagInds = filterFlagInds((i) -> !FlagRecorder.isPickedUp(i));
             int interval = LONG_TARGET_ROUND_INTERVAL;
 
+            // all flags are picked up, just cycle between default locs
+            // TODO: escort flags back instead
             if (rushFlagInds.length == 0) {
-                rushFlagInds = filterFlagInds((i) -> !FlagRecorder.isCaptured(i));
+                rushFlagInds = FLAG_INDS;
                 interval = SHORT_TARGET_ROUND_INTERVAL;
             }
-
-            // FlagRecorder thinks all flags are captured, something is broken if this executes
-            if (rushFlagInds.length == 0) rushFlagInds = FLAG_INDS;
 
             // TODO: modify so that rushLoc doesnt change prematurely when the array changes
             int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
