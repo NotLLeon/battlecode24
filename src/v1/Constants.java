@@ -16,8 +16,9 @@ public class Constants {
         Direction.WEST,
         Direction.NORTHWEST,
 };
+    static GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ACTION;
+    static GlobalUpgrade SECOND_UPGRADE = GlobalUpgrade.HEALING;
 
-    static int NUM_FLAGS = 3;
     // weights for explore
     static int EXPLORE_HIGH_WEIGHT_DIRECTION = 10;
     static int EXPLORE_MID_WEIGHT_DIRECTION = 4;
@@ -29,4 +30,8 @@ public class Constants {
         SIGNAL
     }
 
+    // Comms indices
+    static int COMMS_ENEMY_FLAG_LOCS_START_IND = 0;
+    static int COMMS_ENEMY_FLAG_IDS_START_IND = 3;
+    static int COMMS_FLAG_RECORDER = 6;
 }

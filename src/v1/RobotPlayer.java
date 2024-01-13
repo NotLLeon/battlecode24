@@ -2,6 +2,7 @@ package v1;
 
 import battlecode.common.*;
 
+import static v1.Constants.*;
 import static v1.Random.rng;
 import static v1.Constants.Role;
 
@@ -29,6 +30,9 @@ public strictfp class RobotPlayer {
 
             try {
                 curRound = rc.getRoundNum();
+                if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
+                    buyUpgrade();
+                }
                 if (!rc.isSpawned()){
                     MapLocation[] spawnLocs = rc.getAllySpawnLocations();
                     for (int i = 0; i < 100; i++) {
@@ -75,5 +79,8 @@ public strictfp class RobotPlayer {
             }
         }
     }
-    
+    private static void buyUpgrade() throws GameActionException {
+        if (rc.canBuyGlobal(FIRST_UPGRADE)) rc.buyGlobal(FIRST_UPGRADE);
+        else if (rc.canBuyGlobal(SECOND_UPGRADE)) rc.buyGlobal(SECOND_UPGRADE);
+    }
 }

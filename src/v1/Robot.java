@@ -15,15 +15,8 @@ public abstract class Robot {
         moveTo(dest, false, radius);
     }
 
-    public static void moveToOutsideRadius(MapLocation center, int radius) throws GameActionException {
-        MapLocation currLoc = rc.getLocation();
-        if (currLoc.isWithinDistanceSquared(center, radius)) {
-            Direction opp = currLoc.directionTo(center).opposite();
-            moveTo(currLoc.add(opp).add(opp).add(opp));
-        } else {
-            int r = (int)Math.sqrt(radius) + 1;
-            moveToRadius( center, r*r);
-        }
+    public static void moveToAdjacent(MapLocation dest) throws GameActionException {
+        moveTo(dest, true, -1);
     }
 
     private static void moveTo(MapLocation dest, boolean adj, int radius) throws GameActionException {
