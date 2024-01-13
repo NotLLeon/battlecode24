@@ -32,7 +32,6 @@ public strictfp class RobotPlayer {
                 if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
                     buyUpgrade();
                 }
-                // try to spawn, if spawned on flag, become signal bot
                 if (!rc.isSpawned()) {
                     MapLocation[] spawnLocs = rc.getAllySpawnLocations();
                     for (int i = 0; i < 100; i++) {
