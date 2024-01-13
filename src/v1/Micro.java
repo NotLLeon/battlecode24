@@ -51,24 +51,27 @@ public class Micro {
         if (!rc.isMovementReady()) return;
         FlagInfo[] nearbyFlags = rc.senseNearbyFlags(-1);
 
-        MapLocation flagLoc = null;
+        FlagInfo targetFlag = null;
         for (FlagInfo flag : nearbyFlags) {
             Team flagTeam = flag.getTeam();
 
             if (flagTeam == rc.getTeam() && flag.isPickedUp()
                     && rc.getRoundNum() > GameConstants.SETUP_ROUNDS) {
-                flagLoc = flag.getLocation();
+                targetFlag = flag;
                 break;
             }
 
             if (flagTeam != rc.getTeam() && !flag.isPickedUp()) {
-                flagLoc = flag.getLocation();
+                targetFlag = flag;
             }
         }
-        if (flagLoc == null) return;
+        if (targetFlag == null) return;
+        MapLocation flagLoc = targetFlag.getLocation();
 
-        if (rc.canPickupFlag(flagLoc)) rc.pickupFlag(flagLoc);
-        else {
+        if (rc.canPickupFlag(flagLoc)) {
+            rc.pickupFlag(flagLoc);
+            FlagRecorder.setPickedUp(targetFlag.getID());
+        } else {
             Direction moveDir = rc.getLocation().directionTo(flagLoc);
             if (rc.canMove(moveDir)) rc.move(moveDir);
         }

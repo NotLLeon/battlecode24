@@ -1,28 +1,19 @@
 package v1;
 
 import static v1.Constants.*;
-import static v1.Random.nextDir;
-import static v1.Random.nextInt;
-import static v1.Random.rng;
+import static v1.Random.*;
 
 import battlecode.common.*;
+import battlecode.world.Flag;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
 
-//    private static MapLocation destLoc = null;
     private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
+    private static FlagInfo pickedUpFlag = null;
 
     private static void onBroadcast() throws GameActionException {
-        if (Comms.readLoc(COMMS_ENEMY_FLAGS_START_IND) != null) {
-            return;
-        }
-
-        MapLocation[] approxFlagLocs = rc.senseBroadcastFlagLocations();
-        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
-            int comms_ind = COMMS_ENEMY_FLAGS_START_IND + i;
-            Comms.writeLoc(comms_ind, approxFlagLocs[i]);
-        }
+        FlagRecorder.setApproxFlagLocs();
     }
 
     private static MapLocation getClosestFriendlySpawn() {
@@ -43,28 +34,39 @@ public class MainPhase extends Robot {
         }
 
         if (rc.hasFlag()){
+            // does this work??
+            if (pickedUpFlag == null) pickedUpFlag = rc.senseNearbyFlags(0)[0];
+
             moveTo(getClosestFriendlySpawn());
+
+            if(!rc.hasFlag()) {
+                FlagRecorder.setCaptured(pickedUpFlag.getID());
+                pickedUpFlag = null;
+            }
             return;
+        }
+        // just rush the first noncaptured flag
+        MapLocation flagLoc = null;
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            if (!FlagRecorder.isPickedUp(i)) {
+                flagLoc = FlagRecorder.getFlagLoc(i);
+                break;
+            }
+        }
+
+        if (flagLoc == null) return;
+
+        // TODO: explore within some radius
+        if (rc.getLocation().isAdjacentTo(flagLoc)) Explore.exploreNewArea();
+        else {
+//            rc.setIndicatorString("moving to " + flagLoc);
+            moveToAdjacent(flagLoc);
         }
 
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : visibleEnemyFlags) {
-
-            // FIXME: might alternate between moving to 2 different flags
-            if (!flag.isPickedUp()) {
-                moveTo(flag.getLocation());
-                return;
-            }
+            if (!flag.isPickedUp()) FlagRecorder.foundExactLoc(flag);
         }
-
-        // just rush whichever flag is stored first in comms
-        // TODO: mark as captured/removed and move on to next flag
-        MapLocation destFlag = Comms.readLoc(COMMS_ENEMY_FLAGS_START_IND);
-        if (destFlag == null) return;
-
-        // TODO: explore within some radius
-        if (rc.getLocation().isAdjacentTo(destFlag)) Explore.exploreNewArea();
-        else moveToAdjacent(destFlag);
 
         // Rarely attempt placing traps behind the robot.
         MapLocation prevLoc = rc.getLocation().subtract(nextDir());

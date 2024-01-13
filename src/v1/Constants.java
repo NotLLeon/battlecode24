@@ -26,6 +26,7 @@ public class Constants {
     static int EXPLORE_MOVES_TO_TRACK_LOCATION = 5;
 
     // Comms indices
-    static int COMMS_ENEMY_FLAGS_START_IND = 0;
-    static int COMMS_FLAG_RECORDER = 3;
+    static int COMMS_ENEMY_FLAG_LOCS_START_IND = 0;
+    static int COMMS_ENEMY_FLAG_IDS_START_IND = 3;
+    static int COMMS_FLAG_RECORDER = 6;
 }
