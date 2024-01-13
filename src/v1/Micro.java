@@ -19,6 +19,8 @@ public class Micro {
     private static RobotInfo[] visibleAllyRobots;
     private static RobotInfo[] visibleEnemyRobots;
     private static RobotInfo[] attackableEnemyRobots;
+    private static RobotInfo[] healableAllyRobots;
+
     private static MapLocation lastLocUpdated;
     private static int lastRoundUpdated = 0;
 
@@ -33,8 +35,11 @@ public class Micro {
     }
 
     private static void senseRobots() throws GameActionException {
-        visibleAllyRobots = rc.senseNearbyRobots(-1, rc.getTeam());
-        Team enemyTeam = rc.getTeam().opponent();
+        // TODO only call rc.senseNearbyRobots once
+        Team ownTeam = rc.getTeam();
+        visibleAllyRobots = rc.senseNearbyRobots(-1, ownTeam);
+        healableAllyRobots = rc.senseNearbyRobots(GameConstants.HEAL_RADIUS_SQUARED, ownTeam);
+        Team enemyTeam = ownTeam.opponent();
         visibleEnemyRobots = rc.senseNearbyRobots(-1, enemyTeam);
         attackableEnemyRobots = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, enemyTeam);
     }
@@ -159,7 +164,7 @@ public class Micro {
         lazySenseRobots();
 
         RobotInfo target = null;
-        for (RobotInfo ally : visibleAllyRobots) {
+        for (RobotInfo ally : healableAllyRobots) {
             if (target == null || ally.getHealth() < target.getHealth()) {
                 target = ally;
             }

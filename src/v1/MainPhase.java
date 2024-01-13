@@ -11,7 +11,8 @@ import java.util.function.Function;
 public class MainPhase extends Robot {
 
     private static final int[] FLAG_INDS = {0, 1, 2};
-    private static final int TARGET_ROUND_INTERVAL = 100; // modify based on map size?
+    private static final int LONG_TARGET_ROUND_INTERVAL = 100; // modify based on map size?
+    private static final int SHORT_TARGET_ROUND_INTERVAL = 20;
     private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
     private static FlagInfo pickedUpFlag = null;
 
@@ -61,16 +62,25 @@ public class MainPhase extends Robot {
         } else {
             // prioritize flags that have not been picked up
             // if all have been picked up, visit noncaptured flags
-            // switch targets every TARGET_ROUND_INTERVAL rounds
+            // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
+            // and every SHORT_TARGET_ROUND_INTERVAL if we are looking for noncaptured flags
             int[] rushFlagInds = filterFlagInds((i) -> !FlagRecorder.isPickedUp(i));
-            if (rushFlagInds.length == 0) rushFlagInds = filterFlagInds((i) -> !FlagRecorder.isCaptured(i));
+            int interval = LONG_TARGET_ROUND_INTERVAL;
+
+            if (rushFlagInds.length == 0) {
+                rushFlagInds = filterFlagInds((i) -> !FlagRecorder.isCaptured(i));
+                interval = SHORT_TARGET_ROUND_INTERVAL;
+            }
+
+            // FlagRecorder thinks all flags are captured, something is broken if this executes
             if (rushFlagInds.length == 0) rushFlagInds = FLAG_INDS;
 
-            int rushInd = rushFlagInds[(rc.getRoundNum() / TARGET_ROUND_INTERVAL) % rushFlagInds.length];
+            // TODO: modify so that rushLoc doesnt change prematurely when the array changes
+            int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
             MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
 
-            // TODO: explore within some radius if we are close to approx loc of flag
             if (rc.getLocation().isAdjacentTo(rushLoc) && !FlagRecorder.isExactLoc(rushInd)) {
+                // TODO: only explore within some radius
                 Explore.exploreNewArea();
             } else moveToAdjacent(rushLoc);
 
