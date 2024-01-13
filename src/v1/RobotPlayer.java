@@ -43,22 +43,8 @@ public strictfp class RobotPlayer {
                 else {
                     Micro.run();
 
-                    if (turnCount < GameConstants.SETUP_ROUNDS) {
-                        // we are in setup phase
-                        SetupPhase.run();
-                    } else {
-                        MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-                        for (int i = 0; i < 100; i++) {
-                            MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
-                            if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
-                        }
-                    }
-                } if (turnCount < GameConstants.SETUP_ROUNDS) {
-                    // we are in setup phase
-                    SetupPhase.run();
-                } else {
-                    // else run main phase logic
-                    MainPhase.run();
+                    if (turnCount < GameConstants.SETUP_ROUNDS) SetupPhase.run();
+                    else MainPhase.run();
                 }
 
             } catch (GameActionException e) {
