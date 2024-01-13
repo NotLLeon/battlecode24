@@ -127,6 +127,10 @@ public class FlagRecorder {
         foundIndExactLoc(ind, flag);
     }
 
+    /***
+     * SHOULD ONLY BE CALLED IMMEDIATELY AFTER SETUP
+     * @throws GameActionException
+     */
     public static void setApproxFlagLocs() throws GameActionException {
         if (Comms.readLoc(COMMS_ENEMY_FLAG_LOCS_START_IND) != null) return;
         MapLocation[] approxFlagLocs = rc.senseBroadcastFlagLocations();
@@ -140,7 +144,6 @@ public class FlagRecorder {
         // in case the calling robot can see any enemy flags
         FlagInfo[] exactFlagLocs = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : exactFlagLocs) {
-            if (flag.isPickedUp()) continue;
             foundIndExactLoc(ind, flag);
             ++ind;
         }
