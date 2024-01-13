@@ -16,13 +16,16 @@ public class Micro {
 
     // in all micro movements, try not to move diagonally (messes up formation)
     //
-    private static RobotInfo[] allyRobots;
-    private static RobotInfo[] enemyRobots;
+    private static RobotInfo[] visibleAllyRobots;
+    private static RobotInfo[] visibleEnemyRobots;
+    private static RobotInfo[] attackableEnemyRobots;
     private static MapLocation lastLocUpdated;
-    private static int lastRoundUpdated;
+    private static int lastRoundUpdated = 0;
 
     private static void lazySenseRobots() throws GameActionException {
-        if (!lastLocUpdated.equals(rc.getLocation()) || lastRoundUpdated != rc.getRoundNum()) {
+        boolean locChanged =  lastLocUpdated == null || !lastLocUpdated.equals(rc.getLocation());
+        boolean roundChanged = lastRoundUpdated != rc.getRoundNum();
+        if (locChanged || roundChanged) {
             lastLocUpdated = rc.getLocation();
             lastRoundUpdated = rc.getRoundNum();
             senseRobots();
@@ -30,8 +33,10 @@ public class Micro {
     }
 
     private static void senseRobots() throws GameActionException {
-        allyRobots = rc.senseNearbyRobots(-1, rc.getTeam());
-        enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+        visibleAllyRobots = rc.senseNearbyRobots(-1, rc.getTeam());
+        Team enemyTeam = rc.getTeam().opponent();
+        visibleEnemyRobots = rc.senseNearbyRobots(-1, enemyTeam);
+        attackableEnemyRobots = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, enemyTeam);
     }
 
     // TODO: decide on more factors (ex. health, number of friendly/enemy units nearby, etc...)
@@ -46,25 +51,30 @@ public class Micro {
         if (!rc.isMovementReady()) return;
         FlagInfo[] nearbyFlags = rc.senseNearbyFlags(-1);
 
-        MapLocation flagLoc = null;
+        FlagInfo targetFlag = null;
         for (FlagInfo flag : nearbyFlags) {
             Team flagTeam = flag.getTeam();
 
             if (flagTeam == rc.getTeam() && flag.isPickedUp()
                     && rc.getRoundNum() > GameConstants.SETUP_ROUNDS) {
-                flagLoc = flag.getLocation();
+                targetFlag = flag;
                 break;
             }
 
             if (flagTeam != rc.getTeam() && !flag.isPickedUp()) {
-                flagLoc = flag.getLocation();
+                targetFlag = flag;
             }
         }
-        if (flagLoc == null) return;
+        if (targetFlag == null) return;
+        MapLocation flagLoc = targetFlag.getLocation();
 
-        Direction moveDir = rc.getLocation().directionTo(flagLoc);
-        if (rc.canMove(moveDir)) rc.move(moveDir);
-
+        if (rc.canPickupFlag(flagLoc)) {
+            rc.pickupFlag(flagLoc);
+            FlagRecorder.setPickedUp(targetFlag.getID());
+        } else {
+            Direction moveDir = rc.getLocation().directionTo(flagLoc);
+            if (rc.canMove(moveDir)) rc.move(moveDir);
+        }
     }
 
     private static void tryAttack() throws GameActionException {
@@ -72,7 +82,7 @@ public class Micro {
 
         // attack lowest health enemy
         RobotInfo target = null;
-        for (RobotInfo enemy : enemyRobots) {
+        for (RobotInfo enemy : attackableEnemyRobots) {
             if (target == null || enemy.getHealth() < target.getHealth()) {
                 target = enemy;
             }
@@ -84,7 +94,6 @@ public class Micro {
         }
 
         if (target == null) return;
-
         MapLocation targetLoc = target.getLocation();
         while (rc.canAttack(targetLoc)) rc.attack(targetLoc);
 
@@ -107,7 +116,7 @@ public class Micro {
         lazySenseRobots();
 
         RobotInfo target = null;
-        for (RobotInfo ally : allyRobots) {
+        for (RobotInfo ally : visibleAllyRobots) {
             if (target == null || ally.getHealth() < target.getHealth()) {
                 target = ally;
             }
@@ -122,10 +131,11 @@ public class Micro {
     public static void run() throws GameActionException {
         // TODO: allow more lenient micro movement.
         //  If we want to go N but can't, moving NW or NE is prob fine
+        if (rc.hasFlag()) return;
         tryAttack();
         tryMoveToFlag();
         tryAttack();
-        if (enemyRobots.length > 0) {
+        if (visibleEnemyRobots.length > 0) {
             // TODO: coordinated move-in on enemy position
         } else {
             tryHeal();

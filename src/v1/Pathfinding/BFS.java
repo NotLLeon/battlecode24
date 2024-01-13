@@ -23,49 +23,48 @@ public class BFS {
         Direction firstDir;
         Direction curDir;
         MapLocation loc;
-
         curDir = rotateInt(bestDir, 0);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
+        if (isMoveable(loc, true)) {
             return firstDir;
         }
         curDir = rotateInt(bestDir, 0);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
+        if (isMoveable(loc, true)) {
             return firstDir;
         }
         curDir = rotateInt(bestDir, 1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, -1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, -1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
+            if (isMoveable(loc, false)) {
                 return firstDir;
             }
         }
         curDir = rotateInt(bestDir, -1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
+            if (isMoveable(loc, false)) {
                 return firstDir;
             }
         }
         curDir = rotateInt(bestDir, 1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, -1);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, -1);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
+                if (isMoveable(loc, false)) {
                     return firstDir;
                 }
             }
@@ -73,13 +72,13 @@ public class BFS {
         curDir = rotateInt(bestDir, -1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 1);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 1);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
+                if (isMoveable(loc, false)) {
                     return firstDir;
                 }
             }
@@ -87,13 +86,13 @@ public class BFS {
         curDir = rotateInt(bestDir, -2);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 2);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 2);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
+                if (isMoveable(loc, false)) {
                     return firstDir;
                 }
             }
@@ -101,13 +100,13 @@ public class BFS {
         curDir = rotateInt(bestDir, 2);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, -2);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, -2);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
+                if (isMoveable(loc, false)) {
                     return firstDir;
                 }
             }
@@ -115,16 +114,16 @@ public class BFS {
         curDir = rotateInt(bestDir, 1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, -1);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, -1);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
+                    if (isMoveable(loc, false)) {
                         return firstDir;
                     }
                 }
@@ -133,16 +132,16 @@ public class BFS {
         curDir = rotateInt(bestDir, -1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 1);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 1);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
+                    if (isMoveable(loc, false)) {
                         return firstDir;
                     }
                 }
@@ -151,16 +150,16 @@ public class BFS {
         curDir = rotateInt(bestDir, 1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, -1);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, -1);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, -1);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, -1);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
+                    if (isMoveable(loc, false)) {
                         return firstDir;
                     }
                 }
@@ -169,16 +168,16 @@ public class BFS {
         curDir = rotateInt(bestDir, -1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, -1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, -1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 1);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 1);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 1);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 1);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
+                    if (isMoveable(loc, false)) {
                         return firstDir;
                     }
                 }
@@ -187,16 +186,16 @@ public class BFS {
         curDir = rotateInt(bestDir, 2);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, -2);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, -2);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
+                    if (isMoveable(loc, false)) {
                         return firstDir;
                     }
                 }
@@ -205,16 +204,16 @@ public class BFS {
         curDir = rotateInt(bestDir, -2);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 2);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 2);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
+                    if (isMoveable(loc, false)) {
                         return firstDir;
                     }
                 }
@@ -223,19 +222,19 @@ public class BFS {
         curDir = rotateInt(bestDir, 1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, -1);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, -1);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
+                        if (isMoveable(loc, false)) {
                             return firstDir;
                         }
                     }
@@ -245,107 +244,19 @@ public class BFS {
         curDir = rotateInt(bestDir, -1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 1);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 1);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            return firstDir;
-                        }
-                    }
-                }
-            }
-        }
-        curDir = rotateInt(bestDir, 2);
-        firstDir = curDir;
-        loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
-            loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
-                loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
-                    loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, -2);
-                        loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            return firstDir;
-                        }
-                    }
-                }
-            }
-        }
-        curDir = rotateInt(bestDir, -2);
-        firstDir = curDir;
-        loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
-            loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
-                loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
-                    loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 2);
-                        loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            return firstDir;
-                        }
-                    }
-                }
-            }
-        }
-        curDir = rotateInt(bestDir, 1);
-        firstDir = curDir;
-        loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 1);
-            loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
-                loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, -1);
-                    loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, -1);
-                        loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            return firstDir;
-                        }
-                    }
-                }
-            }
-        }
-        curDir = rotateInt(bestDir, -1);
-        firstDir = curDir;
-        loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, -1);
-            loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
-                loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 1);
-                    loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 1);
-                        loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
+                        if (isMoveable(loc, false)) {
                             return firstDir;
                         }
                     }
@@ -355,19 +266,19 @@ public class BFS {
         curDir = rotateInt(bestDir, 2);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 2);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, -2);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, -2);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, -2);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
+                        if (isMoveable(loc, false)) {
                             return firstDir;
                         }
                     }
@@ -377,19 +288,107 @@ public class BFS {
         curDir = rotateInt(bestDir, -2);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, -2);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 2);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 2);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 2);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
+                        if (isMoveable(loc, false)) {
+                            return firstDir;
+                        }
+                    }
+                }
+            }
+        }
+        curDir = rotateInt(bestDir, 1);
+        firstDir = curDir;
+        loc = curLoc.add(curDir);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 1);
+            loc = loc.add(curDir);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
+                loc = loc.add(curDir);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, -1);
+                    loc = loc.add(curDir);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, -1);
+                        loc = loc.add(curDir);
+                        if (isMoveable(loc, false)) {
+                            return firstDir;
+                        }
+                    }
+                }
+            }
+        }
+        curDir = rotateInt(bestDir, -1);
+        firstDir = curDir;
+        loc = curLoc.add(curDir);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, -1);
+            loc = loc.add(curDir);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
+                loc = loc.add(curDir);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 1);
+                    loc = loc.add(curDir);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 1);
+                        loc = loc.add(curDir);
+                        if (isMoveable(loc, false)) {
+                            return firstDir;
+                        }
+                    }
+                }
+            }
+        }
+        curDir = rotateInt(bestDir, 2);
+        firstDir = curDir;
+        loc = curLoc.add(curDir);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 2);
+            loc = loc.add(curDir);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
+                loc = loc.add(curDir);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, -2);
+                    loc = loc.add(curDir);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, -2);
+                        loc = loc.add(curDir);
+                        if (isMoveable(loc, false)) {
+                            return firstDir;
+                        }
+                    }
+                }
+            }
+        }
+        curDir = rotateInt(bestDir, -2);
+        firstDir = curDir;
+        loc = curLoc.add(curDir);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, -2);
+            loc = loc.add(curDir);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
+                loc = loc.add(curDir);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 2);
+                    loc = loc.add(curDir);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 2);
+                        loc = loc.add(curDir);
+                        if (isMoveable(loc, false)) {
                             return firstDir;
                         }
                     }
@@ -399,19 +398,19 @@ public class BFS {
         curDir = rotateInt(bestDir, 3);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, -1);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, -1);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, -2);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, -2);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
+                        if (isMoveable(loc, false)) {
                             return firstDir;
                         }
                     }
@@ -421,19 +420,19 @@ public class BFS {
         curDir = rotateInt(bestDir, -3);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, -1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, -1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 1);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 1);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 2);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 2);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
+                        if (isMoveable(loc, false)) {
                             return firstDir;
                         }
                     }
@@ -443,19 +442,19 @@ public class BFS {
         curDir = rotateInt(bestDir, 3);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, -1);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, -1);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, -1);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, -1);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
+                        if (isMoveable(loc, false)) {
                             return firstDir;
                         }
                     }
@@ -465,19 +464,19 @@ public class BFS {
         curDir = rotateInt(bestDir, -3);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, -1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, -1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 1);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 1);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 1);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 1);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
+                        if (isMoveable(loc, false)) {
                             return firstDir;
                         }
                     }
@@ -487,22 +486,22 @@ public class BFS {
         curDir = rotateInt(bestDir, 1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 0);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 0);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            curDir = rotateInt(curDir, -1);
+                        if (isMoveable(loc, false)) {
+                            curDir = rotateInt(bestDir, -1);
                             loc = loc.add(curDir);
-                            if(isMoveable(loc, false)){
+                            if (isMoveable(loc, false)) {
                                 return firstDir;
                             }
                         }
@@ -513,22 +512,22 @@ public class BFS {
         curDir = rotateInt(bestDir, -1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 0);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 0);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            curDir = rotateInt(curDir, 1);
+                        if (isMoveable(loc, false)) {
+                            curDir = rotateInt(bestDir, 1);
                             loc = loc.add(curDir);
-                            if(isMoveable(loc, false)){
+                            if (isMoveable(loc, false)) {
                                 return firstDir;
                             }
                         }
@@ -539,22 +538,22 @@ public class BFS {
         curDir = rotateInt(bestDir, 2);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 0);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 0);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            curDir = rotateInt(curDir, -2);
+                        if (isMoveable(loc, false)) {
+                            curDir = rotateInt(bestDir, -2);
                             loc = loc.add(curDir);
-                            if(isMoveable(loc, false)){
+                            if (isMoveable(loc, false)) {
                                 return firstDir;
                             }
                         }
@@ -565,22 +564,22 @@ public class BFS {
         curDir = rotateInt(bestDir, -2);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 0);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 0);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 0);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 0);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            curDir = rotateInt(curDir, 2);
+                        if (isMoveable(loc, false)) {
+                            curDir = rotateInt(bestDir, 2);
                             loc = loc.add(curDir);
-                            if(isMoveable(loc, false)){
+                            if (isMoveable(loc, false)) {
                                 return firstDir;
                             }
                         }
@@ -591,22 +590,22 @@ public class BFS {
         curDir = rotateInt(bestDir, 1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, -1);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, -1);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            curDir = rotateInt(curDir, -1);
+                        if (isMoveable(loc, false)) {
+                            curDir = rotateInt(bestDir, -1);
                             loc = loc.add(curDir);
-                            if(isMoveable(loc, false)){
+                            if (isMoveable(loc, false)) {
                                 return firstDir;
                             }
                         }
@@ -617,22 +616,22 @@ public class BFS {
         curDir = rotateInt(bestDir, -1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, -1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, -1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 1);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 1);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            curDir = rotateInt(curDir, 1);
+                        if (isMoveable(loc, false)) {
+                            curDir = rotateInt(bestDir, 1);
                             loc = loc.add(curDir);
-                            if(isMoveable(loc, false)){
+                            if (isMoveable(loc, false)) {
                                 return firstDir;
                             }
                         }
@@ -643,22 +642,22 @@ public class BFS {
         curDir = rotateInt(bestDir, 2);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 2);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 2);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, -2);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, -2);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            curDir = rotateInt(curDir, -2);
+                        if (isMoveable(loc, false)) {
+                            curDir = rotateInt(bestDir, -2);
                             loc = loc.add(curDir);
-                            if(isMoveable(loc, false)){
+                            if (isMoveable(loc, false)) {
                                 return firstDir;
                             }
                         }
@@ -669,22 +668,22 @@ public class BFS {
         curDir = rotateInt(bestDir, -2);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, -2);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, -2);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 0);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 0);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 0);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 0);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 2);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 2);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            curDir = rotateInt(curDir, 2);
+                        if (isMoveable(loc, false)) {
+                            curDir = rotateInt(bestDir, 2);
                             loc = loc.add(curDir);
-                            if(isMoveable(loc, false)){
+                            if (isMoveable(loc, false)) {
                                 return firstDir;
                             }
                         }
@@ -695,22 +694,22 @@ public class BFS {
         curDir = rotateInt(bestDir, 1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, 1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, 1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, 1);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, 1);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, -1);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, -1);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, -1);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, -1);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            curDir = rotateInt(curDir, -1);
+                        if (isMoveable(loc, false)) {
+                            curDir = rotateInt(bestDir, -1);
                             loc = loc.add(curDir);
-                            if(isMoveable(loc, false)){
+                            if (isMoveable(loc, false)) {
                                 return firstDir;
                             }
                         }
@@ -721,22 +720,22 @@ public class BFS {
         curDir = rotateInt(bestDir, -1);
         firstDir = curDir;
         loc = curLoc.add(curDir);
-        if(isMoveable(loc, true)){
-            curDir = rotateInt(curDir, -1);
+        if (isMoveable(loc, true)) {
+            curDir = rotateInt(bestDir, -1);
             loc = loc.add(curDir);
-            if(isMoveable(loc, false)){
-                curDir = rotateInt(curDir, -1);
+            if (isMoveable(loc, false)) {
+                curDir = rotateInt(bestDir, -1);
                 loc = loc.add(curDir);
-                if(isMoveable(loc, false)){
-                    curDir = rotateInt(curDir, 1);
+                if (isMoveable(loc, false)) {
+                    curDir = rotateInt(bestDir, 1);
                     loc = loc.add(curDir);
-                    if(isMoveable(loc, false)){
-                        curDir = rotateInt(curDir, 1);
+                    if (isMoveable(loc, false)) {
+                        curDir = rotateInt(bestDir, 1);
                         loc = loc.add(curDir);
-                        if(isMoveable(loc, false)){
-                            curDir = rotateInt(curDir, 1);
+                        if (isMoveable(loc, false)) {
+                            curDir = rotateInt(bestDir, 1);
                             loc = loc.add(curDir);
-                            if(isMoveable(loc, false)){
+                            if (isMoveable(loc, false)) {
                                 return firstDir;
                             }
                         }
