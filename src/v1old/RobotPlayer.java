@@ -1,9 +1,9 @@
-package v1;
+package v1old;
 
 import battlecode.common.*;
 
-import static v1.Constants.*;
-import static v1.Random.rng;
+import static v1old.Constants.*;
+import static v1old.Random.rng;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
@@ -39,8 +39,13 @@ public strictfp class RobotPlayer {
                 else {
                     Micro.run();
 
-                    if (turnCount < GameConstants.SETUP_ROUNDS) SetupPhase.run();
-                    else MainPhase.run();
+                    if (turnCount < GameConstants.SETUP_ROUNDS) {
+                        // we are in setup phase
+                        SetupPhase.run();
+                    } else {
+                        // else run main phase logic
+                        MainPhase.run();
+                    }
                 }
 
             } catch (GameActionException e) {

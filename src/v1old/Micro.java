@@ -1,8 +1,8 @@
-package v1;
+package v1old;
 
 import battlecode.common.*;
 
-import static v1.Constants.rc;
+import static v1old.Constants.rc;
 
 public class Micro {
 
@@ -14,8 +14,8 @@ public class Micro {
     // (friendly carrying flag?)
     // (group units?)
 
-    // try not to move diagonally (messes up formation)
-
+    // in all micro movements, try not to move diagonally (messes up formation)
+    //
     private static RobotInfo[] visibleAllyRobots;
     private static RobotInfo[] visibleEnemyRobots;
     private static RobotInfo[] attackableEnemyRobots;
@@ -42,54 +42,6 @@ public class Micro {
     // TODO: decide on more factors (ex. health, number of friendly/enemy units nearby, etc...)
     private static boolean shouldChase(RobotInfo target) {
         return target.hasFlag();
-    }
-
-    /***
-     * Moves in direction with some leniency
-     * @param dir general direction to move in
-     * @param strictness between 0 and 2
-     * @throws GameActionException
-     */
-    private static void moveInDir(Direction dir, int strictness) throws GameActionException {
-        if (rc.canMove(dir)) {
-            rc.move(dir);
-            return;
-        }
-        if (strictness >= 2) return;
-
-        Direction dirL = dir.rotateLeft();
-        Direction dirR = dir.rotateRight();
-        if (rc.canMove(dirL)) rc.move(dirL);
-        else if (rc.canMove(dirR)) rc.move(dirR);
-
-        if (strictness == 1) return;
-
-        Direction dirLL = dirL.rotateLeft();
-        Direction dirRR = dirR.rotateRight();
-        if (rc.canMove(dirLL)) rc.move(dirLL);
-        else if (rc.canMove(dirRR)) rc.move(dirRR);
-    }
-
-    /***
-     * Moves away from moveAwayLoc, preferring cardinal movement over diagonal
-     * @param moveAwayLoc
-     */
-    private static void moveAwayCardinal(MapLocation moveAwayLoc) throws GameActionException {
-        if (!rc.isMovementReady()) return;
-        MapLocation curLoc = rc.getLocation();
-        Direction bestDir = null;
-        MapLocation bestLoc = null;
-        for (Direction dir : Direction.cardinalDirections()) {
-            MapLocation newLoc = curLoc.add(dir);
-            if ((bestDir == null || newLoc.distanceSquaredTo(moveAwayLoc) > bestLoc.distanceSquaredTo(moveAwayLoc)) &&
-                    rc.canMove(dir)) {
-                bestDir = dir;
-                bestLoc = newLoc;
-            }
-        }
-
-        if (bestDir == null) moveInDir(moveAwayLoc.directionTo(curLoc), 1);
-        else rc.move(bestDir);
     }
 
     private static void tryMoveToFlag() throws GameActionException {
@@ -121,7 +73,7 @@ public class Micro {
             FlagRecorder.setPickedUp(targetFlag.getID());
         } else {
             Direction moveDir = rc.getLocation().directionTo(flagLoc);
-            if (moveDir != Direction.CENTER) moveInDir(moveDir, 1);
+            if (rc.canMove(moveDir)) rc.move(moveDir);
         }
     }
 
@@ -145,13 +97,18 @@ public class Micro {
         MapLocation targetLoc = target.getLocation();
         while (rc.canAttack(targetLoc)) rc.attack(targetLoc);
 
-        boolean allEnemiesDead = attackableEnemyRobots.length == 1 && target.getHealth() == 0;
-        if (!rc.isMovementReady() || allEnemiesDead) return;
+        if (!rc.isMovementReady()) return;
 
-        // TODO: move away from centroid of remaining enemy positions
+        // TODO: try not to move diagonally since it might mess up formation
         MapLocation curLoc = rc.getLocation();
-        if (shouldChase(target)) moveInDir(curLoc.directionTo(targetLoc), 1);
-        else moveAwayCardinal(targetLoc);
+        Direction moveDir;
+        if (shouldChase(target)) {
+            moveDir = curLoc.directionTo(targetLoc);
+        } else {
+            moveDir = targetLoc.directionTo(curLoc);
+        }
+
+        if (rc.canMove(moveDir)) rc.move(moveDir);
     }
 
     private static void tryHeal() throws GameActionException {
@@ -172,7 +129,8 @@ public class Micro {
     }
 
     public static void run() throws GameActionException {
-        // TODO: prevent macro from moving closer to enemy for a few rounds after engaging
+        // TODO: allow more lenient micro movement.
+        //  If we want to go N but can't, moving NW or NE is prob fine
         if (rc.hasFlag()) return;
         tryAttack();
         tryMoveToFlag();
@@ -182,6 +140,7 @@ public class Micro {
         } else {
             tryHeal();
         }
+
     }
 
 }
