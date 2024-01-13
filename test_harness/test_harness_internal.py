@@ -45,6 +45,9 @@ def runGames(args: tuple) -> dict:
     gameResInfo['teamA'] = teamA
     gameResInfo['teamB'] = teamB
     gameResInfo['currBotLabel'] = currBotLabel
+    gameResInfo['opposingBotLabel'] = 'A' if currBotLabel == 'B' else 'B'
+    gameResInfo['opposingBotName'] = teamA if currBotLabel == 'B' else teamB
+    gameResInfo['matchup'] = f"Map:{gameMap}, TeamA:{teamA}, TeamB:{teamB}"
     if error:
         print(f"error is: {error}")
         gameResInfo['error'] = error
@@ -69,44 +72,33 @@ def runGamesMain(currBot, botsVersusList, mapsList):
     with multiprocessing.Pool() as pool:
         results = pool.map(runGames, gamesConfigsToRun)
 
-    retDict = defaultdict(dict)
-    for resultDict in results:
-        currMap = resultDict['map']
-        currBotLabel = resultDict['currBotLabel']
-        retDict[currMap][f"currBotAsPlayer{currBotLabel}"] = resultDict
-    return retDict
+    return results
 
-def sideAltersOutcome(sideAGame, sideBGame):
-    # returns True if switching sides affects the outcome of the game.
-    # Want this to be False, otherwise there's potential symmetry problems
-    if sideAGame['currBotLabel'] == sideBGame['currBotLabel']:
-        raise ValueError('The currBot is on the same side both games!')
 
-    # Winner bot should keep winning, despite switching sides
-    return sideAGame['winner'] == sideBGame['winner']
-
-def getGameAnalytics(gamesResDict):
-    if not gamesResDict:
+def getGameAnalytics(gamesResList):
+    if not gamesResList:
         raise ValueError('There are no maps played!')
 
-    mapsWhereSideAltersOutcomeInfo = []
-    numGamesLost, numGamesTotal = 0,0
+    mapsWhereSideAltersOutcomeInfo, matchupResDict = [], defaultdict(dict)
+    #matchupResDict maps: [mapName][opposingBotName] -> winningBot
+    numGamesLost, numGamesTotal = 0,len(gamesResList)
     losingGamesInfo = []
-    for currMap, currMapGames in gamesResDict.items():
-        numGamesTotal += len(currMapGames)
-        currBotAsPlayerAGame, currBotAsPlayerBGame = currMapGames['currBotAsPlayerA'], currMapGames['currBotAsPlayerB']
 
-        if sideAltersOutcome(currBotAsPlayerAGame,currBotAsPlayerBGame):
-            # Check which side our bot lost on
-            currBotLosingGame = currBotAsPlayerAGame if currBotAsPlayerAGame['winner'] == currBotAsPlayerAGame['currBotLabel'] else currBotAsPlayerBGame
-            infoStr = f"On map {currMap}, with side A as {currBotLosingGame['teamA']} and side B as {currBotLosingGame['teamB']}"
-            mapsWhereSideAltersOutcomeInfo.append(infoStr)
+    for currMatchup in gamesResList:
+        currMap = currMatchup['map']
+        opposingBotName = currMatchup['opposingBotName']
+        if opposingBotName not in matchupResDict[currMap]:
+            matchupResDict[currMap][opposingBotName] = (currMatchup['winningBot'], currMatchup['winner'])
+        else:
+            prevWinningBot, prevWinnerLabel = matchupResDict[currMap][opposingBotName]
+            # If the previous winning bot isn't our current bot, or the winning label hasn't switched
+            if prevWinningBot != currMatchup['winningBot'] or prevWinnerLabel == currMatchup['winner']:
+                # Don't know which side cause the currBot to lose, but doesn't matter bc can check the losing games
+                infoStr = f"Inconsistent result on map {currMap}, with one side as {currMatchup['teamA']} and other side as {currMatchup['teamB']}"
+                mapsWhereSideAltersOutcomeInfo.append(infoStr)
 
-        if currBotAsPlayerAGame['winner'] != currBotAsPlayerAGame['currBotLabel']:
-            losingGamesInfo.append(f"currBot lost to {currBotAsPlayerAGame['winningBot']} on map {currMap}")
-            numGamesLost += 1
-        if currBotAsPlayerBGame['winner'] != currBotAsPlayerBGame['currBotLabel']:
-            losingGamesInfo.append(f"currBot lost to {currBotAsPlayerBGame['winningBot']} on map {currMap}")
+        if currMatchup['winner'] != currMatchup['currBotLabel']:
+            losingGamesInfo.append(f"currBot lost to {currMatchup['winningBot']} on map {currMap}")
             numGamesLost += 1
 
     numGamesWon = numGamesTotal - numGamesLost
@@ -120,10 +112,12 @@ def getGameAnalytics(gamesResDict):
 # Example of running the test harness
 if __name__ == '__main__':
     #TODO error with running multiple gradle jobs in parallel, but it still runs
-    retDict = runGamesMain(currBot='examplefuncsplayer',
+    retList = runGamesMain(currBot='examplefuncsplayer',
                            botsVersusList=['examplefuncsplayer'],
                            mapsList=['DefaultSmall'])
-    gamesInfo = getGameAnalytics(retDict)
+
+    print('got here')
+    gamesInfo = getGameAnalytics(retList)
     print(gamesInfo)
 
 
