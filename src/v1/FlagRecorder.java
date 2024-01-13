@@ -10,8 +10,6 @@ import static v1.Constants.*;
 
 import battlecode.common.*;
 
-import java.util.Arrays;
-
 public class FlagRecorder {
     // change this to reflect number of INDs below (must be <6)
     private static final int NUM_BITS_PER_FLAG = 3;
@@ -88,10 +86,6 @@ public class FlagRecorder {
         return isIndBitSet(getFlagLocInd(loc), IND_PICKED_UP);
     }
 
-    public static boolean isExactLoc(MapLocation loc) throws GameActionException {
-        return isIndBitSet(getFlagLocInd(loc), IND_EXACT_LOC);
-    }
-
     public static boolean isExactLoc(int ind) throws GameActionException {
         return isIndBitSet(ind, IND_EXACT_LOC);
     }
@@ -106,11 +100,21 @@ public class FlagRecorder {
         Comms.write(COMMS_FLAG_RECORDER, newEncoded);
     }
 
-    public static void foundExactLoc(FlagInfo flag) throws GameActionException {
+    public static void unSetPickedUp(int ind) throws GameActionException {
+        if (!isPickedUp(ind)) return;
+        int newEncoded = getEncodedFlagRecorder() & ~getMask(ind, IND_PICKED_UP);
+        Comms.write(COMMS_FLAG_RECORDER, newEncoded);
+    }
+
+    public static void foundFlag(FlagInfo flag) throws GameActionException {
         MapLocation flagLoc = flag.getLocation();
 
         // check if this is a duplicate report or dropped flag
-        if (getFlagIdInd(flag.getID()) != -1) return;
+        int existingInd = getFlagIdInd(flag.getID());
+        if (existingInd != -1) {
+            unSetPickedUp(existingInd);
+            return;
+        }
 
         int ind = getClosestApproxLoc(flagLoc);
         if (ind == -1) return; // wtf

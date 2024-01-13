@@ -4,7 +4,6 @@ import static v1.Constants.*;
 import static v1.Random.*;
 
 import battlecode.common.*;
-import battlecode.world.Flag;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
@@ -46,11 +45,15 @@ public class MainPhase extends Robot {
             return;
         }
         // just rush the first non pickedup flag
+        // if all are pickedup (possibly dropped and respawned), go to non captured flags
         MapLocation flagLoc = null;
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             if (!FlagRecorder.isPickedUp(i)) {
                 flagLoc = FlagRecorder.getFlagLoc(i);
                 break;
+            }
+            if (!FlagRecorder.isCaptured(i)) {
+                flagLoc = FlagRecorder.getFlagLoc(i);
             }
         }
 
@@ -64,7 +67,7 @@ public class MainPhase extends Robot {
 
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : visibleEnemyFlags) {
-            if (!flag.isPickedUp()) FlagRecorder.foundExactLoc(flag);
+            if (!flag.isPickedUp()) FlagRecorder.foundFlag(flag);
         }
 
         // Rarely attempt placing traps behind the robot.
