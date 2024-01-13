@@ -45,7 +45,7 @@ public class MainPhase extends Robot {
             }
             return;
         }
-        // just rush the first noncaptured flag
+        // just rush the first non pickedup flag
         MapLocation flagLoc = null;
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             if (!FlagRecorder.isPickedUp(i)) {
@@ -59,7 +59,6 @@ public class MainPhase extends Robot {
         // TODO: explore within some radius
         if (rc.getLocation().isAdjacentTo(flagLoc)) Explore.exploreNewArea();
         else {
-//            rc.setIndicatorString("moving to " + flagLoc);
             moveToAdjacent(flagLoc);
         }
 
@@ -72,6 +71,5 @@ public class MainPhase extends Robot {
         MapLocation prevLoc = rc.getLocation().subtract(nextDir());
         if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && nextInt(2) == 0)
             rc.build(TrapType.EXPLOSIVE, prevLoc);
-        // We can also move our code into different methods or classes to better organize it!
     }
 }
