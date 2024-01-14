@@ -12,7 +12,8 @@ public class SetupPhase extends Robot {
     public static MapLocation setupLoc = null;
 
     public static void run() throws GameActionException {
-        // for now just explore, naturally gather crumbs
+        // for now just explore, try to path to crumbs, then if dam found, gather around dam
+        // to prepare attack
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(-1);
         if (crumbLocs.length > 0) {
             moveTo(crumbLocs[0]);

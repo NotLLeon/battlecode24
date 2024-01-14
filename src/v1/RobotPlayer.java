@@ -12,9 +12,9 @@ import static v1.Random.rng;
  */
 public strictfp class RobotPlayer {
 
-    static int turnCount = 0;
-
     static int curRound = 0;
+
+    static Role role = Role.GENERAL;
 
     public static void run(RobotController rc) throws GameActionException {
         
@@ -28,14 +28,13 @@ public strictfp class RobotPlayer {
                 if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
                     buyUpgrade();
                 }
-                if (!rc.isSpawned()){
+                if (!rc.isSpawned()) {
                     MapLocation[] spawnLocs = rc.getAllySpawnLocations();
                     for (int i = 0; i < 100; i++) {
                         MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
                         if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
                     }
-                }
-                else {
+                } else {
                     Micro.run();
                     if (curRound <= GameConstants.SETUP_ROUNDS) SetupPhase.run();
                     else MainPhase.run();
