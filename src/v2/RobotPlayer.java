@@ -1,7 +1,6 @@
 package v2;
 
 import battlecode.common.*;
-import v2.Constants.Role;
 
 import static v2.Constants.*;
 
