@@ -41,19 +41,19 @@ public class FlagDefense {
         int ind = getFlagIdInd(id);
         if (ind == -1) return;
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, 0);
+        Comms.write(COMMS_FLAG_DISTRESS_LOCS + ind, 0);
     }
 
     public static void stopDistressLoc(MapLocation loc) throws GameActionException {
         int ind = getFlagIndFromLoc(loc);
-        if (ind == -1) return;
-        Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, 0);
+        stopDistress(ind);
     }
 
     public static MapLocation readDistress() throws GameActionException {
         MapLocation nearestLoc = null;
         MapLocation curLoc = rc.getLocation();
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
-            int distressFlag = Comms.read(COMMS_FLAG_DISTRESS_FLAGS + i);
+            int distressFlag = Comms.read(COMMS_FLAG_DISTRESS_FLAGS + i); // 0, loc1 - 2, loc2
             if (distressFlag > 0) {
                 MapLocation distressLoc = Comms.readLoc(COMMS_FLAG_DISTRESS_LOCS + i);
                 if (distressLoc == null) continue;

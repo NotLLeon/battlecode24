@@ -2,6 +2,9 @@ package v2;
 import battlecode.common.*;
 
 import static v2.Constants.*;
+import static v2.Constants.Role;
+import static v2.RobotPlayer.role;
+import static v2.RobotPlayer.spawnLoc;
 
 import v2.fast.*;
 
@@ -57,6 +60,12 @@ public class Spawner {
     }
 
     public static void spawn() throws GameActionException {
+        if (role == Role.SIGNAL) {
+            if(rc.canSpawn(spawnLoc)) {
+                rc.spawn(spawnLoc);
+            }
+            return;
+        }
         MapLocation spawnCenter = spawnCenters[Random.nextInt(3)];
         spawnInDir(spawnCenter, spawnCenter.directionTo(center));
     }

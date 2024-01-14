@@ -15,6 +15,8 @@ public strictfp class RobotPlayer {
 
     static Role role = Role.GENERAL;
 
+    static MapLocation spawnLoc = null;
+
     public static void run(RobotController rc) throws GameActionException {
         
         Constants.rc = rc;
