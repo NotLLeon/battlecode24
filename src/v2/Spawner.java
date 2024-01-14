@@ -4,7 +4,7 @@ import battlecode.common.*;
 import static v2.Constants.*;
 import static v2.Constants.Role;
 import static v2.RobotPlayer.role;
-import static v2.RobotPlayer.spawnLoc;
+import static v2.RobotPlayer.signalSpawnLoc;
 
 import v2.fast.*;
 
@@ -34,7 +34,7 @@ public class Spawner {
         }
     }
 
-    private static void spawnInDir(MapLocation loc, Direction dir) throws GameActionException {
+    private static boolean spawnInDir(MapLocation loc, Direction dir) throws GameActionException {
         Direction[] tryDirs = {
                 dir,
                 dir.rotateRight(),
@@ -50,23 +50,31 @@ public class Spawner {
             MapLocation spawnPoint = loc.add(tryDir);
             if(rc.canSpawn(spawnPoint)) {
                 rc.spawn(spawnPoint);
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     public static void init() {
         getSpawnCenters();
     }
 
-    public static void spawn() throws GameActionException {
+    // FIXME: jank
+    public static boolean spawn() throws GameActionException {
         if (role == Role.SIGNAL) {
-            if(rc.canSpawn(spawnLoc)) {
-                rc.spawn(spawnLoc);
+            if(rc.canSpawn(signalSpawnLoc)) {
+                rc.spawn(signalSpawnLoc);
+                return true;
             }
-            return;
+        } else {
+            for (int i = 0; i < 10; ++i) {
+                MapLocation spawnCenter = spawnCenters[Random.nextInt(3)];
+                if (spawnInDir(spawnCenter, spawnCenter.directionTo(center))) {
+                    return true;
+                }
+            }
         }
-        MapLocation spawnCenter = spawnCenters[Random.nextInt(3)];
-        spawnInDir(spawnCenter, spawnCenter.directionTo(center));
+        return false;
     }
 }

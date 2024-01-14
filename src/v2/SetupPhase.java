@@ -5,7 +5,7 @@ import battlecode.common.*;
 import static v2.Constants.rc;
 import v2.Constants.Role;
 import static v2.RobotPlayer.role;
-import static v2.RobotPlayer.spawnLoc;
+import static v2.RobotPlayer.signalSpawnLoc;
 
 // SETUP PHASE LOGIC GOES HERE (TENTATIVE)
 
@@ -29,10 +29,11 @@ public class SetupPhase extends Robot {
             if (flags[0].getLocation().equals(rc.getLocation())) {
                 role = Role.SIGNAL;
                 rc.setIndicatorString("SIGNAL");
-                spawnLoc = rc.getLocation();
+                signalSpawnLoc = rc.getLocation();
                 return;
             }
         }
+        
         // for now just explore, try to path to crumbs, then if dam found, gather around dam
         // to prepare attack
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(-1);
