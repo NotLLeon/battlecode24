@@ -25,11 +25,6 @@ public class Constants {
     static int EXPLORE_NUM_TRACKED_LOCATIONS = 10;
     static int EXPLORE_MOVES_TO_TRACK_LOCATION = 5;
 
-    public static enum Role {
-        GENERAL,
-        SIGNAL
-    }
-
     // Comms indices
     static int COMMS_ENEMY_FLAG_LOCS_START_IND = 0; // uses 0 - 2
     static int COMMS_ENEMY_FLAG_IDS_START_IND = 3; // uses 3 - 5

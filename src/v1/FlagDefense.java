@@ -22,6 +22,15 @@ public class FlagDefense extends Robot {
         return -1;
     }
 
+    public static int getFlagIdFromLoc(MapLocation loc) throws GameActionException {
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            if (Comms.readLoc(COMMS_FLAG_DISTRESS_LOCS + i).equals(loc)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public static void setDistress(MapLocation loc, int id) throws GameActionException {
         int ind = getFlagIdInd(id);
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, id);
@@ -53,7 +62,7 @@ public class FlagDefense extends Robot {
         for (int i = 0; i < nearbyFlags.length; ++i) {
             if (nearbyFlags[i].isPickedUp()) {
                 setDistress(nearbyFlags[i].getLocation(), nearbyFlags[i].getID());
-            } else {
+            } else if (rc.senseNearbyRobots(-1, rc.getTeam().opponent()).length == 0) {
                 stopDistress(nearbyFlags[i].getID());
             }
         }

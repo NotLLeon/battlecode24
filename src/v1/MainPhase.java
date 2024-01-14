@@ -73,8 +73,12 @@ public class MainPhase extends Robot {
         FlagDefense.scanAndSignal();
         MapLocation distressLoc = FlagDefense.readDistress();
         if (distressLoc != null) {
-            if (rc.getLocation().distanceSquaredTo(distressLoc) < 10) {
+            int dist = rc.getLocation().distanceSquaredTo(distressLoc);
+            if (dist < 10) {
                 moveTo(distressLoc);
+                if (dist < GameConstants.VISION_RADIUS_SQUARED && rc.senseNearbyFlags(-1, rc.getTeam()).length == 0) {
+                    FlagDefense.stopDistress(FlagDefense.getFlagIdFromLoc(distressLoc));
+                }
                 return;
             }
         }
