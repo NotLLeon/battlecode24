@@ -31,11 +31,11 @@ public class MainPhase extends Robot {
             moveTo(findClosestLoc(friendlySpawnLocs));
 
             int flagId = pickedUpFlag.getID();
-            if(!rc.hasFlag()) {
-                FlagRecorder.setCaptured(flagId);
-                pickedUpFlag = null;
-            } else FlagRecorder.notifyCarryingFlag(flagId);
+            if(!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
+             else FlagRecorder.notifyCarryingFlag(flagId);
+
         } else {
+            pickedUpFlag = null;
             // check if any flags have been dropped and returned
             for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) FlagRecorder.checkFlagReturned(i);
 
@@ -65,9 +65,7 @@ public class MainPhase extends Robot {
         }
 
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
-        for (FlagInfo flag : visibleEnemyFlags) {
-            if (!flag.isPickedUp()) FlagRecorder.foundFlag(flag);
-        }
+        for (FlagInfo flag : visibleEnemyFlags) FlagRecorder.foundFlag(flag);
         // Rarely attempt placing traps behind the robot.
         MapLocation prevLoc = rc.getLocation().subtract(nextDir());
         if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && nextInt(2) == 0)

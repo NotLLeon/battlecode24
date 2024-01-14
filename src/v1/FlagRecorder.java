@@ -80,16 +80,8 @@ public class FlagRecorder {
         return isIndBitSet(ind, IND_CAPTURED);
     }
 
-    public static boolean isCaptured(MapLocation loc) throws GameActionException {
-        return isIndBitSet(getFlagLocInd(loc), IND_CAPTURED);
-    }
-
     public static boolean isPickedUp(int ind) throws GameActionException {
         return isIndBitSet(ind, IND_PICKED_UP);
-    }
-
-    public static boolean isPickedUp(MapLocation loc) throws GameActionException {
-        return isIndBitSet(getFlagLocInd(loc), IND_PICKED_UP);
     }
 
     public static boolean isExactLoc(int ind) throws GameActionException {
@@ -108,18 +100,17 @@ public class FlagRecorder {
 
     public static void unSetPickedUp(int ind) throws GameActionException {
         if (!isPickedUp(ind)) return;
-        int newEncoded = getEncodedFlagRecorder() & ~getMask(ind, IND_PICKED_UP);
+        int newEncoded = getEncodedFlagRecorder() ^ getMask(ind, IND_PICKED_UP);
         Comms.write(COMMS_FLAG_RECORDER, newEncoded);
     }
 
     public static void foundFlag(FlagInfo flag) throws GameActionException {
+        if (flag.isPickedUp()) return;
+
         // check if this is a duplicate report or dropped flag
         int flagID = flag.getID();
         int existingInd = getFlagIdInd(flagID);
-        if (existingInd != -1) {
-            unSetPickedUp(existingInd);
-            return;
-        }
+        if (existingInd != -1) return;
 
         MapLocation flagLoc = flag.getLocation();
         int ind = getClosestApproxLoc(flagLoc);
@@ -158,9 +149,10 @@ public class FlagRecorder {
     }
 
     public static void checkFlagReturned(int ind) throws GameActionException {
-        if (isCaptured(ind)) return;
+        if (isCaptured(ind) || !isPickedUp(ind)) return;
         int lastRoundCarrying = Comms.read(COMMS_ENEMY_FLAG_LAST_ROUND_CARRYING_START_IND + ind);
         if (lastRoundCarrying < rc.getRoundNum() - GameConstants.FLAG_DROPPED_RESET_ROUNDS - 1) {
+
             unSetPickedUp(ind);
         }
     }
