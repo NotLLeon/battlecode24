@@ -41,12 +41,12 @@ public class FlagDefense {
         int ind = getFlagIdInd(id);
         if (ind == -1) return;
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, 0);
+        Comms.write(COMMS_FLAG_DISTRESS_LOCS + ind, 0);
     }
 
     public static void stopDistressLoc(MapLocation loc) throws GameActionException {
         int ind = getFlagIndFromLoc(loc);
-        if (ind == -1) return;
-        Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, 0);
+        stopDistress(ind);
     }
 
     public static MapLocation readDistress() throws GameActionException {
