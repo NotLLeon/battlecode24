@@ -1,8 +1,8 @@
-package v2_water_trap;
+package v2old;
 
 import battlecode.common.*;
 
-import static v2_water_trap.Constants.*;
+import static v2old.Constants.*;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
@@ -26,15 +26,14 @@ public strictfp class RobotPlayer {
             try {
                 curRound = rc.getRoundNum();
                 boolean isMainPhase = curRound <= GameConstants.SETUP_ROUNDS;
-                if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
-                    buyUpgrade();
+                tryBuyUpgrade();
+                if (!rc.isSpawned()) {
+                    boolean isSpawned = Spawner.spawn();
+                    if (!isSpawned) continue;
                 }
-                if (!rc.isSpawned()) Spawner.spawn();
-                else {
-                    Micro.run();
-                    if (isMainPhase) SetupPhase.run();
-                    else MainPhase.run();
-                }
+                Micro.run();
+                if (isMainPhase) SetupPhase.run();
+                else MainPhase.run();
 
             } catch (GameActionException e) {
                 System.out.println("GameActionException");
@@ -54,8 +53,11 @@ public strictfp class RobotPlayer {
             }
         }
     }
-    private static void buyUpgrade() throws GameActionException {
-        if (rc.canBuyGlobal(FIRST_UPGRADE)) rc.buyGlobal(FIRST_UPGRADE);
-        else if (rc.canBuyGlobal(SECOND_UPGRADE)) rc.buyGlobal(SECOND_UPGRADE);
+
+    private static void tryBuyUpgrade() throws GameActionException {
+        if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
+            if (rc.canBuyGlobal(FIRST_UPGRADE)) rc.buyGlobal(FIRST_UPGRADE);
+            else if (rc.canBuyGlobal(SECOND_UPGRADE)) rc.buyGlobal(SECOND_UPGRADE);
+        }
     }
 }

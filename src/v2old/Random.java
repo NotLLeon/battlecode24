@@ -1,8 +1,8 @@
-package v2_water_trap;
+package v2old;
 
 import battlecode.common.Direction;
 
-import static v2_water_trap.Constants.directions;
+import static v2old.Constants.directions;
 
 public class Random {
 

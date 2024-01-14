@@ -26,14 +26,15 @@ public strictfp class RobotPlayer {
             try {
                 curRound = rc.getRoundNum();
                 boolean isMainPhase = curRound <= GameConstants.SETUP_ROUNDS;
-                tryBuyUpgrade();
-                if (!rc.isSpawned()) {
-                    boolean isSpawned = Spawner.spawn();
-                    if (!isSpawned) continue;
+                if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
+                    buyUpgrade();
                 }
-                Micro.run();
-                if (isMainPhase) SetupPhase.run();
-                else MainPhase.run();
+                if (!rc.isSpawned()) Spawner.spawn();
+                else {
+                    Micro.run();
+                    if (isMainPhase) SetupPhase.run();
+                    else MainPhase.run();
+                }
 
             } catch (GameActionException e) {
                 System.out.println("GameActionException");
@@ -53,11 +54,8 @@ public strictfp class RobotPlayer {
             }
         }
     }
-
-    private static void tryBuyUpgrade() throws GameActionException {
-        if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
-            if (rc.canBuyGlobal(FIRST_UPGRADE)) rc.buyGlobal(FIRST_UPGRADE);
-            else if (rc.canBuyGlobal(SECOND_UPGRADE)) rc.buyGlobal(SECOND_UPGRADE);
-        }
+    private static void buyUpgrade() throws GameActionException {
+        if (rc.canBuyGlobal(FIRST_UPGRADE)) rc.buyGlobal(FIRST_UPGRADE);
+        else if (rc.canBuyGlobal(SECOND_UPGRADE)) rc.buyGlobal(SECOND_UPGRADE);
     }
 }

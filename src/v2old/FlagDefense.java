@@ -1,8 +1,8 @@
-package v2_water_trap;
+package v2old;
 
 import battlecode.common.*;
 
-import static v2_water_trap.Constants.*;
+import static v2old.Constants.*;
 public class FlagDefense {
 
     // if you are within this distance of a distress flag and there are no enemies, stop signal

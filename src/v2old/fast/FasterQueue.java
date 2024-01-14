@@ -1,23 +1,21 @@
-package v2_water_trap.fast;
+package v2old.fast;
 
-/**
- * An implementation of a ring buffer queue
- */
+// Unsafe version of a queue that 
+// assumes you never try to add more items than maxlen
+// For use ONLY in Nav.java gradientDescent
 @SuppressWarnings("unchecked")
-public class FastQueue<T> {
+public class FasterQueue<T> {
+
 	private T[] buf;
 	private int l;
 	private int r;
 	private int ln;
 
-	public FastQueue() {
-		ln = 10000;
-		buf = (T[])new Object[ln];
-		l = 0;
-		r = 0;
+	public FasterQueue() {
+		this(10000);
 	}
 
-	public FastQueue(int maxlen) {
+	public FasterQueue(int maxlen) {
 		ln = maxlen + 5;
 		buf = (T[])new Object[ln];
 		l = 0;
@@ -29,18 +27,17 @@ public class FastQueue<T> {
 	}
 
 	public void clear() {
-		l = r;
+        l = 0;
+        r = 0;
 	}
 
 	public int size() {
-		return (r - l + ln) % ln;
+		return r - l;
 	}
 
 	public boolean add(T e) {
-		if ((r + 1) % ln == l) return false;
 		buf[r] = e;
 		r++;
-		r %= ln;
 		return true;
 	}
 
@@ -50,10 +47,8 @@ public class FastQueue<T> {
 	}
 
 	public T poll() {
-		if (l == r) return null;
 		T v = buf[l];
 		l++;
-		l %= ln;
 		return v;
 	}
 }

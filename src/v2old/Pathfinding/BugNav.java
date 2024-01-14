@@ -1,8 +1,8 @@
-package v2_water_trap.Pathfinding;
+package v2old.Pathfinding;
 
 import battlecode.common.*;
 
-import static v2_water_trap.Constants.rc;
+import static v2old.Constants.rc;
 
 //import java.util.Arrays;
 

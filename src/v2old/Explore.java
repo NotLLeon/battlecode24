@@ -1,12 +1,12 @@
-package v2_water_trap;
+package v2old;
 
 import battlecode.common.*;
 
-import static v2_water_trap.Constants.rc;
-import static v2_water_trap.Constants.directions;
-import static v2_water_trap.Constants.EXPLORE_NUM_TRACKED_LOCATIONS;
-import static v2_water_trap.Constants.EXPLORE_HIGH_WEIGHT_DIRECTION;
-import static v2_water_trap.Constants.EXPLORE_MOVES_TO_TRACK_LOCATION;
+import static v2old.Constants.rc;
+import static v2old.Constants.directions;
+import static v2old.Constants.EXPLORE_NUM_TRACKED_LOCATIONS;
+import static v2old.Constants.EXPLORE_HIGH_WEIGHT_DIRECTION;
+import static v2old.Constants.EXPLORE_MOVES_TO_TRACK_LOCATION;
 
 public class Explore {
     static int prevlocIdx = 0;

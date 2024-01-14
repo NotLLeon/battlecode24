@@ -1,4 +1,4 @@
-package v2_water_trap.fast;
+package v2old.fast;
 
 // Kinda buggy. Don't use.
 public class FastMinQueue<T extends Comparable<? super T>> {

@@ -1,8 +1,8 @@
-package v2_water_trap;
+package v2old;
 
 import battlecode.common.*;
 
-import static v2_water_trap.Constants.rc;
+import static v2old.Constants.rc;
 
 public class Micro {
 

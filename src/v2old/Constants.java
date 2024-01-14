@@ -1,4 +1,4 @@
-package v2_water_trap;
+package v2old;
 
 import battlecode.common.*;
 

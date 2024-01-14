@@ -1,8 +1,8 @@
-package v2_water_trap;
+package v2old;
 
 import battlecode.common.*;
 
-import static v2_water_trap.Constants.rc;
+import static v2old.Constants.rc;
 
 // SETUP PHASE LOGIC GOES HERE (TENTATIVE)
 
@@ -14,8 +14,6 @@ public class SetupPhase extends Robot {
     public static void run() throws GameActionException {
         // for now just explore, try to path to crumbs, then if dam found, gather around dam
         // to prepare attack
-        buildDefensiveTrap();
-
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(-1);
         if (crumbLocs.length > 0) {
             moveTo(crumbLocs[0]);

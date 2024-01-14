@@ -33,4 +33,27 @@ public abstract class Robot {
         }
         return closest;
     }
+
+    public static void buildDefensiveTrap() throws GameActionException {
+        // Check if the robot can build an water trap at the location
+        FlagInfo[] nearbyFlags = rc.senseNearbyFlags(-1, rc.getTeam());
+        if (nearbyFlags.length == 0) return;
+        MapLocation sp = nearbyFlags[0].getLocation();
+
+        if (rc.canBuild(TrapType.WATER, sp)) {
+            rc.build(TrapType.WATER, sp);
+        }
+    }
+
+    public static void buildOffensiveTrap() throws GameActionException {
+        // Check if the robot can build an water trap at the location
+        MapInfo[] nearbyLocs = rc.senseNearbyMapInfos(2);
+
+        for (MapInfo test : nearbyLocs) {
+            MapLocation testPn = test.getMapLocation();
+            if (test.getSpawnZoneTeam() == (rc.getTeam() == Team.A ? 2 : 1) && rc.canBuild(TrapType.WATER, testPn)) {
+                rc.build(TrapType.WATER, testPn);
+        }
+        }
+    }
 }

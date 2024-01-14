@@ -1,4 +1,4 @@
-package v2_water_trap;
+package v2old;
 
 // class to keep track of:
 // - if a flag is captured
@@ -6,7 +6,7 @@ package v2_water_trap;
 // - if the exact loc of a flag is known
 // for each enemy
 
-import static v2_water_trap.Constants.*;
+import static v2old.Constants.*;
 
 import battlecode.common.*;
 
