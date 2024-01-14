@@ -2,10 +2,7 @@ package v1;
 
 import battlecode.common.*;
 
-import static v1.Constants.rc;
-import static v1.Constants.COMMS_FLAG_DISTRESS_FLAGS;
-import static v1.Constants.COMMS_FLAG_DISTRESS_LOCS;
-
+import static v1.Constants.*;
 public class FlagDefense {
 
     // if you are within this distance of a distress flag and there are no enemies, stop signal

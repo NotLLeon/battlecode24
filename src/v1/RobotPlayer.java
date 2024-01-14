@@ -4,7 +4,6 @@ import battlecode.common.*;
 
 import static v1.Constants.*;
 import static v1.Random.rng;
-import static v1.Constants.Role;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.

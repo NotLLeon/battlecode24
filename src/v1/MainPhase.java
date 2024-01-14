@@ -2,6 +2,7 @@ package v1;
 
 import static v1.Constants.*;
 import static v1.Random.*;
+
 import battlecode.common.*;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
@@ -84,8 +85,10 @@ public class MainPhase extends Robot {
             } else moveToAdjacent(rushLoc);
 
         }
+
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : visibleEnemyFlags) FlagRecorder.foundFlag(flag);
+
         // Rarely attempt placing traps behind the robot.
         MapLocation prevLoc = rc.getLocation().subtract(nextDir());
         if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && nextInt(2) == 0)
