@@ -1,7 +1,7 @@
-package v2;
+package v2old;
 
-import static v2.Constants.*;
-import static v2.Random.*;
+import static v2old.Constants.*;
+import static v2old.Random.*;
 
 import battlecode.common.*;
 
@@ -97,8 +97,8 @@ public class MainPhase extends Robot {
         for (FlagInfo flag : visibleEnemyFlags) FlagRecorder.foundFlag(flag);
 
         // Rarely attempt placing traps behind the robot.
-//        MapLocation prevLoc = rc.getLocation().subtract(nextDir());
-//        if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && nextInt(2) == 0)
-//            rc.build(TrapType.EXPLOSIVE, prevLoc);
+        MapLocation prevLoc = rc.getLocation().subtract(nextDir());
+        if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && nextInt(2) == 0)
+            rc.build(TrapType.EXPLOSIVE, prevLoc);
     }
 }

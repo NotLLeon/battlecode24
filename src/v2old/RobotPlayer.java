@@ -1,8 +1,8 @@
-package v2;
+package v2old;
 
 import battlecode.common.*;
 
-import static v2.Constants.*;
+import static v2old.Constants.*;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
@@ -25,17 +25,15 @@ public strictfp class RobotPlayer {
 
             try {
                 curRound = rc.getRoundNum();
-                boolean isSetupPhase = curRound <= GameConstants.SETUP_ROUNDS;
+                boolean isMainPhase = curRound <= GameConstants.SETUP_ROUNDS;
                 tryBuyUpgrade();
                 if (!rc.isSpawned()) {
                     boolean isSpawned = Spawner.spawn();
                     if (!isSpawned) continue;
                 }
-                if (isSetupPhase) SetupPhase.run();
-                else {
-                    Micro.run();
-                    MainPhase.run();
-                }
+                Micro.run();
+                if (isMainPhase) SetupPhase.run();
+                else MainPhase.run();
 
             } catch (GameActionException e) {
                 System.out.println("GameActionException");
