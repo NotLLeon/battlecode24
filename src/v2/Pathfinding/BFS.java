@@ -10,11 +10,43 @@ import static v2.Constants.rc;
 public class BFS {
 
     static Direction bestDir;
+    static boolean fillAllowed = false;
 
-    public static Direction getDir(MapLocation dest) throws GameActionException {
+    public static Direction getDir(MapLocation dest, boolean allowFill) throws GameActionException {
+        fillAllowed = allowFill;
         MapLocation curLoc = rc.getLocation();
         bestDir = curLoc.directionTo(dest);
         return getDetourDir();
+    }
+
+    private static boolean isMoveable(MapLocation loc, boolean firstMove) throws GameActionException {
+        if (!rc.canSenseLocation(loc))
+            return false;
+        MapInfo info = rc.senseMapInfo(loc);
+        boolean canFill = fillAllowed && info.isWater();
+        return (info.isPassable() || canFill)
+                && (!firstMove || !rc.canSenseRobotAtLocation(loc));
+    }
+
+    private static Direction rotateInt(Direction dir, int rotate) {
+        switch (rotate) {
+            case 0:
+                return dir;
+            case 1:
+                return dir.rotateRight();
+            case -1:
+                return dir.rotateLeft();
+            case 2:
+                return dir.rotateRight().rotateRight();
+            case -2:
+                return dir.rotateLeft().rotateLeft();
+            case 3:
+                return dir.rotateLeft().opposite();
+            case -3:
+                return dir.rotateRight().opposite();
+            default:
+                return dir.opposite();
+        }
     }
 
     private static Direction getDetourDir() throws GameActionException {
@@ -744,34 +776,5 @@ public class BFS {
             }
         }
         return Direction.CENTER;
-    }
-
-    private static Direction rotateInt(Direction dir, int rotate) {
-        switch (rotate) {
-            case 0:
-                return dir;
-            case 1:
-                return dir.rotateRight();
-            case -1:
-                return dir.rotateLeft();
-            case 2:
-                return dir.rotateRight().rotateRight();
-            case -2:
-                return dir.rotateLeft().rotateLeft();
-            case 3:
-                return dir.rotateLeft().opposite();
-            case -3:
-                return dir.rotateRight().opposite();
-            default:
-                return dir.opposite();
-        }
-    }
-
-    private static boolean isMoveable(MapLocation loc, boolean firstMove) throws GameActionException {
-        if (!rc.canSenseLocation(loc))
-            return false;
-        MapInfo info = rc.senseMapInfo(loc);
-        return info.isPassable()
-                && (!firstMove || !rc.canSenseRobotAtLocation(loc));
     }
 }
