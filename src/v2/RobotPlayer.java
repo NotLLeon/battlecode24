@@ -1,6 +1,7 @@
 package v2;
 
 import battlecode.common.*;
+import v2.Constants.Role;
 
 import static v2.Constants.*;
 import static v2.Random.rng;
@@ -20,6 +21,8 @@ public strictfp class RobotPlayer {
         
         Constants.rc = rc;
         Random.initRandom(rc.getID());
+
+        MapLocation[] spawnCenters = Spawner.spawnCenters();
 
         while (true) {
 
