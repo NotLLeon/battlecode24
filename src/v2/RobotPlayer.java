@@ -3,7 +3,6 @@ package v2;
 import battlecode.common.*;
 
 import static v2.Constants.*;
-import static v2.Random.rng;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
@@ -19,6 +18,7 @@ public strictfp class RobotPlayer {
     public static void run(RobotController rc) throws GameActionException {
         
         Constants.rc = rc;
+        Spawner.init();
         Random.initRandom(rc.getID());
 
         while (true) {
@@ -29,13 +29,8 @@ public strictfp class RobotPlayer {
                 if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
                     buyUpgrade();
                 }
-                if (!rc.isSpawned()) {
-                    MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-                    for (int i = 0; i < 100; i++) {
-                        MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
-                        if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
-                    }
-                } else {
+                if (!rc.isSpawned()) Spawner.spawn();
+                else {
                     Micro.run();
                     if (isMainPhase) SetupPhase.run();
                     else MainPhase.run();
