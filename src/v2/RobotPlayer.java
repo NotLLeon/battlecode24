@@ -25,10 +25,12 @@ public strictfp class RobotPlayer {
 
             try {
                 curRound = rc.getRoundNum();
+                boolean isMainPhase = curRound <= GameConstants.SETUP_ROUNDS;
                 if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
                     buyUpgrade();
                 }
                 if (!rc.isSpawned()) {
+                    if (isMainPhase) MainPhase.onDeath();
                     MapLocation[] spawnLocs = rc.getAllySpawnLocations();
                     for (int i = 0; i < 100; i++) {
                         MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
@@ -36,7 +38,7 @@ public strictfp class RobotPlayer {
                     }
                 } else {
                     Micro.run();
-                    if (curRound <= GameConstants.SETUP_ROUNDS) SetupPhase.run();
+                    if (isMainPhase) SetupPhase.run();
                     else MainPhase.run();
                 }
 
