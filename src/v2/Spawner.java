@@ -31,4 +31,26 @@ public class Spawner {
         }
         return spawnCenters;
     }
+
+    static boolean buildInDir(MapLocation center, Direction dir) throws GameActionException {
+        if(rc.isSpawned()) return false;
+        Direction[] tryDirs = {
+                dir,
+                dir.rotateRight(),
+                dir.rotateLeft(),
+                dir.rotateRight().rotateRight(),
+                dir.rotateLeft().rotateLeft(),
+                dir.rotateLeft().opposite(),
+                dir.rotateRight().opposite(),
+                dir.opposite()
+        };
+        for(Direction tryDir : tryDirs) {
+            MapLocation spawnPoint = center.add(tryDir);
+            if(rc.canSpawn(spawnPoint)) {
+                rc.spawn(spawnPoint);
+                return true;
+            }
+        }
+        return false;
+    }
 }

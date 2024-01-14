@@ -23,6 +23,7 @@ public strictfp class RobotPlayer {
         Random.initRandom(rc.getID());
 
         MapLocation[] spawnCenters = Spawner.spawnCenters();
+        MapLocation mapCenter = Spawner.center();
 
         while (true) {
 
@@ -33,10 +34,11 @@ public strictfp class RobotPlayer {
                     buyUpgrade();
                 }
                 if (!rc.isSpawned()) {
-                    MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-                    for (int i = 0; i < 100; i++) {
-                        MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
-                        if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
+                    for (int i = 0; i < 50; i++) {
+                        MapLocation randomCenter = spawnCenters[rng.nextInt(3)];
+                        if (Spawner.buildInDir(randomCenter, randomCenter.directionTo(mapCenter))) {
+                            continue;
+                        }
                     }
                 } else {
                     Micro.run();
