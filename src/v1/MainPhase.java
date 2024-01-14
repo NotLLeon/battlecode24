@@ -12,7 +12,7 @@ public class MainPhase extends Robot {
 
     // TODO: should be based on map size
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
-    private static final int SHORT_TARGET_ROUND_INTERVAL = 20;
+    private static final int SHORT_TARGET_ROUND_INTERVAL = 50;
     private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
     private static FlagInfo pickedUpFlag = null;
 
@@ -21,7 +21,7 @@ public class MainPhase extends Robot {
     }
 
     public static void run() throws GameActionException {
-        if (rc.getRoundNum() % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
+        if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
         }
 

@@ -22,7 +22,6 @@ public strictfp class RobotPlayer {
         Random.initRandom(rc.getID());
 
         while (true) {
-            turnCount += 1;  // We have now been alive for one more turn!
 
             try {
                 curRound = rc.getRoundNum();
@@ -38,8 +37,7 @@ public strictfp class RobotPlayer {
                 }
                 else {
                     Micro.run();
-
-                    if (turnCount < GameConstants.SETUP_ROUNDS) SetupPhase.run();
+                    if (curRound <= GameConstants.SETUP_ROUNDS) SetupPhase.run();
                     else MainPhase.run();
                 }
 
