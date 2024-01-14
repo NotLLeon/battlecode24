@@ -31,7 +31,7 @@ public class Spawner {
         }
     }
 
-    private static void spawnInDir(MapLocation loc, Direction dir) throws GameActionException {
+    private static boolean spawnInDir(MapLocation loc, Direction dir) throws GameActionException {
         Direction[] tryDirs = {
                 dir,
                 dir.rotateRight(),
@@ -47,17 +47,24 @@ public class Spawner {
             MapLocation spawnPoint = loc.add(tryDir);
             if(rc.canSpawn(spawnPoint)) {
                 rc.spawn(spawnPoint);
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     public static void init() {
         getSpawnCenters();
     }
 
-    public static void spawn() throws GameActionException {
-        MapLocation spawnCenter = spawnCenters[Random.nextInt(3)];
-        spawnInDir(spawnCenter, spawnCenter.directionTo(center));
+    // FIXME: jank
+    public static boolean spawn() throws GameActionException {
+        for (int i = 0; i < 10; ++i) {
+            MapLocation spawnCenter = spawnCenters[Random.nextInt(3)];
+            if (spawnInDir(spawnCenter, spawnCenter.directionTo(center))) {
+                return true;
+            }
+        }
+        return false;
     }
 }
