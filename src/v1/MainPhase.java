@@ -12,7 +12,7 @@ public class MainPhase extends Robot {
     // TODO: should be based on map size
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 50;
-    private static final int DISTRESS_HELP_DISTANCE = 10;
+    private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
 
     private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
     private static FlagInfo pickedUpFlag = null;
@@ -26,26 +26,7 @@ public class MainPhase extends Robot {
             onBroadcast();
         }
 
-        // TODO: Experiment with this, how far away to go help, when to check for help
         FlagDefense.scanAndSignal();
-        MapLocation distressLoc = FlagDefense.readDistress();
-        if (distressLoc != null) {
-            int dist = rc.getLocation().distanceSquaredTo(distressLoc);
-            if (dist < DISTRESS_HELP_DISTANCE) {
-                if (dist < GameConstants.VISION_RADIUS_SQUARED && rc.senseNearbyFlags(-1, rc.getTeam()).length == 0) {
-                    FlagDefense.stopDistress(FlagDefense.getFlagIdFromLoc(distressLoc));
-                } else {
-                    moveTo(distressLoc);
-                    return;
-                }
-            }
-        }
-        
-        
-        if (rc.canPickupFlag(rc.getLocation())){
-            rc.pickupFlag(rc.getLocation());
-            rc.setIndicatorString("Holding a flag!");
-        }
 
         if (rc.hasFlag()){
             if (pickedUpFlag == null) pickedUpFlag = rc.senseNearbyFlags(0)[0];
@@ -58,8 +39,24 @@ public class MainPhase extends Robot {
 
         } else {
             pickedUpFlag = null;
+
             // check if any flags have been dropped and returned
             for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) FlagRecorder.checkFlagReturned(i);
+
+            // TODO: Experiment with this, how far away to go help, when to check for help
+            MapLocation distressLoc = FlagDefense.readDistress();
+            if (distressLoc != null) {
+                int dist = rc.getLocation().distanceSquaredTo(distressLoc);
+                if (dist < DISTRESS_HELP_DISTANCE_SQUARED) {
+                    if (dist < GameConstants.VISION_RADIUS_SQUARED &&
+                            rc.senseNearbyFlags(-1, rc.getTeam()).length == 0) {
+                        FlagDefense.stopDistress(FlagDefense.getFlagIndFromLoc(distressLoc));
+                    } else {
+                        moveTo(distressLoc);
+                        return;
+                    }
+                }
+            }
 
             // visit a flag that hasn't been picked up
             // if all flags are picked up, patrol default locs

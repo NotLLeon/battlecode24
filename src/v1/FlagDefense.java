@@ -5,9 +5,11 @@ import battlecode.common.*;
 import static v1.Constants.rc;
 import static v1.Constants.COMMS_FLAG_DISTRESS_FLAGS;
 import static v1.Constants.COMMS_FLAG_DISTRESS_LOCS;
-import v1.Constants.Role;
 
-public class FlagDefense extends Robot {
+public class FlagDefense {
+
+    // if you are within this distance of a distress flag and there are no enemies, stop signal
+    static final int FLAG_SAFE_DISTANCE_SQUARED = 4;
 
     private static int getFlagId(int ind) throws GameActionException {
         return Comms.read(COMMS_FLAG_DISTRESS_FLAGS + ind);
@@ -22,9 +24,9 @@ public class FlagDefense extends Robot {
         return -1;
     }
 
-    public static int getFlagIdFromLoc(MapLocation loc) throws GameActionException {
+    public static int getFlagIndFromLoc(MapLocation loc) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
-            if (Comms.readLoc(COMMS_FLAG_DISTRESS_LOCS + i).equals(loc)) {
+            if (loc.equals(Comms.readLoc(COMMS_FLAG_DISTRESS_LOCS + i))) {
                 return i;
             }
         }
@@ -49,6 +51,7 @@ public class FlagDefense extends Robot {
             int distressFlag = Comms.read(COMMS_FLAG_DISTRESS_FLAGS + i);
             if (distressFlag > 0) {
                 MapLocation distressLoc = Comms.readLoc(COMMS_FLAG_DISTRESS_LOCS + i);
+                if (distressLoc == null) continue;
                 if (nearestLoc == null || curLoc.distanceSquaredTo(nearestLoc) > curLoc.distanceSquaredTo(distressLoc)) {
                     nearestLoc = distressLoc;
                 }
@@ -59,11 +62,13 @@ public class FlagDefense extends Robot {
     
     public static void scanAndSignal() throws GameActionException {
         FlagInfo[] nearbyFlags = rc.senseNearbyFlags(-1, rc.getTeam());
-        for (int i = 0; i < nearbyFlags.length; ++i) {
-            if (nearbyFlags[i].isPickedUp()) {
-                setDistress(nearbyFlags[i].getLocation(), nearbyFlags[i].getID());
-            } else if (rc.senseNearbyRobots(-1, rc.getTeam().opponent()).length == 0) {
-                stopDistress(nearbyFlags[i].getID());
+        for (FlagInfo nearbyFlag : nearbyFlags) {
+            MapLocation curLoc = rc.getLocation();
+            if (nearbyFlag.isPickedUp()) {
+                setDistress(nearbyFlag.getLocation(), nearbyFlag.getID());
+            } else if (curLoc.isWithinDistanceSquared(nearbyFlag.getLocation(), FLAG_SAFE_DISTANCE_SQUARED) &&
+                    rc.senseNearbyRobots(-1, rc.getTeam().opponent()).length == 0) {
+                stopDistress(nearbyFlag.getID());
             }
         }
     }
