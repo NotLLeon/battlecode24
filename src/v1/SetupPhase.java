@@ -1,10 +1,8 @@
 package v1;
 
 import battlecode.common.*;
-import v1.Constants.Role;
 
 import static v1.Constants.rc;
-import static v1.RobotPlayer.role;
 
 // SETUP PHASE LOGIC GOES HERE (TENTATIVE)
 

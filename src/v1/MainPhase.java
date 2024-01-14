@@ -2,28 +2,9 @@ package v1;
 
 import static v1.Constants.*;
 import static v1.Random.*;
-
 import battlecode.common.*;
 
 import java.util.function.Function;
-import static v1.Constants.directions;
-import static v1.Constants.rc;
-import static v1.Constants.Role;
-import static v1.Random.nextDir;
-import static v1.Random.nextInt;
-import static v1.Random.rng;
-
-import static v1.RobotPlayer.role;
-
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.GameConstants;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
-import battlecode.common.TrapType;
-import v1.Constants.Role;
-import battlecode.common.MapInfo;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
@@ -127,7 +108,6 @@ public class MainPhase extends Robot {
             } else moveToAdjacent(rushLoc);
 
         }
-
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : visibleEnemyFlags) {
             if (!flag.isPickedUp()) FlagRecorder.foundFlag(flag);
