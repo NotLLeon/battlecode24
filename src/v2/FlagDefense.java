@@ -3,6 +3,7 @@ package v2;
 import battlecode.common.*;
 
 import static v2.Constants.*;
+
 public class FlagDefense {
 
     // if you are within this distance of a distress flag and there are no enemies, stop signal
@@ -37,16 +38,18 @@ public class FlagDefense {
         Comms.writeLoc(COMMS_FLAG_DISTRESS_LOCS + ind, loc);
     }
 
-    public static void stopDistress(int id) throws GameActionException {
-        int ind = getFlagIdInd(id);
+    private static void stopDistressInd(int ind) throws GameActionException {
         if (ind == -1) return;
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, 0);
         Comms.write(COMMS_FLAG_DISTRESS_LOCS + ind, 0);
     }
 
+    public static void stopDistress(int id) throws GameActionException {
+        stopDistressInd(getFlagIdInd(id));
+    }
+
     public static void stopDistressLoc(MapLocation loc) throws GameActionException {
-        int ind = getFlagIndFromLoc(loc);
-        stopDistress(ind);
+        stopDistressInd(getFlagIndFromLoc(loc));
     }
 
     public static MapLocation readDistress() throws GameActionException {
