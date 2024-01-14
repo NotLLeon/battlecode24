@@ -57,7 +57,6 @@ public class MainPhase extends Robot {
             // TODO: only explore within some radius
             Explore.exploreNewArea();
         } else moveToAdjacent(rushLoc);
-
     }
 
     public static void run() throws GameActionException {
@@ -68,7 +67,15 @@ public class MainPhase extends Robot {
         FlagDefense.scanAndSignal();
 
         if (rc.hasFlag()){
-            FlagInfo pickedUpFlag = rc.senseNearbyFlags(0)[0];
+            FlagInfo[] enemyFlags = rc.senseNearbyFlags(0, rc.getTeam().opponent());
+
+            FlagInfo pickedUpFlag = enemyFlags[0];
+            for (FlagInfo flag : enemyFlags) {
+                if (flag.isPickedUp()) {
+                    pickedUpFlag = flag;
+                    break;
+                }
+            }
 
             moveTo(findClosestLoc(friendlySpawnLocs));
 
