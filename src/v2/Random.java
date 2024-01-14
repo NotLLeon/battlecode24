@@ -6,7 +6,7 @@ import static v2.Constants.directions;
 
 public class Random {
 
-    static java.util.Random rng = null;
+    private static java.util.Random rng = null;
 
     static void initRandom(int seed) {
         rng = new java.util.Random(seed);

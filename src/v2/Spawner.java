@@ -2,25 +2,25 @@ package v2;
 import battlecode.common.*;
 
 import static v2.Constants.*;
+
 import v2.fast.*;
 
 public class Spawner {
 
     // Returns the Map Center
-    public static MapLocation center() {
-        return new MapLocation(rc.getMapHeight() / 2, rc.getMapWidth() / 2);
-    }
+
+    private static MapLocation[] spawnCenters;
+
+    private final static MapLocation center = new MapLocation(rc.getMapHeight() / 2, rc.getMapWidth() / 2);
 
     // Get the array of all the spawn locations
-    public static MapLocation[] spawnCenters() {
+    private static void getSpawnCenters() {
         MapLocation[] spawns = rc.getAllySpawnLocations();
-        MapLocation[] spawnCenters = new MapLocation[3];
+        spawnCenters = new MapLocation[3];
         int idx = 0;
 
         FastIterableLocSet spawnCoords = new FastIterableLocSet();
-        for (MapLocation sp : spawns) {
-            spawnCoords.add(sp);
-        }
+        for (MapLocation sp : spawns) spawnCoords.add(sp);
 
         for (MapLocation sp : spawns) {
             MapLocation NE = sp.add(Direction.NORTHEAST);
@@ -29,15 +29,14 @@ public class Spawner {
                 spawnCenters[idx++] = sp;
             }
         }
-        return spawnCenters;
     }
 
-    static boolean buildInDir(MapLocation center, Direction dir) throws GameActionException {
-        if(rc.isSpawned()) return false;
+    private static void spawnInDir(MapLocation loc, Direction dir) throws GameActionException {
         Direction[] tryDirs = {
                 dir,
                 dir.rotateRight(),
                 dir.rotateLeft(),
+                Direction.CENTER,
                 dir.rotateRight().rotateRight(),
                 dir.rotateLeft().rotateLeft(),
                 dir.rotateLeft().opposite(),
@@ -45,12 +44,20 @@ public class Spawner {
                 dir.opposite()
         };
         for(Direction tryDir : tryDirs) {
-            MapLocation spawnPoint = center.add(tryDir);
+            MapLocation spawnPoint = loc.add(tryDir);
             if(rc.canSpawn(spawnPoint)) {
                 rc.spawn(spawnPoint);
-                return true;
+                return;
             }
         }
-        return false;
+    }
+
+    public static void init() {
+        getSpawnCenters();
+    }
+
+    public static void spawn() throws GameActionException {
+        MapLocation spawnCenter = spawnCenters[Random.nextInt(3)];
+        spawnInDir(spawnCenter, spawnCenter.directionTo(center));
     }
 }
