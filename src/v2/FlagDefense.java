@@ -21,7 +21,7 @@ public class FlagDefense {
         return -1;
     }
 
-    public static int getFlagIndFromLoc(MapLocation loc) throws GameActionException {
+    private static int getFlagIndFromLoc(MapLocation loc) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             if (loc.equals(Comms.readLoc(COMMS_FLAG_DISTRESS_LOCS + i))) {
                 return i;
@@ -32,12 +32,20 @@ public class FlagDefense {
 
     public static void setDistress(MapLocation loc, int id) throws GameActionException {
         int ind = getFlagIdInd(id);
+        if (ind == -1) return;
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, id);
         Comms.writeLoc(COMMS_FLAG_DISTRESS_LOCS + ind, loc);
     }
 
     public static void stopDistress(int id) throws GameActionException {
         int ind = getFlagIdInd(id);
+        if (ind == -1) return;
+        Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, 0);
+    }
+
+    public static void stopDistressLoc(MapLocation loc) throws GameActionException {
+        int ind = getFlagIndFromLoc(loc);
+        if (ind == -1) return;
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, 0);
     }
 
