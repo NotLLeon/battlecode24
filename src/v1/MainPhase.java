@@ -16,14 +16,9 @@ public class MainPhase extends Robot {
     private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
 
     private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
-    private static FlagInfo pickedUpFlag = null;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
-    }
-
-    public static void onDeath() {
-        pickedUpFlag = null;
     }
 
     private static void checkDistressSignal() throws GameActionException {
@@ -73,15 +68,13 @@ public class MainPhase extends Robot {
         FlagDefense.scanAndSignal();
 
         if (rc.hasFlag()){
-            if (pickedUpFlag == null) pickedUpFlag = rc.senseNearbyFlags(0)[0];
+            FlagInfo pickedUpFlag = rc.senseNearbyFlags(0)[0];
 
             moveTo(findClosestLoc(friendlySpawnLocs));
 
             int flagId = pickedUpFlag.getID();
-            if(!rc.hasFlag()) {
-                FlagRecorder.setCaptured(flagId);
-                pickedUpFlag = null;
-            } else FlagRecorder.notifyCarryingFlag(flagId);
+            if(!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
+            else FlagRecorder.notifyCarryingFlag(flagId);
 
         } else {
 

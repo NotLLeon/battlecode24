@@ -30,7 +30,6 @@ public strictfp class RobotPlayer {
                     buyUpgrade();
                 }
                 if (!rc.isSpawned()) {
-                    if (isMainPhase) MainPhase.onDeath();
                     MapLocation[] spawnLocs = rc.getAllySpawnLocations();
                     for (int i = 0; i < 100; i++) {
                         MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
