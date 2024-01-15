@@ -15,8 +15,6 @@ public class MainPhase extends Robot {
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
     private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
 
-    private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
-
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
     }
@@ -57,7 +55,6 @@ public class MainPhase extends Robot {
             // TODO: only explore within some radius
             Explore.exploreNewArea();
         } else moveToAdjacent(rushLoc);
-
     }
 
     public static void run() throws GameActionException {
@@ -68,9 +65,17 @@ public class MainPhase extends Robot {
         FlagDefense.scanAndSignal();
 
         if (rc.hasFlag()){
-            FlagInfo pickedUpFlag = rc.senseNearbyFlags(0)[0];
+            FlagInfo[] enemyFlags = rc.senseNearbyFlags(0, rc.getTeam().opponent());
 
-            moveTo(findClosestLoc(friendlySpawnLocs));
+            FlagInfo pickedUpFlag = enemyFlags[0];
+            for (FlagInfo flag : enemyFlags) {
+                if (flag.isPickedUp()) {
+                    pickedUpFlag = flag;
+                    break;
+                }
+            }
+
+            moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
 
             int flagId = pickedUpFlag.getID();
             if(!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
@@ -89,9 +94,5 @@ public class MainPhase extends Robot {
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : visibleEnemyFlags) FlagRecorder.foundFlag(flag);
 
-        // Rarely attempt placing traps behind the robot.
-        MapLocation prevLoc = rc.getLocation().subtract(nextDir());
-        if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && nextInt(2) == 0)
-            rc.build(TrapType.EXPLOSIVE, prevLoc);
     }
 }

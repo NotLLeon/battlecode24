@@ -19,18 +19,4 @@ public abstract class Robot {
         Pathfinding.moveTo(dest, true, -1);
     }
 
-    static MapLocation findClosestLoc(MapLocation[] locs) {
-        MapLocation curLoc = rc.getLocation();
-        int minDist = 10000;
-        MapLocation closest = null;
-        for (MapLocation loc : locs) {
-            if (loc == null) continue;
-            int newDist = curLoc.distanceSquaredTo(loc);
-            if (newDist < minDist) {
-                minDist = newDist;
-                closest = loc;
-            }
-        }
-        return closest;
-    }
 }

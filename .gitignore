@@ -200,3 +200,6 @@ fabric.properties
 # Additional gitignores
 .idea/
 .DS_Store
+
+# Ignoring python virtual envs, naming it `myenv`
+myenv/

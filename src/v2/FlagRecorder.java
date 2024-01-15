@@ -27,9 +27,7 @@ public class FlagRecorder {
 
     private static int getFlagIdInd(int id) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
-            if (getFlagId(i) == id) {
-                return i;
-            }
+            if (getFlagId(i) == id) return i;
         }
         return -1;
     }
@@ -145,7 +143,8 @@ public class FlagRecorder {
     }
 
     public static void notifyCarryingFlag(int id) throws GameActionException {
-        Comms.write(COMMS_ENEMY_FLAG_LAST_ROUND_CARRYING_START_IND + getFlagIdInd(id), rc.getRoundNum());
+        int flagInd = getFlagIdInd(id);
+        Comms.write(COMMS_ENEMY_FLAG_LAST_ROUND_CARRYING_START_IND + flagInd, rc.getRoundNum());
     }
 
     public static void checkFlagReturned(int ind) throws GameActionException {

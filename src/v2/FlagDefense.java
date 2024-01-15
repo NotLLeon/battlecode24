@@ -3,6 +3,7 @@ package v2;
 import battlecode.common.*;
 
 import static v2.Constants.*;
+
 public class FlagDefense {
 
     // if you are within this distance of a distress flag and there are no enemies, stop signal
@@ -12,9 +13,17 @@ public class FlagDefense {
         return Comms.read(COMMS_FLAG_DISTRESS_FLAGS + ind);
     }
 
-    private static int getFlagIdInd(int id) throws GameActionException {
+    private static int getFlagIndFromId(int id) throws GameActionException {
+        // first try to see if it exists
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
-            if (getFlagId(i) == id || getFlagId(i) == 0) {
+            if (getFlagId(i) == id) {
+                return i;
+            }
+        }
+
+        // then look for next open slot, since we're adding new flag
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            if (getFlagId(i) == 0) {
                 return i;
             }
         }
@@ -31,22 +40,24 @@ public class FlagDefense {
     }
 
     public static void setDistress(MapLocation loc, int id) throws GameActionException {
-        int ind = getFlagIdInd(id);
+        int ind = getFlagIndFromId(id);
         if (ind == -1) return;
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, id);
         Comms.writeLoc(COMMS_FLAG_DISTRESS_LOCS + ind, loc);
     }
 
-    public static void stopDistress(int id) throws GameActionException {
-        int ind = getFlagIdInd(id);
+    private static void stopDistressInd(int ind) throws GameActionException {
         if (ind == -1) return;
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, 0);
+        Comms.write(COMMS_FLAG_DISTRESS_LOCS + ind, 0);
+    }
+
+    public static void stopDistress(int id) throws GameActionException {
+        stopDistressInd(getFlagIndFromId(id));
     }
 
     public static void stopDistressLoc(MapLocation loc) throws GameActionException {
-        int ind = getFlagIndFromLoc(loc);
-        if (ind == -1) return;
-        Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, 0);
+        stopDistressInd(getFlagIndFromLoc(loc));
     }
 
     public static MapLocation readDistress() throws GameActionException {

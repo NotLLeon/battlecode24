@@ -17,7 +17,7 @@ public class Spawner {
     private final static MapLocation center = new MapLocation(rc.getMapHeight() / 2, rc.getMapWidth() / 2);
 
     // Get the array of all the spawn locations
-    private static void getSpawnCenters() {
+    private static void computeSpawnCenters() {
         MapLocation[] spawns = rc.getAllySpawnLocations();
         spawnCenters = new MapLocation[3];
         int idx = 0;
@@ -56,8 +56,12 @@ public class Spawner {
         return false;
     }
 
+    public static MapLocation[] getSpawnCenters() {
+        return spawnCenters;
+    }
+
     public static void init() {
-        getSpawnCenters();
+        computeSpawnCenters();
     }
 
     // FIXME: jank

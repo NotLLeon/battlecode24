@@ -3,6 +3,7 @@ package v1;
 import battlecode.common.*;
 
 import static v1.Constants.*;
+
 public class FlagDefense {
 
     // if you are within this distance of a distress flag and there are no enemies, stop signal
@@ -12,9 +13,17 @@ public class FlagDefense {
         return Comms.read(COMMS_FLAG_DISTRESS_FLAGS + ind);
     }
 
-    private static int getFlagIdInd(int id) throws GameActionException {
+    private static int getFlagIndFromId(int id) throws GameActionException {
+        // first try to see if it exists
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
-            if (getFlagId(i) == id || getFlagId(i) == 0) {
+            if (getFlagId(i) == id) {
+                return i;
+            }
+        }
+
+        // then look for next open slot, since we're adding new flag
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            if (getFlagId(i) == 0) {
                 return i;
             }
         }
@@ -31,29 +40,31 @@ public class FlagDefense {
     }
 
     public static void setDistress(MapLocation loc, int id) throws GameActionException {
-        int ind = getFlagIdInd(id);
+        int ind = getFlagIndFromId(id);
         if (ind == -1) return;
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, id);
         Comms.writeLoc(COMMS_FLAG_DISTRESS_LOCS + ind, loc);
     }
 
-    public static void stopDistress(int id) throws GameActionException {
-        int ind = getFlagIdInd(id);
+    private static void stopDistressInd(int ind) throws GameActionException {
         if (ind == -1) return;
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, 0);
         Comms.write(COMMS_FLAG_DISTRESS_LOCS + ind, 0);
     }
 
+    public static void stopDistress(int id) throws GameActionException {
+        stopDistressInd(getFlagIndFromId(id));
+    }
+
     public static void stopDistressLoc(MapLocation loc) throws GameActionException {
-        int ind = getFlagIndFromLoc(loc);
-        stopDistress(ind);
+        stopDistressInd(getFlagIndFromLoc(loc));
     }
 
     public static MapLocation readDistress() throws GameActionException {
         MapLocation nearestLoc = null;
         MapLocation curLoc = rc.getLocation();
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
-            int distressFlag = Comms.read(COMMS_FLAG_DISTRESS_FLAGS + i); // 0, loc1 - 2, loc2
+            int distressFlag = Comms.read(COMMS_FLAG_DISTRESS_FLAGS + i);
             if (distressFlag > 0) {
                 MapLocation distressLoc = Comms.readLoc(COMMS_FLAG_DISTRESS_LOCS + i);
                 if (distressLoc == null) continue;
@@ -64,7 +75,7 @@ public class FlagDefense {
         }
         return nearestLoc;
     }
-    
+
     public static void scanAndSignal() throws GameActionException {
         FlagInfo[] nearbyFlags = rc.senseNearbyFlags(-1, rc.getTeam());
         for (FlagInfo nearbyFlag : nearbyFlags) {
