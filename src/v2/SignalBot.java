@@ -1,13 +1,26 @@
 package v2;
 
 import battlecode.common.*;
+import v2.Constants.Role;
 
 import static v2.Constants.*;
 public class SignalBot{
 
     public static void run() throws GameActionException {
         SignalBot.scanAndSignal();
-        // TODO: make signal bots shoot
+
+        RobotInfo[] nearbyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+        RobotInfo target = null;
+        for (RobotInfo bot : nearbyRobots) {
+            if (target == null || bot.getHealth() < target.getHealth()) {
+                target = bot;
+            }
+
+            if (bot.hasFlag()) {
+                target = bot;
+                break;
+            }
+        }
     }
 
     public static void tryBecomeSignalBot() throws GameActionException {
