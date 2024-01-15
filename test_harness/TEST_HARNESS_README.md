@@ -1,4 +1,6 @@
 ## How to use the testing harness:
+NOTE: Need to pip install `tabulate` as a dependency.
+
 Call `run_tests_script.py` as a console command
 
 
