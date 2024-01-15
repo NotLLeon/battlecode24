@@ -22,15 +22,30 @@ public class Utils {
     }
 
     public static int[] filterIntArr(int[] arr, CheckedFunction<Integer, Boolean> fn) {
-        int numRemaining = 0;
         Function<Integer, Boolean> sfn = lambdaExceptionWrapper(fn, false);
+        int numRemaining = 0;
 
         // idk if this is the best way to do this
         for (int ind : arr) if (sfn.apply(ind)) ++numRemaining;
 
         int[] filtered = new int[numRemaining];
+
         int i = 0;
         for (int ind : arr) if (sfn.apply(ind)) filtered[i++] = ind;
+        return filtered;
+    }
+
+    public static MapLocation[] filterLocArr(MapLocation[] arr, CheckedFunction<MapLocation, Boolean> fn) {
+        Function<MapLocation, Boolean> sfn = lambdaExceptionWrapper(fn, false);
+        int numRemaining = 0;
+
+        // idk if this is the best way to do this
+        for (MapLocation loc : arr) if (sfn.apply(loc)) ++numRemaining;
+
+        MapLocation[] filtered = new MapLocation[numRemaining];
+
+        int i = 0;
+        for (MapLocation loc : arr) if (sfn.apply(loc)) filtered[i++] = loc;
         return filtered;
     }
 

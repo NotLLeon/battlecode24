@@ -6,7 +6,7 @@ public class Constants {
 
     public static RobotController rc;
 
-    static final Direction[] directions = {
+    static final Direction[] DIRECTIONS = {
         Direction.NORTH,
         Direction.NORTHEAST,
         Direction.EAST,
@@ -16,6 +16,9 @@ public class Constants {
         Direction.WEST,
         Direction.NORTHWEST,
 };
+
+    static final int[] FLAG_INDS = {0, 1, 2};
+
     static GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ACTION;
     static GlobalUpgrade SECOND_UPGRADE = GlobalUpgrade.HEALING;
 
@@ -32,6 +35,7 @@ public class Constants {
     static int COMMS_FLAG_RECORDER = 9; // uses 9
     static int COMMS_FLAG_DISTRESS_FLAGS = 10; // uses 10 - 12
     static int COMMS_FLAG_DISTRESS_LOCS = 13; // uses 13 - 15
+    static int COMMS_SIGNAL_BOT_DISTRESS_LOCS = 16; // uses 16 - 19
 
     // role enum
     public static enum Role {

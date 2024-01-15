@@ -12,6 +12,7 @@ public class SetupPhase {
     public static boolean exploring = true;
     public static MapLocation setupLoc = null;
 
+    // anything that happens only once at the beginning of the game
     public static void onSpawn() throws GameActionException {
         SignalBot.tryBecomeSignalBot();
     }

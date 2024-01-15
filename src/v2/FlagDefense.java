@@ -88,4 +88,13 @@ public class FlagDefense {
             }
         }
     }
+
+    public static MapLocation[] getAllDistressLocs() throws GameActionException {
+        int[] distressInds = Utils.filterIntArr(FLAG_INDS, (i) -> Comms.read(COMMS_FLAG_DISTRESS_FLAGS + i) > 0);
+        MapLocation[] distressLocs = new MapLocation[distressInds.length];
+        for (int i = 0; i < distressInds.length; ++i) {
+            distressLocs[i] = Comms.readLoc(COMMS_FLAG_DISTRESS_LOCS + distressInds[i]);
+        }
+        return distressLocs;
+    }
 }

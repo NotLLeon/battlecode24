@@ -27,19 +27,18 @@ public strictfp class RobotPlayer {
                 tryBuyUpgrade();
                 if (!rc.isSpawned()) {
                     if (isSetupPhase) {
-                        Spawner.initialSpawn();
-                        SetupPhase.onSpawn();
+                        boolean isSpawned = Spawner.initialSpawn();
+                        if (isSpawned) SetupPhase.onSpawn();
+                        continue; // skip rest of turn
+
                     } else {
-                        boolean isSpawned = Spawner.spawnTo(MainPhase.getRushLoc());;
+                        boolean isSpawned = Spawner.spawnTo(MainPhase.getRushLoc());
                         if (!isSpawned) continue;
                     }
                 }
 
                 if (isSetupPhase) SetupPhase.run();
-                else {
-                    Micro.run();
-                    MainPhase.run();
-                }
+                else MainPhase.run();
 
             } catch (GameActionException e) {
                 System.out.println("GameActionException");

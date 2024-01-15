@@ -7,8 +7,6 @@ import battlecode.common.*;
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase {
 
-    private static final int[] FLAG_INDS = {0, 1, 2};
-
     // TODO: should be based on map size
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
@@ -36,7 +34,8 @@ public class MainPhase {
         // if all flags are picked up, patrol default locs
         // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
         // and every SHORT_TARGET_ROUND_INTERVAL if we are patrolling
-        int[] rushFlagInds = Utils.filterIntArr(FLAG_INDS, (i) -> !FlagRecorder.isPickedUp(i));
+
+        int[] rushFlagInds = Utils.filterIntArr(FLAG_INDS, (Integer i) -> !FlagRecorder.isPickedUp(i));
         int interval = LONG_TARGET_ROUND_INTERVAL;
 
         // all flags are picked up, just cycle between default locs
@@ -69,7 +68,7 @@ public class MainPhase {
 
     public static void run() throws GameActionException {
         if (Robot.role == Role.SIGNAL) {
-            SignalBot.scanAndSignal();
+            SignalBot.run();
             return;
         }
 

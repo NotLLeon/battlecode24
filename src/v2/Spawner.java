@@ -10,18 +10,23 @@ public class Spawner {
 
     private static MapLocation[] spawnCenters;
 
+    private static MapLocation[] allSpawns;
+
+    // different from one in Constants - includes center
+    private static Direction[] allDirections = Direction.allDirections();
+
     private final static MapLocation center = new MapLocation(rc.getMapHeight() / 2, rc.getMapWidth() / 2);
 
     // Get the array of all the spawn locations
     private static void computeSpawnCenters() {
-        MapLocation[] spawns = rc.getAllySpawnLocations();
+        allSpawns = rc.getAllySpawnLocations();
         spawnCenters = new MapLocation[3];
         int idx = 0;
 
         FastIterableLocSet spawnCoords = new FastIterableLocSet();
-        for (MapLocation sp : spawns) spawnCoords.add(sp);
+        for (MapLocation sp : allSpawns) spawnCoords.add(sp);
 
-        for (MapLocation sp : spawns) {
+        for (MapLocation sp : allSpawns) {
             MapLocation NE = sp.add(Direction.NORTHEAST);
             MapLocation SW = sp.add(Direction.SOUTHWEST);
             if (spawnCoords.contains(NE) && spawnCoords.contains(SW)) {
@@ -60,30 +65,48 @@ public class Spawner {
         computeSpawnCenters();
     }
 
-    public static void initialSpawn() throws GameActionException {
-
-    }
-
-    // FIXME: rename trySpawn
-    public static boolean spawn() throws GameActionException {
-//        if (Robot.role == Role.SIGNAL) {
-//            if(rc.canSpawn(SignalBot.signalSpawnLoc)) {
-//                rc.spawn(SignalBot.signalSpawnLoc);
-//                return true;
-//            }
-
-        MapLocation[] tryOrder = Utils.sort3Locations(spawnCenters, loc -> Random.nextInt(1000));
-        for (MapLocation spawnLoc : tryOrder) {
-            if (spawnInDir(spawnLoc, spawnLoc.directionTo(center))) return true;
+    public static boolean initialSpawn() throws GameActionException {
+        for(MapLocation loc : allSpawns) {
+            if (rc.canSpawn(loc)) {
+                rc.spawn(loc);
+                return true;
+            }
         }
         return false;
     }
 
     public static boolean spawnTo(MapLocation toLoc) throws GameActionException {
+        if (Robot.role == Role.SIGNAL) return spawnSignalBot();
+
+        if (spawnNearDistress()) return true;
+
         MapLocation[] tryOrder = Utils.sort3Locations(spawnCenters, loc -> loc.distanceSquaredTo(toLoc));
         for (MapLocation spawnLoc : tryOrder) {
             if (spawnInDir(spawnLoc, spawnLoc.directionTo(center))) return true;
         }
         return false;
+    }
+
+    // TODO: don't spawn signal bot on captured flag (how do we tell if captured?)
+    private static boolean spawnSignalBot() throws GameActionException {
+        for(MapLocation loc : spawnCenters) {
+            if (rc.canSpawn(loc)) {
+                rc.spawn(loc);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // TODO: also spawn near flag distress signals (not just signal bot),
+    //  also spawn in direction of distress (needs to be stored)
+    private static boolean spawnNearDistress() throws GameActionException {
+        MapLocation[] signalDistressLocs = Utils.filterLocArr(spawnCenters, SignalBot::isDistressLoc);
+
+        if(signalDistressLocs.length == 0) return false;
+        // FIXME: janky
+        MapLocation spawnDistressLoc = signalDistressLocs[Random.nextInt(signalDistressLocs.length)];
+
+        return spawnInDir(spawnDistressLoc, allDirections[Random.nextInt(allDirections.length)]);
     }
 }
