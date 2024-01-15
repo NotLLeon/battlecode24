@@ -15,6 +15,7 @@ public class Micro {
     // (group units?)
 
     // try not to move diagonally (messes up formation)
+    private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
 
     private static RobotInfo[] visibleAllyRobots;
     private static RobotInfo[] visibleEnemyRobots;
@@ -97,6 +98,16 @@ public class Micro {
         else rc.move(bestDir);
     }
 
+    private static void escortFlag(FlagInfo flag) throws GameActionException {
+        MapLocation flagLoc = flag.getLocation();
+        MapLocation curLoc = rc.getLocation();
+        Direction moveDir;
+        if (curLoc.isWithinDistanceSquared(flagLoc, FLAG_ESCORT_RADIUS_SQUARED)) moveDir = flagLoc.directionTo(curLoc);
+        else moveDir = curLoc.directionTo(flagLoc);
+
+        moveInDir(moveDir, 1);
+    }
+
     private static void tryMoveToFlag() throws GameActionException {
         // move towards dropped enemy flags and picked up friendly flags
         // TODO: move towards picked up enemy flags depending on macro
@@ -108,17 +119,25 @@ public class Micro {
         for (FlagInfo flag : nearbyFlags) {
             Team flagTeam = flag.getTeam();
 
+            // chase picked up friendly flags
             if (flagTeam == rc.getTeam() && flag.isPickedUp()
                     && rc.getRoundNum() > GameConstants.SETUP_ROUNDS) {
                 targetFlag = flag;
                 break;
             }
 
-            if (flagTeam != rc.getTeam() && !flag.isPickedUp()) {
-                targetFlag = flag;
-            }
+            // move towards enemy flags
+            if (flagTeam != rc.getTeam()) targetFlag = flag;
         }
+
+
         if (targetFlag == null) return;
+
+        if (targetFlag.getTeam() != rc.getTeam() && targetFlag.isPickedUp()) {
+            escortFlag(targetFlag);
+            return;
+        }
+
         MapLocation flagLoc = targetFlag.getLocation();
 
         if (rc.canPickupFlag(flagLoc)) {
