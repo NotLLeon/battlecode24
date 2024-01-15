@@ -8,6 +8,7 @@ import v2.fast.*;
 
 public class Spawner {
 
+    private static final int SPAWN_WAVE_INTERVAL = 25;
     private static MapLocation[] spawnCenters;
 
     private static MapLocation[] allSpawns;
@@ -79,6 +80,8 @@ public class Spawner {
         if (Robot.role == Role.SIGNAL) return spawnSignalBot();
 
         if (spawnNearDistress()) return true;
+
+        if (rc.getRoundNum() % SPAWN_WAVE_INTERVAL != 0) return false;
 
         MapLocation[] tryOrder = Utils.sort3Locations(spawnCenters, loc -> loc.distanceSquaredTo(toLoc));
         for (MapLocation spawnLoc : tryOrder) {
