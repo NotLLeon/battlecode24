@@ -13,7 +13,8 @@ public class MainPhase extends Robot {
     // TODO: should be based on map size
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
-    private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
+    private static final int DISTRESS_HELP_DISTANCE_SQUARED_NORMAL = 100;
+    private static final int DISTRESS_HELP_DISTANCE_SQUARED_SEVERE = 400;
 
     private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
 
