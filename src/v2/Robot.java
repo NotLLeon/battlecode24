@@ -7,6 +7,8 @@ import static v2.Constants.rc;
 
 public abstract class Robot {
 
+    public static Constants.Role role = Constants.Role.GENERAL;
+
     public static void moveTo(MapLocation dest) throws GameActionException {
         Pathfinding.moveTo(dest, false, -1);
     }

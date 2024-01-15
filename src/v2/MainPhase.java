@@ -1,19 +1,19 @@
 package v2;
 
 import static v2.Constants.*;
-import static v2.Random.*;
 
 import battlecode.common.*;
+import v2.Constants.Role;
+
+import v2.fast.FastIterableLocSet;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
-public class MainPhase extends Robot {
-
-    private static final int[] FLAG_INDS = {0, 1, 2};
+public class MainPhase {
 
     // TODO: should be based on map size
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
-    private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
+    private static final int DISTRESS_DISTANCE_DIFF_THRESHOLD = 50;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -21,40 +21,70 @@ public class MainPhase extends Robot {
 
     private static void checkDistressSignal() throws GameActionException {
         // TODO: Experiment with this, how far away to go help, when to check for help
-        MapLocation distressLoc = FlagDefense.readDistress();
-        if (distressLoc == null) return;
-        int dist = rc.getLocation().distanceSquaredTo(distressLoc);
-        if (dist < DISTRESS_HELP_DISTANCE_SQUARED) {
-            if (dist < GameConstants.VISION_RADIUS_SQUARED &&
-                    rc.senseNearbyFlags(-1, rc.getTeam()).length == 0) {
-                FlagDefense.stopDistressLoc(distressLoc);
-            } else moveTo(distressLoc);
+        MapLocation curLoc = rc.getLocation();
+        // get distress
+        MapLocation[] flagDistressLocs = FlagDefense.readDistressLocInRange(curLoc);
+        int empty = 0;
+        for (MapLocation loc : flagDistressLocs) {
+            if (loc == null) ++empty;
+        }
+        if (empty == flagDistressLocs.length) return;
+
+        MapLocation target = flagDistressLocs[Random.nextInt(flagDistressLocs.length - empty)];
+ 
+        if (curLoc.distanceSquaredTo(target) < GameConstants.VISION_RADIUS_SQUARED &&
+                rc.senseNearbyFlags(-1, rc.getTeam()).length == 0) {
+            FlagDefense.stopDistressLoc(target);
+        } else Robot.moveTo(target);
+    }
+
+    // should only run if Micro doesnt spot the flag
+    private static void moveToRushLoc() throws GameActionException {
+
+        int rushInd = getRushInd();
+        MapLocation rushLoc = getRushLoc();
+
+        if (rc.getLocation().isAdjacentTo(rushLoc)) {
+            if (FlagRecorder.isPickedUp(rushInd)) changeRushInd();
+
+            // TODO: only explore within some radius
+            Explore.exploreNewArea();
+        } else Robot.moveToAdjacent(rushLoc);
+    }
+
+    private static void changeRushInd() throws GameActionException {
+        MapLocation curRushLoc = getRushLoc();
+
+        int[] rushFlagInds = Utils.filterIntArr(FLAG_INDS, (Integer i) -> !FlagRecorder.isPickedUp(i));
+        if (rushFlagInds.length == 0) return;
+
+        int curInd = 0;
+        for (int i = 0; i < rushFlagInds.length; ++i) {
+            if (curRushLoc.equals(FlagRecorder.getFlagLoc(rushFlagInds[i]))) {
+                curInd = i;
+                break;
+            }
+        }
+
+        Comms.write(COMMS_RUSH_IND, rushFlagInds[(curInd + 1) % rushFlagInds.length]);
+        Comms.write(COMMS_RUSH_LAST_CHANGED, rc.getRoundNum());
+    }
+
+    private static void tryChangeRushInd() throws GameActionException {
+        int lastUpdated = Comms.read(COMMS_RUSH_LAST_CHANGED);
+        int curRound = rc.getRoundNum();
+        int roundsPassed = (curRound - lastUpdated) - 1;
+        if (roundsPassed > 0 && roundsPassed % LONG_TARGET_ROUND_INTERVAL == 0) {
+            changeRushInd();
         }
     }
 
-    private static void moveToRushLoc() throws GameActionException {
-        // visit a flag that hasn't been picked up
-        // if all flags are picked up, patrol default locs
-        // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
-        // and every SHORT_TARGET_ROUND_INTERVAL if we are patrolling
-        int[] rushFlagInds = Utils.filterIntArr(FLAG_INDS, (i) -> !FlagRecorder.isPickedUp(i));
-        int interval = LONG_TARGET_ROUND_INTERVAL;
+    private static int getRushInd() throws GameActionException {
+        return Comms.read(COMMS_RUSH_IND);
+    }
 
-        // all flags are picked up, just cycle between default locs
-        // TODO: escort flags back instead
-        if (rushFlagInds.length == 0) {
-            rushFlagInds = FLAG_INDS;
-            interval = SHORT_TARGET_ROUND_INTERVAL;
-        }
-
-        // TODO: modify so that rushLoc doesnt change prematurely when the array changes
-        int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
-        MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
-
-        if (rc.getLocation().isAdjacentTo(rushLoc) && !FlagRecorder.isExactLoc(rushInd)) {
-            // TODO: only explore within some radius
-            Explore.exploreNewArea();
-        } else moveToAdjacent(rushLoc);
+    public static MapLocation getRushLoc() throws GameActionException {
+        return FlagRecorder.getFlagLoc(getRushInd());
     }
 
     private static void runStrat() throws GameActionException {
@@ -75,7 +105,7 @@ public class MainPhase extends Robot {
                 }
             }
 
-            moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
+            Robot.moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
 
             int flagId = pickedUpFlag.getID();
             if (!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
@@ -88,6 +118,8 @@ public class MainPhase extends Robot {
 
             checkDistressSignal();
 
+            tryChangeRushInd();
+
             if (rc.isMovementReady()) moveToRushLoc();
         }
 
@@ -97,6 +129,10 @@ public class MainPhase extends Robot {
     }
 
     public static void run() throws GameActionException {
+        if (Robot.role == Role.SIGNAL) {
+            SignalBot.run();
+            return;
+        }
         Micro.run();
         runStrat();
         Micro.run();

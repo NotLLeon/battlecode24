@@ -6,6 +6,8 @@ package v2;
 // - if the exact loc of a flag is known
 // for each enemy
 
+// we use index in the FlagRecorder as a unique identifier for each flag, since the ID is not always known
+
 import static v2.Constants.*;
 
 import battlecode.common.*;

@@ -6,7 +6,7 @@ public class Constants {
 
     public static RobotController rc;
 
-    static final Direction[] directions = {
+    static final Direction[] DIRECTIONS = {
         Direction.NORTH,
         Direction.NORTHEAST,
         Direction.EAST,
@@ -16,6 +16,9 @@ public class Constants {
         Direction.WEST,
         Direction.NORTHWEST,
 };
+
+    static final int[] FLAG_INDS = {0, 1, 2};
+
     static GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ACTION;
     static GlobalUpgrade SECOND_UPGRADE = GlobalUpgrade.HEALING;
 
@@ -25,6 +28,11 @@ public class Constants {
     static int EXPLORE_NUM_TRACKED_LOCATIONS = 10;
     static int EXPLORE_MOVES_TO_TRACK_LOCATION = 5;
 
+    // ratio for severity check
+    static final int DISTRESS_HELP_DISTANCE_SQUARED_LO = 100;
+    static final int DISTRESS_HELP_DISTANCE_SQUARED_HI = 400;
+    static final double ENEMY_DISTRESS_RATIO = 5.0/3;
+
     // Comms indices
     static int COMMS_ENEMY_FLAG_LOCS_START_IND = 0; // uses 0 - 2
     static int COMMS_ENEMY_FLAG_IDS_START_IND = 3; // uses 3 - 5
@@ -32,6 +40,11 @@ public class Constants {
     static int COMMS_FLAG_RECORDER = 9; // uses 9
     static int COMMS_FLAG_DISTRESS_FLAGS = 10; // uses 10 - 12
     static int COMMS_FLAG_DISTRESS_LOCS = 13; // uses 13 - 15
+    static int COMMS_FLAG_DISTRESS_LEVEL = 16; // uses 16 - 18
+    static int COMMS_SIGNAL_BOT_DISTRESS_LOCS = 19; // uses 19 - 21
+    static int COMMS_SIGNAL_BOT_DISTRESS_LEVEL = 22; // uses 22 - 24
+    static int COMMS_RUSH_IND = 25; // uses 25
+    static int COMMS_RUSH_LAST_CHANGED = 26; // uses 26
 
     // role enum
     public static enum Role {

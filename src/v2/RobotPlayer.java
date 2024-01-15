@@ -13,8 +13,6 @@ public strictfp class RobotPlayer {
 
     static int curRound = 0;
 
-    static Role role = Role.GENERAL;
-
     public static void run(RobotController rc) throws GameActionException {
         
         Constants.rc = rc;
@@ -28,9 +26,17 @@ public strictfp class RobotPlayer {
                 boolean isSetupPhase = curRound <= GameConstants.SETUP_ROUNDS;
                 tryBuyUpgrade();
                 if (!rc.isSpawned()) {
-                    boolean isSpawned = Spawner.spawn();
-                    if (!isSpawned) continue;
+                    if (isSetupPhase) {
+                        boolean isSpawned = Spawner.initialSpawn();
+                        if (isSpawned) SetupPhase.onSpawn();
+                        continue; // skip rest of turn
+
+                    } else {
+                        boolean isSpawned = Spawner.spawnTo(MainPhase.getRushLoc());
+                        if (!isSpawned) continue;
+                    }
                 }
+
                 if (isSetupPhase) SetupPhase.run();
                 else MainPhase.run();
 
