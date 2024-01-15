@@ -3,14 +3,10 @@ import battlecode.common.*;
 
 import static v2.Constants.*;
 import static v2.Constants.Role;
-import static v2.RobotPlayer.role;
-import static v2.RobotPlayer.signalSpawnLoc;
 
 import v2.fast.*;
 
 public class Spawner {
-
-    // Returns the Map Center
 
     private static MapLocation[] spawnCenters;
 
@@ -64,11 +60,15 @@ public class Spawner {
         computeSpawnCenters();
     }
 
-    // FIXME: jank
+    public static void initialSpawn() throws GameActionException {
+
+    }
+
+    // FIXME: rename trySpawn
     public static boolean spawn() throws GameActionException {
-        if (role == Role.SIGNAL) {
-            if(rc.canSpawn(signalSpawnLoc)) {
-                rc.spawn(signalSpawnLoc);
+        if (Robot.role == Role.SIGNAL) {
+            if(rc.canSpawn(SignalBot.signalSpawnLoc)) {
+                rc.spawn(SignalBot.signalSpawnLoc);
                 return true;
             }
         } else {

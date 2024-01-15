@@ -34,7 +34,7 @@ public class Utils {
         return filtered;
     }
 
-    static MapLocation findClosestLoc(MapLocation[] locs) {
+    public static MapLocation findClosestLoc(MapLocation[] locs) {
         MapLocation curLoc = rc.getLocation();
         int minDist = 10000;
         MapLocation closest = null;

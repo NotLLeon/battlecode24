@@ -13,10 +13,6 @@ public strictfp class RobotPlayer {
 
     static int curRound = 0;
 
-    static Role role = Role.GENERAL;
-
-    static MapLocation signalSpawnLoc = null;
-
     public static void run(RobotController rc) throws GameActionException {
         
         Constants.rc = rc;
@@ -30,9 +26,16 @@ public strictfp class RobotPlayer {
                 boolean isSetupPhase = curRound <= GameConstants.SETUP_ROUNDS;
                 tryBuyUpgrade();
                 if (!rc.isSpawned()) {
-                    boolean isSpawned = Spawner.spawn();
-                    if (!isSpawned) continue;
+                    if (isSetupPhase) {
+                        Spawner.initialSpawn();
+                        SetupPhase.onSpawn();
+                    } else {
+                        boolean isSpawned = Spawner.spawn();
+                        if (!isSpawned) continue;
+                    }
+
                 }
+
                 if (isSetupPhase) SetupPhase.run();
                 else {
                     Micro.run();

@@ -1,13 +1,11 @@
 package v2;
 
 import static v2.Constants.*;
-import static v2.Random.*;
-import static v2.RobotPlayer.role;
 
 import battlecode.common.*;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
-public class MainPhase extends Robot {
+public class MainPhase {
 
     private static final int[] FLAG_INDS = {0, 1, 2};
 
@@ -29,7 +27,7 @@ public class MainPhase extends Robot {
             if (dist < GameConstants.VISION_RADIUS_SQUARED &&
                     rc.senseNearbyFlags(-1, rc.getTeam()).length == 0) {
                 FlagDefense.stopDistressLoc(distressLoc);
-            } else moveTo(distressLoc);
+            } else Robot.moveTo(distressLoc);
         }
     }
 
@@ -55,14 +53,20 @@ public class MainPhase extends Robot {
         if (rc.getLocation().isAdjacentTo(rushLoc) && !FlagRecorder.isExactLoc(rushInd)) {
             // TODO: only explore within some radius
             Explore.exploreNewArea();
-        } else moveToAdjacent(rushLoc);
+        } else Robot.moveToAdjacent(rushLoc);
+    }
+
+    public static void onSpawn() throws GameActionException {
+
     }
 
     public static void run() throws GameActionException {
-        if (role == Role.SIGNAL) {
-            FlagDefense.scanAndSignal();
+        if (Robot.role == Role.SIGNAL) {
+            SignalBot.scanAndSignal();
             return;
         }
+
+        Micro.run();
 
         if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
@@ -81,7 +85,7 @@ public class MainPhase extends Robot {
                 }
             }
 
-            moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
+            Robot.moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
 
             int flagId = pickedUpFlag.getID();
             if(!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
