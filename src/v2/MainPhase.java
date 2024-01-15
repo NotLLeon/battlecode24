@@ -29,37 +29,49 @@ public class MainPhase {
         }
     }
 
-    private static int getRushInd() {
-        // rush a flag that hasn't been picked up
-        // if all flags are picked up, patrol default locs
-        // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
-        // and every SHORT_TARGET_ROUND_INTERVAL if we are patrolling
-
-        int[] rushFlagInds = Utils.filterIntArr(FLAG_INDS, (Integer i) -> !FlagRecorder.isPickedUp(i));
-        int interval = LONG_TARGET_ROUND_INTERVAL;
-
-        // all flags are picked up, just cycle between default locs
-        // TODO: escort flags back instead
-        if (rushFlagInds.length == 0) {
-            rushFlagInds = FLAG_INDS;
-            interval = SHORT_TARGET_ROUND_INTERVAL;
-        }
-
-        // TODO: modify so that rushLoc doesnt change prematurely when the array changes
-        return rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
-    }
-
+    // should only run if Micro doesnt spot the flag
     private static void moveToRushLoc() throws GameActionException {
+
         int rushInd = getRushInd();
-        MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
-        if (rc.getLocation().isAdjacentTo(rushLoc) && !FlagRecorder.isExactLoc(rushInd)) {
+        MapLocation rushLoc = getRushLoc();
+
+        if (rc.getLocation().isAdjacentTo(rushLoc)) {
+            if (FlagRecorder.isPickedUp(rushInd)) changeRushInd();
+
             // TODO: only explore within some radius
             Explore.exploreNewArea();
         } else Robot.moveToAdjacent(rushLoc);
     }
 
-    public static void onSpawn() throws GameActionException {
+    private static void changeRushInd() throws GameActionException {
+        MapLocation curRushLoc = getRushLoc();
 
+        int[] rushFlagInds = Utils.filterIntArr(FLAG_INDS, (Integer i) -> !FlagRecorder.isPickedUp(i));
+        if (rushFlagInds.length == 0) return;
+
+        int curInd = 0;
+        for (int i = 0; i < rushFlagInds.length; ++i) {
+            if (curRushLoc.equals(FlagRecorder.getFlagLoc(rushFlagInds[i]))) {
+                curInd = i;
+                break;
+            }
+        }
+
+        Comms.write(COMMS_RUSH_IND, rushFlagInds[(curInd + 1) % rushFlagInds.length]);
+        Comms.write(COMMS_RUSH_LAST_CHANGED, rc.getRoundNum());
+    }
+
+    private static void tryChangeRushInd() throws GameActionException {
+        int lastUpdated = Comms.read(COMMS_RUSH_LAST_CHANGED);
+        int curRound = rc.getRoundNum();
+        int roundsPassed = (curRound - lastUpdated) - 1;
+        if (roundsPassed > 0 && roundsPassed % LONG_TARGET_ROUND_INTERVAL == 0) {
+            changeRushInd();
+        }
+    }
+
+    private static int getRushInd() throws GameActionException {
+        return Comms.read(COMMS_RUSH_IND);
     }
 
     public static MapLocation getRushLoc() throws GameActionException {
@@ -103,6 +115,8 @@ public class MainPhase {
             for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) FlagRecorder.checkFlagReturned(i);
 
             checkDistressSignal();
+
+            tryChangeRushInd();
 
             if (rc.isMovementReady()) moveToRushLoc();
         }
