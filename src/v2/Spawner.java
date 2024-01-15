@@ -63,11 +63,17 @@ public class Spawner {
 
     // FIXME: jank
     public static boolean spawn() throws GameActionException {
-        for (int i = 0; i < 10; ++i) {
-            MapLocation spawnCenter = spawnCenters[Random.nextInt(3)];
-            if (spawnInDir(spawnCenter, spawnCenter.directionTo(center))) {
-                return true;
-            }
+        MapLocation[] tryOrder = Utils.sort3Locations(spawnCenters, loc -> Random.nextInt(1000));
+        for (MapLocation spawnLoc : tryOrder) {
+            if (spawnInDir(spawnLoc, spawnLoc.directionTo(center))) return true;
+        }
+        return false;
+    }
+
+    public static boolean spawnTo(MapLocation toLoc) throws GameActionException {
+        MapLocation[] tryOrder = Utils.sort3Locations(spawnCenters, loc -> loc.distanceSquaredTo(toLoc));
+        for (MapLocation spawnLoc : tryOrder) {
+            if (spawnInDir(spawnLoc, spawnLoc.directionTo(center))) return true;
         }
         return false;
     }
