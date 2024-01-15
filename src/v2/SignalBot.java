@@ -4,6 +4,8 @@ import battlecode.common.*;
 import v2.Constants.Role;
 
 import static v2.Constants.*;
+
+import v2.fast.FastIterableLocSet;
 public class SignalBot{
 
     public static void run() throws GameActionException {
@@ -54,23 +56,6 @@ public class SignalBot{
         return false;
     }
 
-    public static MapLocation getHighestPrioDistress(MapLocation loc) throws GameActionException {
-        MapLocation nearestLoc = null;
-        int highestSev = 0;
-        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
-            MapLocation curLoc = Comms.readLoc(COMMS_SIGNAL_BOT_DISTRESS_LOCS + i);
-            int sev = Comms.read(COMMS_SIGNAL_BOT_DISTRESS_LEVEL + i);
-            if (nearestLoc == null || 
-                (nearestLoc.distanceSquaredTo(loc) < curLoc.distanceSquaredTo(loc) && sev >= highestSev)) {
-                nearestLoc = curLoc;
-            } else if (sev > highestSev) {
-                nearestLoc = curLoc;
-                highestSev = sev;
-            }
-        }
-        return nearestLoc;
-    }
-
     public static int readSignalDistressLevel(MapLocation loc) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             MapLocation curLoc = Comms.readLoc(COMMS_SIGNAL_BOT_DISTRESS_LOCS + i);
@@ -99,6 +84,7 @@ public class SignalBot{
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             if (loc.equals(Comms.readLoc(COMMS_SIGNAL_BOT_DISTRESS_LOCS + i))) {
                 Comms.write(COMMS_SIGNAL_BOT_DISTRESS_LOCS + i, 0);
+                Comms.write(COMMS_SIGNAL_BOT_DISTRESS_LEVEL + i, 0);
                 return;
             }
         }

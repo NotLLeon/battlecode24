@@ -29,6 +29,8 @@ public class Constants {
     static int EXPLORE_MOVES_TO_TRACK_LOCATION = 5;
 
     // ratio for severity check
+    static final int DISTRESS_HELP_DISTANCE_SQUARED_LO = 100;
+    static final int DISTRESS_HELP_DISTANCE_SQUARED_HI = 400;
     static final float ENEMY_DISTRESS_RATIO = 5/3;
 
     // Comms indices

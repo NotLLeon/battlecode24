@@ -106,7 +106,20 @@ public class Spawner {
     private static boolean spawnNearDistress() throws GameActionException {
         MapLocation[] signalDistressLocs = Utils.filterLocArr(spawnCenters, SignalBot::isDistressLoc);
 
-        if(signalDistressLocs.length == 0) return false;
+        // if no signal distress, try spawning in dir of flag distress
+        if(signalDistressLocs.length == 0) {
+            MapLocation[] distressLocs = FlagDefense.getAllDistressLocs();
+            if (distressLocs.length == 0) return false;
+            MapLocation targetLoc = distressLocs[Random.nextInt(distressLocs.length)];
+            MapLocation nearestSpawnCenter = null;
+            for (int i = 0; i < 3; ++i) {
+                if (nearestSpawnCenter == null || 
+                    targetLoc.distanceSquaredTo(spawnCenters[i]) < targetLoc.distanceSquaredTo(nearestSpawnCenter)) {
+                        nearestSpawnCenter = spawnCenters[i];
+                }
+            }
+            return spawnInDir(nearestSpawnCenter, nearestSpawnCenter.directionTo(targetLoc));
+        }
         // FIXME: janky
         MapLocation spawnDistressLoc = signalDistressLocs[Random.nextInt(signalDistressLocs.length)];
 

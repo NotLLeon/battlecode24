@@ -5,14 +5,14 @@ import static v2.Constants.*;
 import battlecode.common.*;
 import v2.Constants.Role;
 
+import v2.fast.FastIterableLocSet;
+
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase {
 
     // TODO: should be based on map size
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
-    private static final int DISTRESS_HELP_DISTANCE_SQUARED_LO = 100;
-    private static final int DISTRESS_HELP_DISTANCE_SQUARED_HI = 400;
     private static final int DISTRESS_DISTANCE_DIFF_THRESHOLD = 50;
 
     private static void onBroadcast() throws GameActionException {
@@ -22,51 +22,20 @@ public class MainPhase {
     private static void checkDistressSignal() throws GameActionException {
         // TODO: Experiment with this, how far away to go help, when to check for help
         MapLocation curLoc = rc.getLocation();
-        // get flag distress
-        MapLocation flagDistressLoc = FlagDefense.readDistressLoc();
-        int flagDistressDist = rc.getLocation().distanceSquaredTo(flagDistressLoc);
-
-        // get signal distress
-        MapLocation signalDistressLoc = SignalBot.getHighestPrioDistress(curLoc);
-        int signalDistressDist = rc.getLocation().distanceSquaredTo(signalDistressLoc);
-
-        // determine severity
-        int flagSev = FlagDefense.readDistressLevel(flagDistressLoc);
-        int signalSev = SignalBot.readSignalDistressLevel(signalDistressLoc);
-        
-        // compare
-        MapLocation targetLoc = null;
-        int targetSev = 0;
-        int targetDist = 0;
-        if (flagSev > signalSev) {
-            targetSev = flagSev;
-            targetLoc = flagDistressLoc;
-            targetDist = flagDistressDist;
-        } else if (flagSev < signalSev) {
-            targetSev = signalSev;
-            targetLoc = signalDistressLoc;
-            targetDist = signalDistressDist;
-        } else if (flagDistressDist < DISTRESS_DISTANCE_DIFF_THRESHOLD + signalDistressDist) {
-            targetLoc = flagDistressLoc;
-            targetSev = flagSev;
-            targetDist = flagDistressDist;
-        } else {
-            targetLoc = signalDistressLoc;
-            targetSev = signalSev;
-            targetDist = signalDistressDist;
+        // get distress
+        MapLocation[] flagDistressLocs = FlagDefense.readDistressLocInRange(curLoc);
+        int empty = 0;
+        for (MapLocation loc : flagDistressLocs) {
+            if (loc == null) ++empty;
         }
+        if (empty == flagDistressLocs.length) return;
 
-        int threshold = DISTRESS_HELP_DISTANCE_SQUARED_LO;
-        if (targetSev == 1) {
-            threshold = DISTRESS_HELP_DISTANCE_SQUARED_HI;
-        }
-        
-        if (targetDist < threshold) {
-            if (targetDist < GameConstants.VISION_RADIUS_SQUARED &&
-                    rc.senseNearbyFlags(-1, rc.getTeam()).length == 0) {
-                FlagDefense.stopDistressLoc(targetLoc);
-            } else Robot.moveTo(targetLoc);
-        }
+        MapLocation target = flagDistressLocs[Random.nextInt(flagDistressLocs.length - empty)];
+ 
+        if (curLoc.distanceSquaredTo(target) < GameConstants.VISION_RADIUS_SQUARED &&
+                rc.senseNearbyFlags(-1, rc.getTeam()).length == 0) {
+            FlagDefense.stopDistressLoc(target);
+        } else Robot.moveTo(target);
     }
 
     // should only run if Micro doesnt spot the flag
