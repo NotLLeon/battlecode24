@@ -1,8 +1,8 @@
-package v2;
+package v2old;
 
 import battlecode.common.*;
 
-import static v2.Constants.rc;
+import static v2old.Constants.rc;
 
 public class Micro {
 
@@ -162,8 +162,6 @@ public class Micro {
     private static void tryHeal() throws GameActionException {
         if (!rc.isActionReady()) return;
         lazySenseRobots();
-        if (attackableEnemyRobots.length > 0) return;
-        if (visibleEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
 
         RobotInfo target = null;
         for (RobotInfo ally : healableAllyRobots) {
@@ -182,7 +180,6 @@ public class Micro {
         if (!rc.isActionReady()) return;
 
         senseRobots();
-        // TODO: use ID instead of random?
         if (visibleEnemyRobots.length == 0 ||
                 attackableEnemyRobots.length > 0 ||
                 Random.nextInt(3) == 0) return;
@@ -203,9 +200,11 @@ public class Micro {
         tryPlaceTrap();
         tryAttack();
 //        tryPlaceTrap();
-        tryHeal();
+
         if (visibleEnemyRobots.length > 0) {
             // TODO: coordinated move-in on enemy position
+        } else {
+            tryHeal();
         }
     }
 
