@@ -94,9 +94,5 @@ public class MainPhase extends Robot {
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : visibleEnemyFlags) FlagRecorder.foundFlag(flag);
 
-        // Rarely attempt placing traps behind the robot.
-//        MapLocation prevLoc = rc.getLocation().subtract(nextDir());
-//        if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && nextInt(2) == 0)
-//            rc.build(TrapType.EXPLOSIVE, prevLoc);
     }
 }
