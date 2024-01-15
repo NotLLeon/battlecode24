@@ -14,8 +14,16 @@ public class FlagDefense {
     }
 
     private static int getFlagIndFromId(int id) throws GameActionException {
+        // first try to see if it exists
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
-            if (getFlagId(i) == id || getFlagId(i) == 0) {
+            if (getFlagId(i) == id) {
+                return i;
+            }
+        }
+
+        // then look for next open slot, since we're adding new flag
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            if (getFlagId(i) == 0) {
                 return i;
             }
         }
