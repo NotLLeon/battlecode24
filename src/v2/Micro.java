@@ -176,12 +176,31 @@ public class Micro {
         while (rc.canHeal(targetLoc)) rc.heal(targetLoc);
     }
 
+    private static void tryPlaceTrap() throws GameActionException {
+        if (!rc.isActionReady()) return;
+
+        senseRobots();
+        if (visibleEnemyRobots.length == 0 ||
+                attackableEnemyRobots.length > 0 ||
+                Random.nextInt(3) == 0) return;
+
+        TrapType trapType = TrapType.EXPLOSIVE;
+//        if (visibleAllyRobots.length > 3 || rc.getCrumbs() < TrapType.EXPLOSIVE.buildCost) {
+//            trapType = TrapType.STUN;
+//        } else trapType = TrapType.EXPLOSIVE;
+
+        if (rc.canBuild(trapType, rc.getLocation())) rc.build(trapType, rc.getLocation());
+
+    }
     public static void run() throws GameActionException {
         // TODO: prevent macro from moving closer to enemy for a few rounds after engaging
         if (rc.hasFlag()) return;
         tryAttack();
         tryMoveToFlag();
+        tryPlaceTrap();
         tryAttack();
+//        tryPlaceTrap();
+
         if (visibleEnemyRobots.length > 0) {
             // TODO: coordinated move-in on enemy position
         } else {

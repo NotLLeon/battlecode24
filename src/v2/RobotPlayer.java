@@ -25,15 +25,17 @@ public strictfp class RobotPlayer {
 
             try {
                 curRound = rc.getRoundNum();
-                boolean isMainPhase = curRound <= GameConstants.SETUP_ROUNDS;
+                boolean isSetupPhase = curRound <= GameConstants.SETUP_ROUNDS;
                 tryBuyUpgrade();
                 if (!rc.isSpawned()) {
                     boolean isSpawned = Spawner.spawn();
                     if (!isSpawned) continue;
                 }
-                Micro.run();
-                if (isMainPhase) SetupPhase.run();
-                else MainPhase.run();
+                if (isSetupPhase) SetupPhase.run();
+                else {
+                    Micro.run();
+                    MainPhase.run();
+                }
 
             } catch (GameActionException e) {
                 System.out.println("GameActionException");

@@ -8,9 +8,10 @@ public class Pathfinding {
 
     // 1 out of every FILLERS_RATIO units are allowed to fill
     private static final int FILLERS_RATIO = 5;
+    private static final int MIN_CRUMBS_TO_FILL = 5 * GameConstants.FILL_COST;
 
     private static boolean shouldFill() {
-        return (rc.getID() % FILLERS_RATIO == 0) && (rc.getCrumbs() >= GameConstants.FILL_COST);
+        return (rc.getID() % FILLERS_RATIO == 0) && (rc.getCrumbs() >= MIN_CRUMBS_TO_FILL);
     }
 
     public static void moveTo(MapLocation dest, boolean adj, int radius) throws GameActionException {
