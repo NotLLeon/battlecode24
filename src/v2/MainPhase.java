@@ -2,6 +2,7 @@ package v2;
 
 import static v2.Constants.*;
 import static v2.Random.*;
+import static v2.RobotPlayer.role;
 
 import battlecode.common.*;
 
@@ -58,6 +59,11 @@ public class MainPhase extends Robot {
     }
 
     public static void run() throws GameActionException {
+        if (role == Role.SIGNAL) {
+            FlagDefense.scanAndSignal();
+            return;
+        }
+
         if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
         }
