@@ -1,8 +1,11 @@
 package v2;
 
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 
 import java.util.function.Function;
+
+import static v2.Constants.rc;
 
 public class Utils {
 
@@ -29,5 +32,20 @@ public class Utils {
         int i = 0;
         for (int ind : arr) if (sfn.apply(ind)) filtered[i++] = ind;
         return filtered;
+    }
+
+    static MapLocation findClosestLoc(MapLocation[] locs) {
+        MapLocation curLoc = rc.getLocation();
+        int minDist = 10000;
+        MapLocation closest = null;
+        for (MapLocation loc : locs) {
+            if (loc == null) continue;
+            int newDist = curLoc.distanceSquaredTo(loc);
+            if (newDist < minDist) {
+                minDist = newDist;
+                closest = loc;
+            }
+        }
+        return closest;
     }
 }

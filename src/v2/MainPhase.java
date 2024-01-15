@@ -15,8 +15,6 @@ public class MainPhase extends Robot {
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
     private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
 
-    private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
-
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
     }
@@ -77,7 +75,7 @@ public class MainPhase extends Robot {
                 }
             }
 
-            moveTo(findClosestLoc(friendlySpawnLocs));
+            moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
 
             int flagId = pickedUpFlag.getID();
             if(!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
