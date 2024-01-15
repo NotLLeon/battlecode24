@@ -8,7 +8,6 @@ public class FlagDefense {
 
     // if you are within this distance of a distress flag and there are no enemies, stop signal
     static final int FLAG_SAFE_DISTANCE_SQUARED = 4;
-    static final float ENEMY_DISTRESS_RATIO = 5/3;
 
     private static int getFlagId(int ind) throws GameActionException {
         return Comms.read(COMMS_FLAG_DISTRESS_FLAGS + ind);
@@ -40,11 +39,12 @@ public class FlagDefense {
         return -1;
     }
 
-    public static void setDistress(MapLocation loc, int id) throws GameActionException {
+    public static void setDistress(MapLocation loc, int id, int severity) throws GameActionException {
         int ind = getFlagIndFromId(id);
         if (ind == -1) return;
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, id);
         Comms.writeLoc(COMMS_FLAG_DISTRESS_LOCS + ind, loc);
+        Comms.write(COMMS_FLAG_DISTRESS_LEVEL + ind, severity);
     }
 
     private static void stopDistressInd(int ind) throws GameActionException {
@@ -63,14 +63,21 @@ public class FlagDefense {
 
     public static MapLocation readDistressLoc() throws GameActionException {
         MapLocation nearestLoc = null;
+        int nearestSev = 0;
         MapLocation curLoc = rc.getLocation();
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             int distressFlag = Comms.read(COMMS_FLAG_DISTRESS_FLAGS + i);
             if (distressFlag > 0) {
                 MapLocation distressLoc = Comms.readLoc(COMMS_FLAG_DISTRESS_LOCS + i);
+                int sev = Comms.read(COMMS_FLAG_DISTRESS_LEVEL + i);
                 if (distressLoc == null) continue;
-                if (nearestLoc == null || curLoc.distanceSquaredTo(nearestLoc) > curLoc.distanceSquaredTo(distressLoc)) {
+                else if (nearestLoc == null 
+                    || (curLoc.distanceSquaredTo(nearestLoc) > curLoc.distanceSquaredTo(distressLoc) && sev >= nearestSev)) {
                     nearestLoc = distressLoc;
+                    nearestSev = sev;
+                } else if (sev > nearestSev) {
+                    nearestLoc = distressLoc;
+                    nearestSev = sev;
                 }
             }
         }

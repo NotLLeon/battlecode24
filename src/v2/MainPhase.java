@@ -3,6 +3,7 @@ package v2;
 import static v2.Constants.*;
 
 import battlecode.common.*;
+import v2.Constants.Role;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase {
@@ -12,6 +13,7 @@ public class MainPhase {
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
     private static final int DISTRESS_HELP_DISTANCE_SQUARED_LO = 100;
     private static final int DISTRESS_HELP_DISTANCE_SQUARED_HI = 400;
+    private static final int DISTRESS_DISTANCE_DIFF_THRESHOLD = 50;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -19,22 +21,51 @@ public class MainPhase {
 
     private static void checkDistressSignal() throws GameActionException {
         // TODO: Experiment with this, how far away to go help, when to check for help
-        MapLocation distressLoc = FlagDefense.readDistressLoc();
-        if (distressLoc == null) return;
-        int dist = rc.getLocation().distanceSquaredTo(distressLoc);
+        MapLocation curLoc = rc.getLocation();
+        // get flag distress
+        MapLocation flagDistressLoc = FlagDefense.readDistressLoc();
+        int flagDistressDist = rc.getLocation().distanceSquaredTo(flagDistressLoc);
+
+        // get signal distress
+        MapLocation signalDistressLoc = SignalBot.getHighestPrioDistress(curLoc);
+        int signalDistressDist = rc.getLocation().distanceSquaredTo(signalDistressLoc);
 
         // determine severity
-        int level = FlagDefense.readDistressLevel(distressLoc);
+        int flagSev = FlagDefense.readDistressLevel(flagDistressLoc);
+        int signalSev = SignalBot.readSignalDistressLevel(signalDistressLoc);
+        
+        // compare
+        MapLocation targetLoc = null;
+        int targetSev = 0;
+        int targetDist = 0;
+        if (flagSev > signalSev) {
+            targetSev = flagSev;
+            targetLoc = flagDistressLoc;
+            targetDist = flagDistressDist;
+        } else if (flagSev < signalSev) {
+            targetSev = signalSev;
+            targetLoc = signalDistressLoc;
+            targetDist = signalDistressDist;
+        } else if (flagDistressDist < DISTRESS_DISTANCE_DIFF_THRESHOLD + signalDistressDist) {
+            targetLoc = flagDistressLoc;
+            targetSev = flagSev;
+            targetDist = flagDistressDist;
+        } else {
+            targetLoc = signalDistressLoc;
+            targetSev = signalSev;
+            targetDist = signalDistressDist;
+        }
+
         int threshold = DISTRESS_HELP_DISTANCE_SQUARED_LO;
-        if (level == 1) {
+        if (targetSev == 1) {
             threshold = DISTRESS_HELP_DISTANCE_SQUARED_HI;
         }
         
-        if (dist < threshold) {
-            if (dist < GameConstants.VISION_RADIUS_SQUARED &&
+        if (targetDist < threshold) {
+            if (targetDist < GameConstants.VISION_RADIUS_SQUARED &&
                     rc.senseNearbyFlags(-1, rc.getTeam()).length == 0) {
-                FlagDefense.stopDistressLoc(distressLoc);
-            } else Robot.moveTo(distressLoc);
+                FlagDefense.stopDistressLoc(targetLoc);
+            } else Robot.moveTo(targetLoc);
         }
     }
 
