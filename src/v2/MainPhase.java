@@ -57,14 +57,14 @@ public class MainPhase extends Robot {
         } else moveToAdjacent(rushLoc);
     }
 
-    public static void run() throws GameActionException {
+    private static void runStrat() throws GameActionException {
         if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
         }
 
         FlagDefense.scanAndSignal();
 
-        if (rc.hasFlag()){
+        if (rc.hasFlag()) {
             FlagInfo[] enemyFlags = rc.senseNearbyFlags(0, rc.getTeam().opponent());
 
             FlagInfo pickedUpFlag = enemyFlags[0];
@@ -78,7 +78,7 @@ public class MainPhase extends Robot {
             moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
 
             int flagId = pickedUpFlag.getID();
-            if(!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
+            if (!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
             else FlagRecorder.notifyCarryingFlag(flagId);
 
         } else {
@@ -94,5 +94,11 @@ public class MainPhase extends Robot {
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : visibleEnemyFlags) FlagRecorder.foundFlag(flag);
 
+    }
+
+    public static void run() throws GameActionException {
+        Micro.run();
+        runStrat();
+        Micro.run();
     }
 }

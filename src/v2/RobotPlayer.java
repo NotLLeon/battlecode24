@@ -32,10 +32,7 @@ public strictfp class RobotPlayer {
                     if (!isSpawned) continue;
                 }
                 if (isSetupPhase) SetupPhase.run();
-                else {
-                    Micro.run();
-                    MainPhase.run();
-                }
+                else MainPhase.run();
 
             } catch (GameActionException e) {
                 System.out.println("GameActionException");
