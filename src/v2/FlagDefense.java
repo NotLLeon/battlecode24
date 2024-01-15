@@ -101,6 +101,7 @@ public class FlagDefense {
         return level;
     }
     
+    // TODO: reduce FLAG_SAFE_DISTANCE_SQUARED
     public static void scanAndSignal() throws GameActionException {
         FlagInfo[] nearbyFlags = rc.senseNearbyFlags(-1, rc.getTeam());
         for (FlagInfo nearbyFlag : nearbyFlags) {
