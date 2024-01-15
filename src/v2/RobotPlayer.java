@@ -30,10 +30,9 @@ public strictfp class RobotPlayer {
                         Spawner.initialSpawn();
                         SetupPhase.onSpawn();
                     } else {
-                        boolean isSpawned = Spawner.spawn();
+                        boolean isSpawned = Spawner.spawnTo(MainPhase.getRushLoc());;
                         if (!isSpawned) continue;
                     }
-
                 }
 
                 if (isSetupPhase) SetupPhase.run();

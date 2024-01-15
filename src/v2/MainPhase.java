@@ -31,8 +31,8 @@ public class MainPhase {
         }
     }
 
-    private static void moveToRushLoc() throws GameActionException {
-        // visit a flag that hasn't been picked up
+    private static int getRushInd() {
+        // rush a flag that hasn't been picked up
         // if all flags are picked up, patrol default locs
         // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
         // and every SHORT_TARGET_ROUND_INTERVAL if we are patrolling
@@ -47,9 +47,12 @@ public class MainPhase {
         }
 
         // TODO: modify so that rushLoc doesnt change prematurely when the array changes
-        int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
-        MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
+        return rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
+    }
 
+    private static void moveToRushLoc() throws GameActionException {
+        int rushInd = getRushInd();
+        MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
         if (rc.getLocation().isAdjacentTo(rushLoc) && !FlagRecorder.isExactLoc(rushInd)) {
             // TODO: only explore within some radius
             Explore.exploreNewArea();
@@ -58,6 +61,10 @@ public class MainPhase {
 
     public static void onSpawn() throws GameActionException {
 
+    }
+
+    public static MapLocation getRushLoc() throws GameActionException {
+        return FlagRecorder.getFlagLoc(getRushInd());
     }
 
     public static void run() throws GameActionException {
