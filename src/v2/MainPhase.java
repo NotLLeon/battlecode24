@@ -87,21 +87,14 @@ public class MainPhase {
         return FlagRecorder.getFlagLoc(getRushInd());
     }
 
-    public static void run() throws GameActionException {
-        if (Robot.role == Role.SIGNAL) {
-            SignalBot.run();
-            return;
-        }
-
-        Micro.run();
-
+    private static void runStrat() throws GameActionException {
         if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
         }
 
         FlagDefense.scanAndSignal();
 
-        if (rc.hasFlag()){
+        if (rc.hasFlag()) {
             FlagInfo[] enemyFlags = rc.senseNearbyFlags(0, rc.getTeam().opponent());
 
             FlagInfo pickedUpFlag = enemyFlags[0];
@@ -115,7 +108,7 @@ public class MainPhase {
             Robot.moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
 
             int flagId = pickedUpFlag.getID();
-            if(!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
+            if (!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
             else FlagRecorder.notifyCarryingFlag(flagId);
 
         } else {
@@ -133,5 +126,15 @@ public class MainPhase {
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : visibleEnemyFlags) FlagRecorder.foundFlag(flag);
 
+    }
+
+    public static void run() throws GameActionException {
+        if (Robot.role == Role.SIGNAL) {
+            SignalBot.run();
+            return;
+        }
+        Micro.run();
+        runStrat();
+        Micro.run();
     }
 }
