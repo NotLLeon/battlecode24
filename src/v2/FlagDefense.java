@@ -39,11 +39,12 @@ public class FlagDefense {
         return -1;
     }
 
-    public static void setDistress(MapLocation loc, int id) throws GameActionException {
+    public static void setDistress(MapLocation loc, int id, int severity) throws GameActionException {
         int ind = getFlagIndFromId(id);
         if (ind == -1) return;
         Comms.write(COMMS_FLAG_DISTRESS_FLAGS + ind, id);
         Comms.writeLoc(COMMS_FLAG_DISTRESS_LOCS + ind, loc);
+        Comms.write(COMMS_FLAG_DISTRESS_LEVEL + ind, severity);
     }
 
     private static void stopDistressInd(int ind) throws GameActionException {
@@ -60,20 +61,33 @@ public class FlagDefense {
         stopDistressInd(getFlagIndFromLoc(loc));
     }
 
-    public static MapLocation readDistress() throws GameActionException {
+    public static MapLocation readDistressLoc() throws GameActionException {
         MapLocation nearestLoc = null;
+        int nearestSev = 0;
         MapLocation curLoc = rc.getLocation();
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             int distressFlag = Comms.read(COMMS_FLAG_DISTRESS_FLAGS + i);
             if (distressFlag > 0) {
                 MapLocation distressLoc = Comms.readLoc(COMMS_FLAG_DISTRESS_LOCS + i);
+                int sev = Comms.read(COMMS_FLAG_DISTRESS_LEVEL + i);
                 if (distressLoc == null) continue;
-                if (nearestLoc == null || curLoc.distanceSquaredTo(nearestLoc) > curLoc.distanceSquaredTo(distressLoc)) {
+                else if (nearestLoc == null 
+                    || (curLoc.distanceSquaredTo(nearestLoc) > curLoc.distanceSquaredTo(distressLoc) && sev >= nearestSev)) {
                     nearestLoc = distressLoc;
+                    nearestSev = sev;
+                } else if (sev > nearestSev) {
+                    nearestLoc = distressLoc;
+                    nearestSev = sev;
                 }
             }
         }
         return nearestLoc;
+    }
+
+    public static int readDistressLevel(MapLocation loc) throws GameActionException {
+        int ind = getFlagIndFromLoc(loc);
+        int level = Comms.read(COMMS_FLAG_DISTRESS_LEVEL + ind);
+        return level;
     }
     
     public static void scanAndSignal() throws GameActionException {
@@ -81,7 +95,20 @@ public class FlagDefense {
         for (FlagInfo nearbyFlag : nearbyFlags) {
             MapLocation curLoc = rc.getLocation();
             if (nearbyFlag.isPickedUp()) {
-                setDistress(nearbyFlag.getLocation(), nearbyFlag.getID());
+                // set distress and severity based on ratio of nearby enemies and friendlies
+                int severity = 0;
+                RobotInfo[] nearbyBots = rc.senseNearbyRobots();
+                int teammates = 0;
+
+                for (RobotInfo bot : nearbyBots) {
+                    if (bot.getTeam() == rc.getTeam()) teammates++;
+                }
+
+                if ((nearbyBots.length - teammates)/(float)teammates > ENEMY_DISTRESS_RATIO) {
+                    severity = 1;
+                }
+                
+                setDistress(nearbyFlag.getLocation(), nearbyFlag.getID(), severity);
             } else if (curLoc.isWithinDistanceSquared(nearbyFlag.getLocation(), FLAG_SAFE_DISTANCE_SQUARED) &&
                     rc.senseNearbyRobots(-1, rc.getTeam().opponent()).length == 0) {
                 stopDistress(nearbyFlag.getID());
