@@ -13,7 +13,8 @@ public class MainPhase extends Robot {
     // TODO: should be based on map size
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
-    private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
+    private static final int DISTRESS_HELP_DISTANCE_SQUARED_LO = 100;
+    private static final int DISTRESS_HELP_DISTANCE_SQUARED_HI = 400;
 
     private static MapLocation[] friendlySpawnLocs = rc.getAllySpawnLocations();
 
@@ -23,10 +24,18 @@ public class MainPhase extends Robot {
 
     private static void checkDistressSignal() throws GameActionException {
         // TODO: Experiment with this, how far away to go help, when to check for help
-        MapLocation distressLoc = FlagDefense.readDistress();
+        MapLocation distressLoc = FlagDefense.readDistressLoc();
         if (distressLoc == null) return;
         int dist = rc.getLocation().distanceSquaredTo(distressLoc);
-        if (dist < DISTRESS_HELP_DISTANCE_SQUARED) {
+
+        // determine severity
+        int level = FlagDefense.readDistressLevel(distressLoc);
+        int threshold = DISTRESS_HELP_DISTANCE_SQUARED_LO;
+        if (level == 1) {
+            threshold = DISTRESS_HELP_DISTANCE_SQUARED_HI;
+        }
+        
+        if (dist < threshold) {
             if (dist < GameConstants.VISION_RADIUS_SQUARED &&
                     rc.senseNearbyFlags(-1, rc.getTeam()).length == 0) {
                 FlagDefense.stopDistressLoc(distressLoc);
