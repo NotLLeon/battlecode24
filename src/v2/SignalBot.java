@@ -18,8 +18,8 @@ public class SignalBot{
     private static void scanAndSignal() throws GameActionException {
         RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
         MapLocation curLoc = rc.getLocation();
-        if (nearbyEnemies.length == 0) setSignal(curLoc);
-        else clearSignal(curLoc);
+        if (nearbyEnemies.length == 0) clearSignal(curLoc);
+        else setSignal(curLoc);
     }
 
     public static boolean isDistressLoc(MapLocation loc) throws GameActionException {

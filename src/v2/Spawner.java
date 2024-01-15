@@ -82,7 +82,7 @@ public class Spawner {
 
         MapLocation[] tryOrder = Utils.sort3Locations(spawnCenters, loc -> loc.distanceSquaredTo(toLoc));
         for (MapLocation spawnLoc : tryOrder) {
-            if (spawnInDir(spawnLoc, spawnLoc.directionTo(center))) return true;
+            if (spawnInDir(spawnLoc, spawnLoc.directionTo(toLoc))) return true;
         }
         return false;
     }
