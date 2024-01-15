@@ -8,26 +8,48 @@ from collections import defaultdict
 # If you must, then only modify the if __name__ == '__main__' part.
 
 
-def get_winner_info(input_string):
+def get_winner_info(input_string, retDict):
     match = re.search(r'(\w+) \(A\) wins \(round (\d+)\)|(\w+) \(B\) wins \(round (\d+)\)', input_string)
     if not match:
-        return None
+        # This should NOT happen
+        retDict['Cant determine winner'] = True
     if match.group(1):
-        return {'winningBot': match.group(1), 'winner': 'A', 'round': int(match.group(2))}
+        retDict['winningBot'] = match.group(1)
+        retDict['winner'] = 'A'
+        retDict['round'] = int(match.group(2))
     elif match.group(3):
-        return {'winningBot': match.group(3), 'winner': 'B', 'round': int(match.group(4))}
+        retDict['winningBot'] = match.group(3)
+        retDict['winner'] = 'B'
+        retDict['round'] = int(match.group(4))
 
+def extractInsideBrackets(input_string):
+    match = re.search(r'\((.*?)\)', input_string)
+    if match:
+        return match.group(1)
+    else:
+        return 'Tiebreak, but couldnt get reason'
+def setWinningReason(reasonStr, retDict):
+    if 'team captured all flags' in reasonStr:
+        retDict['winningReason'] = 'Captured All Flags'
+    elif 'tiebreakers' in reasonStr:
+        retDict['tieBreaker'] = True
+        # need to get tiebreak reason
+        retDict['winningReason'] = extractInsideBrackets(reasonStr)
 
 def getGameInfo(logStr: str):
     # Only care about lines that start with `[server]`
     importantLogLines = [line.strip() for line in logStr.split('\n') if line.strip().startswith('[server]')]
-
+    retDict = {'tieBreaker' : False}
     for line in importantLogLines:
         # Assuming that there is a single instance of the word `wins`
         if 'wins' in line:
-            return get_winner_info(line)
+            get_winner_info(line, retDict)
+            continue
+        if 'Reason:' in line:
+            setWinningReason(line, retDict)
+            continue
 
-    return None
+    return retDict
 
 # Expected arguments: (gameMap, teamA, teamB)
 def runGames(args: tuple) -> dict:
@@ -49,7 +71,7 @@ def runGames(args: tuple) -> dict:
     gameResInfo['opposingBotName'] = teamA if currBotLabel == 'B' else teamB
     gameResInfo['matchup'] = f"Map:{gameMap}, TeamA:{teamA}, TeamB:{teamB}"
     if error:
-        print(f"error is: {error}")
+        # print(f"error is: {error}")
         gameResInfo['error'] = error
     return gameResInfo
 
