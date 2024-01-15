@@ -1,9 +1,8 @@
-package v1;
+package v2;
 
 import battlecode.common.*;
 
-import static v1.Constants.*;
-import static v1.Random.rng;
+import static v2.Constants.*;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
@@ -19,26 +18,23 @@ public strictfp class RobotPlayer {
     public static void run(RobotController rc) throws GameActionException {
         
         Constants.rc = rc;
+        Spawner.init();
         Random.initRandom(rc.getID());
 
         while (true) {
 
             try {
                 curRound = rc.getRoundNum();
-                boolean isMainPhase = curRound <= GameConstants.SETUP_ROUNDS;
-                if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
-                    buyUpgrade();
-                }
+                boolean isSetupPhase = curRound <= GameConstants.SETUP_ROUNDS;
+                tryBuyUpgrade();
                 if (!rc.isSpawned()) {
-                    MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-                    for (int i = 0; i < 100; i++) {
-                        MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
-                        if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
-                    }
-                } else {
+                    boolean isSpawned = Spawner.spawn();
+                    if (!isSpawned) continue;
+                }
+                if (isSetupPhase) SetupPhase.run();
+                else {
                     Micro.run();
-                    if (isMainPhase) SetupPhase.run();
-                    else MainPhase.run();
+                    MainPhase.run();
                 }
 
             } catch (GameActionException e) {
@@ -59,8 +55,11 @@ public strictfp class RobotPlayer {
             }
         }
     }
-    private static void buyUpgrade() throws GameActionException {
-        if (rc.canBuyGlobal(FIRST_UPGRADE)) rc.buyGlobal(FIRST_UPGRADE);
-        else if (rc.canBuyGlobal(SECOND_UPGRADE)) rc.buyGlobal(SECOND_UPGRADE);
+
+    private static void tryBuyUpgrade() throws GameActionException {
+        if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
+            if (rc.canBuyGlobal(FIRST_UPGRADE)) rc.buyGlobal(FIRST_UPGRADE);
+            else if (rc.canBuyGlobal(SECOND_UPGRADE)) rc.buyGlobal(SECOND_UPGRADE);
+        }
     }
 }

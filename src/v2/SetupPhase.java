@@ -1,8 +1,8 @@
-package v1;
+package v2;
 
 import battlecode.common.*;
 
-import static v1.Constants.rc;
+import static v2.Constants.rc;
 
 // SETUP PHASE LOGIC GOES HERE (TENTATIVE)
 
