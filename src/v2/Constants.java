@@ -31,7 +31,7 @@ public class Constants {
     // ratio for severity check
     static final int DISTRESS_HELP_DISTANCE_SQUARED_LO = 100;
     static final int DISTRESS_HELP_DISTANCE_SQUARED_HI = 400;
-    static final float ENEMY_DISTRESS_RATIO = 5/3;
+    static final double ENEMY_DISTRESS_RATIO = 5.0/3;
 
     // Comms indices
     static int COMMS_ENEMY_FLAG_LOCS_START_IND = 0; // uses 0 - 2
