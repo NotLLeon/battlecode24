@@ -19,4 +19,14 @@ public abstract class Robot {
         Pathfinding.moveTo(dest, true, -1);
     }
 
+    public static void moveToOutsideRadius(MapLocation center, int radius) throws GameActionException {
+        MapLocation currLoc = rc.getLocation();
+        if (currLoc.isWithinDistanceSquared(center, radius)) {
+            Direction opp = currLoc.directionTo(center).opposite();
+            moveTo(currLoc.add(opp).add(opp).add(opp));
+        } else {
+            moveToRadius(center, radius);
+        }
+    }
+
 }

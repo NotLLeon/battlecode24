@@ -3,6 +3,7 @@ package v2;
 import battlecode.common.*;
 
 import static v2.Constants.rc;
+import static v2.Robot.*;
 
 public class Micro {
 
@@ -192,11 +193,23 @@ public class Micro {
         if (rc.canBuild(trapType, rc.getLocation())) rc.build(trapType, rc.getLocation());
 
     }
+
+    private static void followFlagCarrier() throws GameActionException {
+        FlagInfo[] enemyCarriedFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
+
+        for (FlagInfo flag : enemyCarriedFlags) {
+            if (flag.isPickedUp()) {
+                moveToOutsideRadius(flag.getLocation(), 1);
+            }
+        }
+    }
+
     public static void run() throws GameActionException {
         // TODO: prevent macro from moving closer to enemy for a few rounds after engaging
         if (rc.hasFlag()) return;
         tryAttack();
         tryMoveToFlag();
+        followFlagCarrier();
         tryPlaceTrap();
         tryAttack();
 //        tryPlaceTrap();

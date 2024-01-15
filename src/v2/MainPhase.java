@@ -75,7 +75,8 @@ public class MainPhase extends Robot {
                 }
             }
 
-            moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
+            MapLocation nearestSpawn = Utils.findClosestLoc(Spawner.getSpawnCenters());
+            moveTo(nearestSpawn);
 
             int flagId = pickedUpFlag.getID();
             if(!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
