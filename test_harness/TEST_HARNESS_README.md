@@ -1,29 +1,22 @@
 ## How to use the testing harness:
-Don't modify test_harness_internal.py, but instead create another python file and call it from there. 
+Call `run_tests_script.py` as a console command
 
-If you have issues with python, then modify the `if __name__=='__main__` part of the `test_harness_internal.py` to your liking.
 
-See sample_test.py for an example of what the usage looks like.
+Usage: `python3 run_tests_script.py  curr_bot [-b BOTS [BOTS ...]] [-m MAPS [MAPS ...]] `
 
-Function params:
+It has a mandatory argument of the current bot you want to test (`curr_bot`), 
+(optionally) followed up by a list of bots to play against, then (optionally) followed up by
+all the maps to play on. 
 
-`runGamesMain(currBot, botsVersusList, mapsList)`
+The default for bots to play against is V0 and examplefuncsplayer, and the default maps are all the maps
 
-The currBot indicates the name of the current bot that you would like to test on,
-and botsVersusList is a list of bots that your current bot will be paired against.
-Generally have this be set to all the previous bots we've implemented. 
-mapsList is a list of maps that these matches will happen on.
+Example usage: `python3 run_tests_script.py v1 -b v0 examplefuncsplayer -m DefaultSmall DefaultLarge`
 
-Every matchup is run twice, since we need to switch sides.
+Plays the v1 bot against v0, examplefuncsplayer on maps DefaultSmall, DefaultLarge
 
-`getGameAnalytics(gamesResultsDict)`
-
-gamesResultsDict is just the output of runGamesMain().
-getGameAnalytics() outputs a info about how the games went.
-
-Current it returns:
+Additionally, I currently have some basic analytics about the game that might be of help. 
+These are printed to the console upon being called
 1) How many games were won, and what the win percentage was.
 2) Which games did the currBot lose on
 3) Which games did the outcome change based on the side? This is prob helpful for detecting symmetry.
 
-I'd recommend just using the debugger if you want to see the results, but printing it or piping it into a file works too.
