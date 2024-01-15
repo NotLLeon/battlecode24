@@ -203,3 +203,7 @@ fabric.properties
 
 # Ignoring python virtual envs, naming it `myenv`
 myenv/
+
+# Ignoring Carlos' random testing files
+
+random_stuff.py
