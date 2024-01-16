@@ -207,3 +207,5 @@ myenv/
 # Ignoring Carlos' random testing files
 
 random_stuff.py
+jwt.txt
+SampleTeams.json
