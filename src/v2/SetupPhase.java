@@ -10,6 +10,7 @@ public class SetupPhase extends Robot {
 
     public static boolean exploring = true;
     public static MapLocation setupLoc = null;
+    private static int roundsWaiting = 0;
 
     public static void run() throws GameActionException {
         // for now just explore, try to path to crumbs, then if dam found, gather around dam
@@ -20,7 +21,7 @@ public class SetupPhase extends Robot {
         } else if (exploring){
             MapInfo[] nearbyMap = rc.senseNearbyMapInfos();
             for (MapInfo info : nearbyMap) {
-                if (info.isDam()) {
+                if (info.isDam() && roundsWaiting == 0) {
                     exploring = false;
                     setupLoc = info.getMapLocation();
                     moveTo(setupLoc);
@@ -28,8 +29,25 @@ public class SetupPhase extends Robot {
                 }
             }
             if (exploring) Explore.exploreNewArea();
+            if (roundsWaiting > 0) roundsWaiting--;
         } else {
-            moveTo(setupLoc);
+            MapInfo[] adjacent = rc.senseNearbyMapInfos(2);
+            // not adjacent yet to dam tile
+            if (rc.getLocation().distanceSquaredTo(setupLoc) > 2) {
+                for (MapInfo info : adjacent) {
+                    if (info.isDam()) {
+                        setupLoc = info.getMapLocation();
+                    }
+                }
+                moveInDir(rc.getLocation().directionTo(setupLoc), 0);
+
+                roundsWaiting++;
+                if (roundsWaiting >= 4) {
+                    exploring = true;
+                }
+            } else {
+                moveToAdjacent(setupLoc);
+            }
         }
     }
 }

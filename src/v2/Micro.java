@@ -51,32 +51,6 @@ public class Micro {
     }
 
     /***
-     * Moves in direction with some leniency
-     * @param dir general direction to move in
-     * @param strictness between 0 and 2
-     * @throws GameActionException
-     */
-    private static void moveInDir(Direction dir, int strictness) throws GameActionException {
-        if (rc.canMove(dir)) {
-            rc.move(dir);
-            return;
-        }
-        if (strictness >= 2) return;
-
-        Direction dirL = dir.rotateLeft();
-        Direction dirR = dir.rotateRight();
-        if (rc.canMove(dirL)) rc.move(dirL);
-        else if (rc.canMove(dirR)) rc.move(dirR);
-
-        if (strictness == 1) return;
-
-        Direction dirLL = dirL.rotateLeft();
-        Direction dirRR = dirR.rotateRight();
-        if (rc.canMove(dirLL)) rc.move(dirLL);
-        else if (rc.canMove(dirRR)) rc.move(dirRR);
-    }
-
-    /***
      * Moves away from moveAwayLoc, preferring cardinal movement over diagonal
      * @param moveAwayLoc
      */
@@ -94,7 +68,7 @@ public class Micro {
             }
         }
 
-        if (bestDir == null) moveInDir(moveAwayLoc.directionTo(curLoc), 1);
+        if (bestDir == null) Robot.moveInDir(moveAwayLoc.directionTo(curLoc), 1);
         else rc.move(bestDir);
     }
 
@@ -105,7 +79,7 @@ public class Micro {
         if (curLoc.isWithinDistanceSquared(flagLoc, FLAG_ESCORT_RADIUS_SQUARED)) moveDir = flagLoc.directionTo(curLoc);
         else moveDir = curLoc.directionTo(flagLoc);
 
-        moveInDir(moveDir, 1);
+        Robot.moveInDir(moveDir, 1);
     }
 
     private static void tryMoveToFlag() throws GameActionException {
@@ -145,9 +119,11 @@ public class Micro {
             FlagRecorder.setPickedUp(targetFlag.getID());
         } else {
             Direction moveDir = rc.getLocation().directionTo(flagLoc);
-            if (moveDir != Direction.CENTER) moveInDir(moveDir, 1);
+            if (moveDir != Direction.CENTER) Robot.moveInDir(moveDir, 1);
         }
     }
+
+    
 
     private static void tryAttack() throws GameActionException {
         lazySenseRobots();
@@ -174,7 +150,7 @@ public class Micro {
 
         // TODO: move away from centroid of remaining enemy positions
         MapLocation curLoc = rc.getLocation();
-        if (shouldChase(target)) moveInDir(curLoc.directionTo(targetLoc), 1);
+        if (shouldChase(target)) Robot.moveInDir(curLoc.directionTo(targetLoc), 1);
         else moveAwayCardinal(targetLoc);
     }
 
