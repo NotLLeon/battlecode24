@@ -53,6 +53,7 @@ public abstract class Robot {
             if (rc.canBuild(TrapType.STUN, sp)) {
                 rc.build(TrapType.STUN, sp);
             }
-        }
+
+        }        
     }
 }
