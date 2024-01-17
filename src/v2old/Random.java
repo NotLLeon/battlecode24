@@ -1,8 +1,8 @@
-package v2;
+package v2old;
 
 import battlecode.common.Direction;
 
-import static v2.Constants.DIRECTIONS;
+import static v2old.Constants.directions;
 
 public class Random {
 
@@ -14,22 +14,22 @@ public class Random {
 
     static int getDirectionOrderNum(Direction dir) {
         for (int i = 0; i < 8; ++i) {
-            if (DIRECTIONS[i] == dir) return i;
+            if (directions[i] == dir) return i;
         }
         return -1;
     }
 
     static Direction nextDir() {
-        return DIRECTIONS[rng.nextInt(DIRECTIONS.length)];
+        return directions[rng.nextInt(directions.length)];
     }
 
     static Direction nextDirWeighted(int[] weights, int totalWeight) {
         int idx = 0;
-        for (int i = nextInt(totalWeight); idx < DIRECTIONS.length - 1; ++idx) {
+        for (int i = nextInt(totalWeight); idx < directions.length - 1; ++idx) {
             i -= weights[idx];
             if (i <= 0 && weights[idx] > 0) break;
         }
-        return DIRECTIONS[idx];
+        return directions[idx];
     }
 
     static int nextIndexWeighted(int[] weights) {

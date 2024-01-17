@@ -1,12 +1,12 @@
-package v2;
+package v2old;
 
 import battlecode.common.*;
 
-import static v2.Constants.rc;
-import static v2.Constants.DIRECTIONS;
-import static v2.Constants.EXPLORE_NUM_TRACKED_LOCATIONS;
-import static v2.Constants.EXPLORE_HIGH_WEIGHT_DIRECTION;
-import static v2.Constants.EXPLORE_MOVES_TO_TRACK_LOCATION;
+import static v2old.Constants.rc;
+import static v2old.Constants.directions;
+import static v2old.Constants.EXPLORE_NUM_TRACKED_LOCATIONS;
+import static v2old.Constants.EXPLORE_HIGH_WEIGHT_DIRECTION;
+import static v2old.Constants.EXPLORE_MOVES_TO_TRACK_LOCATION;
 
 public class Explore {
     static int prevlocIdx = 0;
@@ -47,7 +47,7 @@ public class Explore {
             weights[Random.getDirectionOrderNum(curLoc.directionTo(wall))] = 0;
         }
 
-        for (Direction dir : DIRECTIONS) {
+        for (Direction dir : directions) {
             if (!rc.onTheMap(curLoc.add(dir).add(dir))) {
                 weights[Random.getDirectionOrderNum(dir)] = 0;
             }
@@ -66,7 +66,7 @@ public class Explore {
         }
 
         for(int i = 0; i < 8; ++i) {
-            Direction tmp = DIRECTIONS[i];
+            Direction tmp = directions[i];
             if(!rc.canMove(tmp)) weights[i] = 0;
         }
         int totalWeight = 0;

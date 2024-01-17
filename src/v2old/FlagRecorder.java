@@ -1,4 +1,4 @@
-package v2;
+package v2old;
 
 // class to keep track of:
 // - if a flag is captured
@@ -6,7 +6,7 @@ package v2;
 // - if the exact loc of a flag is known
 // for each enemy
 
-import static v2.Constants.*;
+import static v2old.Constants.*;
 
 import battlecode.common.*;
 
@@ -25,7 +25,7 @@ public class FlagRecorder {
         return Comms.read(COMMS_FLAG_RECORDER);
     }
 
-    public static int getFlagIdInd(int id) throws GameActionException {
+    private static int getFlagIdInd(int id) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             if (getFlagId(i) == id) return i;
         }
@@ -82,7 +82,7 @@ public class FlagRecorder {
         return isIndBitSet(ind, IND_PICKED_UP);
     }
 
-    private static boolean isExactLoc(int ind) throws GameActionException {
+    public static boolean isExactLoc(int ind) throws GameActionException {
         return isIndBitSet(ind, IND_EXACT_LOC);
     }
 

@@ -1,7 +1,7 @@
-package v2;
+package v2old;
 
-import static v2.Constants.*;
-import static v2.Random.*;
+import static v2old.Constants.*;
+import static v2old.Random.*;
 
 import battlecode.common.*;
 
@@ -33,8 +33,6 @@ public class MainPhase extends Robot {
     }
 
     private static void moveToRushLoc() throws GameActionException {
-        if (!rc.isMovementReady()) return;
-
         // visit a flag that hasn't been picked up
         // if all flags are picked up, patrol default locs
         // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
@@ -52,9 +50,8 @@ public class MainPhase extends Robot {
         // TODO: modify so that rushLoc doesnt change prematurely when the array changes
         int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
         MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
-        MapLocation curLoc = rc.getLocation();
 
-        if (curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED)) {
+        if (rc.getLocation().isAdjacentTo(rushLoc) && !FlagRecorder.isExactLoc(rushInd)) {
             // TODO: only explore within some radius
             Explore.exploreNewArea();
         } else moveToAdjacent(rushLoc);
@@ -91,7 +88,7 @@ public class MainPhase extends Robot {
 
             checkDistressSignal();
 
-            if (!Micro.inCombat()) moveToRushLoc();
+            if (rc.isMovementReady()) moveToRushLoc();
         }
 
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());

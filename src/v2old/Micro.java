@@ -1,8 +1,8 @@
-package v2;
+package v2old;
 
 import battlecode.common.*;
 
-import static v2.Constants.*;
+import static v2old.Constants.rc;
 
 public class Micro {
 
@@ -16,26 +16,38 @@ public class Micro {
 
     // try not to move diagonally (messes up formation)
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
+
     private static RobotInfo[] visibleAllyRobots;
     private static RobotInfo[] visibleEnemyRobots;
-    private static RobotInfo[] closeEnemyRobots;
-    private static RobotInfo[] dangerousEnemyRobots;
-    private static RobotInfo[] closeAllyRobots;
+    private static RobotInfo[] attackableEnemyRobots;
+    private static RobotInfo[] healableAllyRobots;
 
-    private static void sense() throws GameActionException {
+    private static MapLocation lastLocUpdated;
+    private static int lastRoundUpdated = 0;
+
+    private static void lazySenseRobots() throws GameActionException {
+        boolean locChanged =  lastLocUpdated == null || !lastLocUpdated.equals(rc.getLocation());
+        boolean roundChanged = lastRoundUpdated != rc.getRoundNum();
+        if (locChanged || roundChanged) {
+            lastLocUpdated = rc.getLocation();
+            lastRoundUpdated = rc.getRoundNum();
+            senseRobots();
+        }
+    }
+
+    private static void senseRobots() throws GameActionException {
         // TODO only call rc.senseNearbyRobots once
         Team ownTeam = rc.getTeam();
         visibleAllyRobots = rc.senseNearbyRobots(-1, ownTeam);
-        closeAllyRobots = rc.senseNearbyRobots(GameConstants.HEAL_RADIUS_SQUARED, ownTeam);
+        healableAllyRobots = rc.senseNearbyRobots(GameConstants.HEAL_RADIUS_SQUARED, ownTeam);
         Team enemyTeam = ownTeam.opponent();
         visibleEnemyRobots = rc.senseNearbyRobots(-1, enemyTeam);
-        closeEnemyRobots = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, enemyTeam);
-        dangerousEnemyRobots = rc.senseNearbyRobots(ATTACK_RADIUS_PLUS_ONE_SQUARED, enemyTeam);
+        attackableEnemyRobots = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, enemyTeam);
     }
 
     // TODO: decide on more factors (ex. health, number of friendly/enemy units nearby, etc...)
-    private static boolean shouldMoveTowards(RobotInfo target) {
-        return target.hasFlag() || visibleAllyRobots.length >= 2*visibleEnemyRobots.length;
+    private static boolean shouldChase(RobotInfo target) {
+        return target.hasFlag();
     }
 
     /***
@@ -64,40 +76,26 @@ public class Micro {
         else if (rc.canMove(dirRR)) rc.move(dirRR);
     }
 
-    private static int getNumAttackableEnemies(MapLocation loc) {
-        int numAttackableEnemies = 0;
-        for (RobotInfo enemy : visibleEnemyRobots) {
-            if (enemy.getLocation().isWithinDistanceSquared(loc, GameConstants.ATTACK_RADIUS_SQUARED)) {
-                numAttackableEnemies++;
-            }
-        }
-        return numAttackableEnemies;
-    }
-
-    // moves in first direction in dirs that minimizes number of attackable enemies
-    private static void moveMinEnemies(Direction[] dirs) throws GameActionException {
+    /***
+     * Moves away from moveAwayLoc, preferring cardinal movement over diagonal
+     * @param moveAwayLoc
+     */
+    private static void moveAwayCardinal(MapLocation moveAwayLoc) throws GameActionException {
         if (!rc.isMovementReady()) return;
-        Direction bestDir = null;
-        int minAttackableEnemies = 10000;
         MapLocation curLoc = rc.getLocation();
-        for (Direction dir : dirs) {
-            if(!rc.canMove(dir)) continue;
-            int numAttackableEnemies = getNumAttackableEnemies(curLoc.add(dir));
-            if (bestDir == null || numAttackableEnemies < minAttackableEnemies) {
-                minAttackableEnemies = numAttackableEnemies;
+        Direction bestDir = null;
+        MapLocation bestLoc = null;
+        for (Direction dir : Direction.cardinalDirections()) {
+            MapLocation newLoc = curLoc.add(dir);
+            if ((bestDir == null || newLoc.distanceSquaredTo(moveAwayLoc) > bestLoc.distanceSquaredTo(moveAwayLoc)) &&
+                    rc.canMove(dir)) {
                 bestDir = dir;
+                bestLoc = newLoc;
             }
         }
-        if (bestDir != null) rc.move(bestDir);
-    }
 
-    private static void moveAwayFromEnemy() throws GameActionException {
-        moveMinEnemies(DIRECTIONS);
-    }
-
-    private static void moveInDirMinEnemies(Direction dir) throws GameActionException {
-        Direction[] dirs = {dir, dir.rotateLeft(), dir.rotateRight()};
-        moveMinEnemies(dirs);
+        if (bestDir == null) moveInDir(moveAwayLoc.directionTo(curLoc), 1);
+        else rc.move(bestDir);
     }
 
     private static void escortFlag(FlagInfo flag) throws GameActionException {
@@ -152,9 +150,11 @@ public class Micro {
     }
 
     private static void tryAttack() throws GameActionException {
+        lazySenseRobots();
+
         // attack lowest health enemy
         RobotInfo target = null;
-        for (RobotInfo enemy : closeEnemyRobots) {
+        for (RobotInfo enemy : attackableEnemyRobots) {
             if (target == null || enemy.getHealth() < target.getHealth()) {
                 target = enemy;
             }
@@ -169,22 +169,23 @@ public class Micro {
         MapLocation targetLoc = target.getLocation();
         while (rc.canAttack(targetLoc)) rc.attack(targetLoc);
 
-        boolean allEnemiesDead = closeEnemyRobots.length == 1 && target.getHealth() == 0;
+        boolean allEnemiesDead = attackableEnemyRobots.length == 1 && target.getHealth() == 0;
         if (!rc.isMovementReady() || allEnemiesDead) return;
 
         // TODO: move away from centroid of remaining enemy positions
         MapLocation curLoc = rc.getLocation();
-        if (shouldMoveTowards(target)) moveInDirMinEnemies(curLoc.directionTo(targetLoc));
-        else moveAwayFromEnemy();
+        if (shouldChase(target)) moveInDir(curLoc.directionTo(targetLoc), 1);
+        else moveAwayCardinal(targetLoc);
     }
 
     private static void tryHeal() throws GameActionException {
         if (!rc.isActionReady()) return;
-        if (closeEnemyRobots.length > 0) return;
+        lazySenseRobots();
+        if (attackableEnemyRobots.length > 0) return;
         if (visibleEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
 
         RobotInfo target = null;
-        for (RobotInfo ally : closeAllyRobots) {
+        for (RobotInfo ally : healableAllyRobots) {
             if (target == null || ally.getHealth() < target.getHealth()) {
                 target = ally;
             }
@@ -199,9 +200,10 @@ public class Micro {
     private static void tryPlaceTrap() throws GameActionException {
         if (!rc.isActionReady()) return;
 
+        senseRobots();
         // TODO: use ID instead of random?
         if (visibleEnemyRobots.length == 0 ||
-                closeEnemyRobots.length > 0 ||
+                attackableEnemyRobots.length > 0 ||
                 Random.nextInt(3) == 0) return;
 
         TrapType trapType = TrapType.EXPLOSIVE;
@@ -212,35 +214,14 @@ public class Micro {
         if (rc.canBuild(trapType, rc.getLocation())) rc.build(trapType, rc.getLocation());
 
     }
-
-    public static boolean inCombat() throws GameActionException {
-        sense();
-
-        // can prob add more conditions
-        return dangerousEnemyRobots.length > 0;
-    }
-
     public static void run() throws GameActionException {
         // TODO: prevent macro from moving closer to enemy for a few rounds after engaging
         if (rc.hasFlag()) return;
-
-        sense();
-        if (rc.getHealth() <= closeEnemyRobots.length * BASE_ATTACK_DMG) {
-
-        }
-
         tryAttack();
-
-        // TODO: remove from micro?
-        sense();
         tryMoveToFlag();
-
-        sense();
         tryPlaceTrap();
-
         tryAttack();
-
-        sense();
+//        tryPlaceTrap();
         tryHeal();
         if (visibleEnemyRobots.length > 0) {
             // TODO: coordinated move-in on enemy position
