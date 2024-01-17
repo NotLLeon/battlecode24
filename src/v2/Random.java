@@ -14,22 +14,22 @@ public class Random {
 
     static int getDirectionOrderNum(Direction dir) {
         for (int i = 0; i < 8; ++i) {
-            if (directions[i] == dir) return i;
+            if (DIRECTIONS[i] == dir) return i;
         }
         return -1;
     }
 
     static Direction nextDir() {
-        return directions[rng.nextInt(directions.length)];
+        return DIRECTIONS[rng.nextInt(DIRECTIONS.length)];
     }
 
     static Direction nextDirWeighted(int[] weights, int totalWeight) {
         int idx = 0;
-        for (int i = nextInt(totalWeight); idx < directions.length - 1; ++idx) {
+        for (int i = nextInt(totalWeight); idx < DIRECTIONS.length - 1; ++idx) {
             i -= weights[idx];
             if (i <= 0 && weights[idx] > 0) break;
         }
-        return directions[idx];
+        return DIRECTIONS[idx];
     }
 
     static int nextIndexWeighted(int[] weights) {
