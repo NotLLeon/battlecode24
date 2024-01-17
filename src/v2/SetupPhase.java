@@ -16,6 +16,10 @@ public class SetupPhase extends Robot {
         // for now just explore, try to path to crumbs, then if dam found, gather around dam
         // to prepare attack
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(-1);
+
+        // build traps if possible
+        placeDefensiveTraps();
+
         if (crumbLocs.length > 0) {
             moveTo(crumbLocs[0]);
         } else if (exploring){

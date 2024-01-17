@@ -44,4 +44,15 @@ public abstract class Robot {
         if (rc.canMove(dirLL)) rc.move(dirLL);
         else if (rc.canMove(dirRR)) rc.move(dirRR);
     }
+
+    public static void placeDefensiveTraps() throws GameActionException {
+        MapLocation[] spawns = Spawner.getSpawnCenters();
+        // Check if the robot can build an stun trap at the location
+
+        for (MapLocation sp : spawns) {
+            if (rc.canBuild(TrapType.STUN, sp)) {
+                rc.build(TrapType.STUN, sp);
+            }
+        }
+    }
 }

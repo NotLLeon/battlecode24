@@ -63,6 +63,8 @@ public class MainPhase extends Robot {
         }
 
         FlagDefense.scanAndSignal();
+        // place down traps around the flag
+        placeDefensiveTraps();
 
         if (rc.hasFlag()) {
             FlagInfo[] enemyFlags = rc.senseNearbyFlags(0, rc.getTeam().opponent());
