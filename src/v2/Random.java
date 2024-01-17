@@ -2,14 +2,14 @@ package v2;
 
 import battlecode.common.Direction;
 
-import static v2.Constants.directions;
+import static v2.Constants.*;
 
 public class Random {
 
     private static java.util.Random rng = null;
 
-    static void initRandom(int seed) {
-        rng = new java.util.Random(seed);
+    static void initRandom() {
+        rng = new java.util.Random(rc.getID());
     }
 
     static int getDirectionOrderNum(Direction dir) {
