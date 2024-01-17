@@ -3,47 +3,43 @@ import argparse
 import requests
 from concurrent.futures import ThreadPoolExecutor
 import time
-from enum import Enum
+
+from get_queued_results import matchGames
+
 from read_files import *
+from constants import *
 
-DEFAULT_BOTS = ['Teh Devs']
-DEFAULT_MAPS = ["DefaultMedium", "DefaultSmall", "DefaultHuge", "DefaultLarge"]
 
-BATTLECODE_URL = "https://api.battlecode.org/api/compete/bc24/request/"
-HEADERS = {"authority": "api.battlecode.org",
-           "accept": "application/json, text/javascript, */*; q=0.01",
-           "accept-language": "en-US,en;q=0.9",
-           "authorization": f"Bearer {getJWTToken()}",
-           "content-type": "application/json",
-           "origin": "https://play.battlecode.org",
-           "referer": "https://play.battlecode.org/",
-           "sec-fetch-mode": "cors",
-           "sec-fetch-site": "same-site",
-           "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
-
-TEAM_ID_DICT = getTeamNameToIDDict()
-
-class PlayerOrder(Enum):
-    REQUESTER_FIRST = '+' # This is teamA
-    REQUESTER_LAST = '-'  # This is teamB
-    ALTERNATING = '?'
+TEAM_ID_DICT, ID_TEAM_DICT = getTeamNameToIDDict()
 
 
 
-def requestGamesCallback(callBackArgs):
-    oppTeamName, mapsList = callBackArgs
+def generateGameReqBody(oppTeamName, mapsList):
     oppTeamID = TEAM_ID_DICT[oppTeamName]
+    reqBodyTeamA = {"is_ranked": False,
+                    "requested_to": oppTeamID,
+                    "player_order": PlayerOrder.REQUESTER_FIRST.value,
+                    "map_names": mapsList}
+
+    reqBodyTeamB = reqBodyTeamA.copy()
+    reqBodyTeamB['player_order'] = PlayerOrder.REQUESTER_LAST.value
+
+    return (reqBodyTeamA, reqBodyTeamB)
+
+def generateGameReqsList(oppBotsList, mapsList):
+    return [generateGameReqBody(oppTeam, mapsList) for oppTeam in oppBotsList]
+
+# TODO: test this
+def requestGamesCallback(callBackArgs):
+    gameReqTeamA, gameReqTeamB = callBackArgs
 
     responsesList = []
-    reqBody = {"is_ranked": False,
-               "requested_to": oppTeamID,
-               "player_order": PlayerOrder.REQUESTER_FIRST.value,
-               "map_names": mapsList}
 
-    game1Response = requests.post(BATTLECODE_URL, headers=HEADERS, json=reqBody)
+    game1Response = requests.post(BATTLECODE_URL, headers=HEADERS, json=gameReqTeamA)
     response1Body = json.loads(game1Response.text)
-    game1Info = {'oppTeamName': oppTeamName,
+    game1Info = {'oppTeamName': ID_TEAM_DICT[gameReqTeamA['requested_to']],
                  'creationDateTime': response1Body['created'],
+                 'side': PlayerOrder.REQUESTER_FIRST,
                  'responseBody': response1Body,
                  'statusCode': game1Response.status_code,
                  'fullResponse': game1Response}
@@ -52,12 +48,12 @@ def requestGamesCallback(callBackArgs):
     # Need to wait 1 second since we're using the creation_time as a key, which is only accurate up to the second
     time.sleep(1)
 
-    reqBody['player_order'] = PlayerOrder.REQUESTER_LAST.value
-    game2Response = requests.post(BATTLECODE_URL, headers=HEADERS, json=reqBody)
+    game2Response = requests.post(BATTLECODE_URL, headers=HEADERS, json=gameReqTeamB)
 
     response2Body = json.loads(game2Response.text)
-    game2Info = {'oppTeamName': oppTeamName,
+    game2Info = {'oppTeamName': ID_TEAM_DICT[gameReqTeamA['requested_to']],
                  'creationDateTime': response2Body['created'],
+                 'side': PlayerOrder.REQUESTER_LAST,
                  'responseBody': response2Body,
                  'statusCode': game2Response.status_code,
                  'fullResponse': game2Response}
@@ -79,18 +75,21 @@ def main():
     args = parser.parse_args()
 
     mapsList = args.maps
-
     oppBotsList = loadJSON(args.read) if args.read else args.bots
+
+    gameReqs = generateGameReqsList(oppBotsList, mapsList)
 
 
     with ThreadPoolExecutor(max_workers=5) as executor:
-        callBackArgs = [(oppID, mapsList) for oppID in oppBotsList]
-        futures = [executor.submit(requestGamesCallback, currArg) for currArg in callBackArgs]
+        futures = [executor.submit(requestGamesCallback, gameReq) for gameReq in gameReqs]
         concurrent.futures.wait(futures)
         responseList = [future.result() for future in futures]
 
     print(responseList)
+    matchGames(responseList)
 
 
 if __name__ == '__main__':
     main()
+    # resList = generateGameReqsList(['camel_case','Teh Devs'], ['DefaultLarge', 'DefaultSmall'])
+    # print('got here')

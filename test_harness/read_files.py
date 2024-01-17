@@ -4,7 +4,12 @@ def getTeamNameToIDDict():
     try:
         with open("unranked_accepted_teams_id.json", 'r') as json_file:
             unrankedTeamsDict = json.load(json_file)
-            return unrankedTeamsDict
+            idToTeamName = {}
+
+            # Since this is a bijection, want the reverse mapping too
+            for teamName in unrankedTeamsDict:
+                idToTeamName[unrankedTeamsDict[teamName]] = teamName
+            return unrankedTeamsDict, idToTeamName
     except FileNotFoundError as e:
         print(f"Error: {e}")
 
@@ -20,8 +25,8 @@ def getJWTToken():
 def loadJSON(filePath):
     try:
         with open(filePath, 'r') as json_file:
-            unrankedTeamsDict = json.load(json_file)
-            return unrankedTeamsDict
+            loadedJSON = json.load(json_file)
+            return loadedJSON
     except FileNotFoundError as e:
         print(f"File not found: {e}")
     except json.JSONDecodeError as e:

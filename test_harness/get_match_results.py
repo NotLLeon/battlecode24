@@ -1,9 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-class PlayerIndex(Enum):
-    REQUESTER_FIRST = 0 # This is teamA
-    REQUESTER_LAST = 1  # This is teamB
+
 
 
 def getDateTimeToNearestSecond(dateTimeStrFull):
