@@ -10,24 +10,17 @@ public class SignalBot{
 
     public static void run() throws GameActionException {
         SignalBot.scanAndSignal();
-
-        RobotInfo[] nearbyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
-        RobotInfo target = null;
-        for (RobotInfo bot : nearbyRobots) {
-            if (target == null || bot.getHealth() < target.getHealth()) {
-                target = bot;
-            }
-
-            if (bot.hasFlag()) {
-                target = bot;
-                break;
-            }
-        }
     }
 
     public static void tryBecomeSignalBot() throws GameActionException {
-        FlagInfo[] flags = rc.senseNearbyFlags(0);
-        if (flags.length > 0) Robot.role = Role.SIGNAL;
+        FlagInfo[] flags = rc.senseNearbyFlags(2);
+        if (flags.length > 0) {
+            if (rc.senseNearbyRobots(flags[0].getLocation(), 0, rc.getTeam()).length > 0) {
+                return;
+            }
+            Robot.role = Role.SIGNAL;
+            Robot.moveTo(flags[0].getLocation());
+        }
     }
 
     private static void scanAndSignal() throws GameActionException {

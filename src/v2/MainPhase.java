@@ -4,11 +4,10 @@ import static v2.Constants.*;
 import static v2.Random.*;
 
 import battlecode.common.*;
+import v2.Constants.Role;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
-
-    private static final int[] FLAG_INDS = {0, 1, 2};
 
     // TODO: should be based on map size
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
@@ -67,6 +66,11 @@ public class MainPhase extends Robot {
     }
 
     private static void runStrat() throws GameActionException {
+        if (Robot.role == Role.SIGNAL) {
+            SignalBot.run();
+            return;
+        }
+
         if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
         }
@@ -103,6 +107,11 @@ public class MainPhase extends Robot {
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : visibleEnemyFlags) FlagRecorder.foundFlag(flag);
 
+    }
+
+    public static void onSpawn() throws GameActionException {
+        SignalBot.tryBecomeSignalBot();
+        
     }
 
     public static void run() throws GameActionException {

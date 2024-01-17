@@ -22,8 +22,13 @@ public class Micro {
     private static RobotInfo[] closeEnemyRobots;
     private static RobotInfo[] dangerousEnemyRobots;
     private static RobotInfo[] closeAllyRobots;
+    private static boolean shouldMove = true;
 
-    private static void sense() throws GameActionException {
+    public static void setShouldMove(boolean val) {
+        shouldMove = val;
+    }
+
+    public static void sense() throws GameActionException {
         // TODO only call rc.senseNearbyRobots once
         Team ownTeam = rc.getTeam();
         visibleAllyRobots = rc.senseNearbyRobots(-1, ownTeam);
@@ -173,7 +178,7 @@ public class Micro {
         return target;
     }
 
-    private static void tryAttack() throws GameActionException {
+    public static void tryAttack() throws GameActionException {
         // attack lowest health enemy
         RobotInfo target = selectAttackTarget();
         if (target != null && rc.isActionReady()) {
@@ -182,7 +187,7 @@ public class Micro {
             if (target != null && rc.isActionReady()) rc.attack(target.getLocation());
         }
 
-        if (!rc.isMovementReady()) return;
+        if (!rc.isMovementReady() || !shouldMove) return;
 
         MapLocation curLoc = rc.getLocation();
         if (target != null && shouldMoveTowards(target)) {
@@ -191,7 +196,7 @@ public class Micro {
         } else moveAwayFromEnemy();
     }
 
-    private static void tryHeal() throws GameActionException {
+    public static void tryHeal() throws GameActionException {
         if (!rc.isActionReady()) return;
         if (closeEnemyRobots.length > 0) return;
         if (dangerousEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
@@ -241,8 +246,10 @@ public class Micro {
         tryAttack();
 
         // TODO: remove from micro?
-        sense();
-        tryMoveToFlag();
+        if (shouldMove) {
+            sense();
+            tryMoveToFlag();
+        }
 
         sense();
         tryPlaceTrap();
