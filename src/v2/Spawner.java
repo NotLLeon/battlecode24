@@ -2,8 +2,8 @@ package v2;
 import battlecode.common.*;
 
 import static v2.Constants.*;
-import static v2.Constants.Role;
 
+import v2.Constants.Role;
 import v2.fast.*;
 
 public class Spawner {
@@ -76,16 +76,19 @@ public class Spawner {
         return false;
     }
 
-    public static boolean spawnTo(MapLocation toLoc) throws GameActionException {
+    // FIXME: jank
+    public static boolean spawn() throws GameActionException {
         if (Robot.role == Role.SIGNAL) return spawnSignalBot();
 
         if (spawnNearDistress()) return true;
 
         if (rc.getRoundNum() % SPAWN_WAVE_INTERVAL != 0) return false;
 
-        MapLocation[] tryOrder = Utils.sort3Locations(spawnCenters, loc -> loc.distanceSquaredTo(toLoc));
-        for (MapLocation spawnLoc : tryOrder) {
-            if (spawnInDir(spawnLoc, spawnLoc.directionTo(toLoc))) return true;
+        for (int i = 0; i < 10; ++i) {
+            MapLocation spawnCenter = spawnCenters[Random.nextInt(3)];
+            if (spawnInDir(spawnCenter, spawnCenter.directionTo(center))) {
+                return true;
+            }
         }
         return false;
     }
