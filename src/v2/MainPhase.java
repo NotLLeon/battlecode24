@@ -5,8 +5,6 @@ import static v2.Constants.*;
 import battlecode.common.*;
 import v2.Constants.Role;
 
-import v2.fast.FastIterableLocSet;
-
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase {
 
@@ -73,6 +71,10 @@ public class MainPhase {
     }
 
     private static void runStrat() throws GameActionException {
+        if (Robot.role == Role.SIGNAL) {
+            SignalBot.run();
+        }
+
         if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
         }

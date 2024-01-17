@@ -82,7 +82,7 @@ public class Spawner {
 
         if (spawnNearDistress()) return true;
 
-        if (rc.getRoundNum() % SPAWN_WAVE_INTERVAL != 0) return false;
+        if (rc.getRoundNum() % SPAWN_WAVE_INTERVAL != 1) return false;
 
         for (int i = 0; i < 10; ++i) {
             MapLocation spawnCenter = spawnCenters[Random.nextInt(3)];

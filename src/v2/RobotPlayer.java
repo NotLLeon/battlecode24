@@ -29,7 +29,10 @@ public strictfp class RobotPlayer {
                     boolean isSpawned = Spawner.spawn();
                     if (!isSpawned) continue;
                 }
-                if (isSetupPhase) SetupPhase.run();
+                if (isSetupPhase) {
+                    SetupPhase.onSpawn();
+                    SetupPhase.run();
+                }
                 else MainPhase.run();
             } catch (GameActionException e) {
                 System.out.println("GameActionException");
