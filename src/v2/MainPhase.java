@@ -1,17 +1,19 @@
 package v2;
 
 import static v2.Constants.*;
+import static v2.Random.*;
 
 import battlecode.common.*;
-import v2.Constants.Role;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
-public class MainPhase {
+public class MainPhase extends Robot {
+
+    private static final int[] FLAG_INDS = {0, 1, 2};
 
     // TODO: should be based on map size
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
-    private static final int DISTRESS_DISTANCE_DIFF_THRESHOLD = 50;
+    private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -36,23 +38,14 @@ public class MainPhase {
         } else Robot.moveTo(target);
     }
 
-    // should only run if Micro doesnt spot the flag
     private static void moveToRushLoc() throws GameActionException {
-        int rushInd = getRushInd();
-        MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
-        if (rc.getLocation().isAdjacentTo(rushLoc) && !FlagRecorder.isExactLoc(rushInd)) {
-            // TODO: only explore within some radius
-            Explore.exploreNewArea();
-        } else Robot.moveToAdjacent(rushLoc);
-    }
+        if (!rc.isMovementReady()) return;
 
-    private static int getRushInd() throws GameActionException {
-        // rush a flag that hasn't been picked up
+        // visit a flag that hasn't been picked up
         // if all flags are picked up, patrol default locs
         // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
         // and every SHORT_TARGET_ROUND_INTERVAL if we are patrolling
-
-        int[] rushFlagInds = Utils.filterIntArr(FLAG_INDS, (Integer i) -> !FlagRecorder.isPickedUp(i));
+        int[] rushFlagInds = Utils.filterIntArr(FLAG_INDS, (i) -> !FlagRecorder.isPickedUp(i));
         int interval = LONG_TARGET_ROUND_INTERVAL;
 
         // all flags are picked up, just cycle between default locs
@@ -63,18 +56,17 @@ public class MainPhase {
         }
 
         // TODO: modify so that rushLoc doesnt change prematurely when the array changes
-        return rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
-    }
+        int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
+        MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
+        MapLocation curLoc = rc.getLocation();
 
-    public static MapLocation getRushLoc() throws GameActionException {
-        return FlagRecorder.getFlagLoc(getRushInd());
+        if (curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED)) {
+            // TODO: only explore within some radius
+            Explore.exploreNewArea();
+        } else moveToAdjacent(rushLoc);
     }
 
     private static void runStrat() throws GameActionException {
-        if (Robot.role == Role.SIGNAL) {
-            SignalBot.run();
-        }
-
         if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
         }
@@ -92,7 +84,7 @@ public class MainPhase {
                 }
             }
 
-            Robot.moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
+            moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
 
             int flagId = pickedUpFlag.getID();
             if (!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
@@ -105,7 +97,7 @@ public class MainPhase {
 
             checkDistressSignal();
 
-            if (rc.isMovementReady()) moveToRushLoc();
+            if (!Micro.inCombat()) moveToRushLoc();
         }
 
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
@@ -114,10 +106,6 @@ public class MainPhase {
     }
 
     public static void run() throws GameActionException {
-        if (Robot.role == Role.SIGNAL) {
-            SignalBot.run();
-            return;
-        }
         Micro.run();
         runStrat();
         Micro.run();

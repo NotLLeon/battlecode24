@@ -1,7 +1,6 @@
 package v2;
 
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
+import battlecode.common.*;
 
 import java.util.function.Function;
 

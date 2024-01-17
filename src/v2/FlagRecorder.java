@@ -27,7 +27,7 @@ public class FlagRecorder {
         return Comms.read(COMMS_FLAG_RECORDER);
     }
 
-    private static int getFlagIdInd(int id) throws GameActionException {
+    public static int getFlagIdInd(int id) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             if (getFlagId(i) == id) return i;
         }
@@ -84,7 +84,7 @@ public class FlagRecorder {
         return isIndBitSet(ind, IND_PICKED_UP);
     }
 
-    public static boolean isExactLoc(int ind) throws GameActionException {
+    private static boolean isExactLoc(int ind) throws GameActionException {
         return isIndBitSet(ind, IND_EXACT_LOC);
     }
 

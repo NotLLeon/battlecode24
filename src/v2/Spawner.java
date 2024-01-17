@@ -66,16 +66,6 @@ public class Spawner {
         computeSpawnCenters();
     }
 
-    public static boolean initialSpawn() throws GameActionException {
-        for(MapLocation loc : allSpawns) {
-            if (rc.canSpawn(loc)) {
-                rc.spawn(loc);
-                return true;
-            }
-        }
-        return false;
-    }
-
     // FIXME: jank
     public static boolean spawn() throws GameActionException {
         if (Robot.role == Role.SIGNAL) return spawnSignalBot();
