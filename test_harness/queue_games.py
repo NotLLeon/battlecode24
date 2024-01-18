@@ -101,5 +101,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # resList = generateGameReqsList(['camel_case','Teh Devs'], ['DefaultLarge', 'DefaultSmall'])
-    # print('got here')

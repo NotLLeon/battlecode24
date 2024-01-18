@@ -1,4 +1,4 @@
-## How to use the testing harness:
+## How to use the local testing harness:
 NOTE: Need to pip install `tabulate` as a dependency.
 
 Call `run_tests_script.py` as a console command
@@ -22,3 +22,4 @@ These are printed to the console upon being called
 2) Which games did the currBot lose on
 3) Which games did the outcome change based on the side? This is prob helpful for detecting symmetry.
 
+## How to use the queuing tool
