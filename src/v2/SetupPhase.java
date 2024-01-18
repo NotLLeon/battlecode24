@@ -1,6 +1,7 @@
 package v2;
 
 import battlecode.common.*;
+import v2.fast.FastLocIntMap;
 
 import static v2.Constants.rc;
 
@@ -20,30 +21,37 @@ public class SetupPhase extends Robot {
         // build traps if possible
         placeDefensiveTraps();
 
-        if (crumbLocs.length > 0) {
+        if (crumbLocs.length > 0 && rc.getRoundNum() < 150) {
             moveTo(crumbLocs[0]);
         } else if (exploring){
             MapInfo[] nearbyMap = rc.senseNearbyMapInfos();
+            FastLocIntMap damMap = new FastLocIntMap();
+            
             for (MapInfo info : nearbyMap) {
-                if (info.isDam() && roundsWaiting == 0) {
+                if (info.isDam()) {
+                    damMap.add(info.getMapLocation(), 1);
+                }
+            }
+
+            if (roundsWaiting > 0) {
+                roundsWaiting--;
+                setupMeetLocation();
+            }
+            else {
+                MapLocation[] dams = damMap.getKeys();
+                if (dams.length > 0) {
+                    setupLoc = dams[Random.nextInt(dams.length)];
                     exploring = false;
-                    setupLoc = info.getMapLocation();
                     moveTo(setupLoc);
-                    break;
                 }
             }
             if (exploring) Explore.exploreNewArea();
-            if (roundsWaiting > 0) roundsWaiting--;
         } else {
             MapInfo[] adjacent = rc.senseNearbyMapInfos(2);
             // not adjacent yet to dam tile
             if (rc.getLocation().distanceSquaredTo(setupLoc) > 2) {
-                for (MapInfo info : adjacent) {
-                    if (info.isDam()) {
-                        setupLoc = info.getMapLocation();
-                    }
-                }
-                moveInDir(rc.getLocation().directionTo(setupLoc), 0);
+                setupMeetLocation();
+                moveTo(setupLoc);
 
                 roundsWaiting++;
                 if (roundsWaiting >= 4) {
@@ -51,7 +59,25 @@ public class SetupPhase extends Robot {
                 }
             } else {
                 moveToAdjacent(setupLoc);
+                for (MapInfo info : adjacent) {
+                    if (info.isWater() && rc.canFill(info.getMapLocation())) {
+                        rc.fill(info.getMapLocation());
+                    }
+                }
             }
         }
+    }
+
+    private static boolean setupMeetLocation() throws GameActionException {
+        MapInfo[] adjacent = rc.senseNearbyMapInfos(2);
+        for (MapInfo info : adjacent) {
+            if (info.isDam()) {
+                setupLoc = info.getMapLocation();
+                roundsWaiting = 0;
+                exploring = false;
+                return true;
+            }
+        }
+        return false;
     }
 }
