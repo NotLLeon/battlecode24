@@ -25,7 +25,7 @@ public class FlagRecorder {
         return Comms.read(COMMS_FLAG_RECORDER);
     }
 
-    private static int getFlagIdInd(int id) throws GameActionException {
+    public static int getFlagIdInd(int id) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             if (getFlagId(i) == id) return i;
         }
@@ -67,6 +67,33 @@ public class FlagRecorder {
         return bestInd;
     }
 
+    private static void foundExactLoc(FlagInfo flag) throws GameActionException {
+        MapLocation[] bLocs = rc.senseBroadcastFlagLocations();
+        MapLocation flagLoc = flag.getLocation();
+        int ind = -1;
+
+        // find which approximate location doesnt show up in broadcast
+        // if multiple, pick the closest one to the flag
+        int minDis = 99999999;
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            if (isExactLoc(i)) continue;
+            MapLocation approxLoc = getFlagLoc(i);
+            boolean appears = false;
+            for (MapLocation bLoc : bLocs) {
+                if (approxLoc.equals(bLoc)) {
+                    appears = true;
+                    break;
+                }
+            }
+            if (!appears && flagLoc.distanceSquaredTo(approxLoc) < minDis) {
+                minDis = flagLoc.distanceSquaredTo(approxLoc);
+                ind = i;
+            }
+        }
+        if (ind == -1) return;
+        foundIndExactLoc(ind, flag);
+    }
+
     private static void foundIndExactLoc(int ind, FlagInfo flag) throws GameActionException {
         int newEncoded = getEncodedFlagRecorder() | getMask(ind, IND_EXACT_LOC);
         Comms.write(COMMS_FLAG_RECORDER, newEncoded);
@@ -82,7 +109,7 @@ public class FlagRecorder {
         return isIndBitSet(ind, IND_PICKED_UP);
     }
 
-    public static boolean isExactLoc(int ind) throws GameActionException {
+    private static boolean isExactLoc(int ind) throws GameActionException {
         return isIndBitSet(ind, IND_EXACT_LOC);
     }
 
@@ -106,14 +133,10 @@ public class FlagRecorder {
         if (flag.isPickedUp()) return;
 
         // check if this is a duplicate report or dropped flag
-        int flagID = flag.getID();
-        int existingInd = getFlagIdInd(flagID);
+        int existingInd = getFlagIdInd(flag.getID());
         if (existingInd != -1) return;
 
-        MapLocation flagLoc = flag.getLocation();
-        int ind = getClosestApproxLoc(flagLoc);
-        if (ind == -1) return; // wtf
-        foundIndExactLoc(ind, flag);
+        foundExactLoc(flag);
     }
 
     /***
@@ -121,7 +144,7 @@ public class FlagRecorder {
      * @throws GameActionException
      */
     public static void setApproxFlagLocs() throws GameActionException {
-        if (Comms.readLoc(COMMS_ENEMY_FLAG_LOCS_START_IND) != null) return;
+        if (Comms.read(COMMS_ENEMY_FLAG_LOCS_START_IND) != 0) return;
         MapLocation[] approxFlagLocs = rc.senseBroadcastFlagLocations();
         int ind = 0;
         for (; ind < approxFlagLocs.length; ++ind) {

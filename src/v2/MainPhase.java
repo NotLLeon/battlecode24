@@ -1,7 +1,6 @@
 package v2;
 
 import static v2.Constants.*;
-import static v2.Random.*;
 
 import battlecode.common.*;
 
@@ -33,6 +32,8 @@ public class MainPhase extends Robot {
     }
 
     private static void moveToRushLoc() throws GameActionException {
+        if (!rc.isMovementReady()) return;
+
         // visit a flag that hasn't been picked up
         // if all flags are picked up, patrol default locs
         // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
@@ -51,20 +52,21 @@ public class MainPhase extends Robot {
         int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
         MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
 
-        if (rc.getLocation().isAdjacentTo(rushLoc) && !FlagRecorder.isExactLoc(rushInd)) {
-            // TODO: only explore within some radius
+        MapLocation curLoc = rc.getLocation();
+
+        if (curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED)) {
             Explore.exploreNewArea();
         } else moveToAdjacent(rushLoc);
     }
 
-    public static void run() throws GameActionException {
+    private static void runStrat() throws GameActionException {
         if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
         }
 
         FlagDefense.scanAndSignal();
 
-        if (rc.hasFlag()){
+        if (rc.hasFlag()) {
             FlagInfo[] enemyFlags = rc.senseNearbyFlags(0, rc.getTeam().opponent());
 
             FlagInfo pickedUpFlag = enemyFlags[0];
@@ -78,7 +80,7 @@ public class MainPhase extends Robot {
             moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
 
             int flagId = pickedUpFlag.getID();
-            if(!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
+            if (!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
             else FlagRecorder.notifyCarryingFlag(flagId);
 
         } else {
@@ -88,11 +90,17 @@ public class MainPhase extends Robot {
 
             checkDistressSignal();
 
-            if (rc.isMovementReady()) moveToRushLoc();
+            if (!Micro.inCombat()) moveToRushLoc();
         }
 
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : visibleEnemyFlags) FlagRecorder.foundFlag(flag);
 
+    }
+
+    public static void run() throws GameActionException {
+        Micro.run();
+        runStrat();
+        Micro.run();
     }
 }

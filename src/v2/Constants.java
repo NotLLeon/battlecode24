@@ -6,7 +6,7 @@ public class Constants {
 
     public static RobotController rc;
 
-    static final Direction[] directions = {
+    static final Direction[] DIRECTIONS = {
         Direction.NORTH,
         Direction.NORTHEAST,
         Direction.EAST,
@@ -15,9 +15,14 @@ public class Constants {
         Direction.SOUTHWEST,
         Direction.WEST,
         Direction.NORTHWEST,
-};
-    static GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ACTION;
+    };
+    static int FLAG_PICKUP_DIS_SQUARED = 2;
+    static int ATTACK_RADIUS_PLUS_ONE_SQUARED = 9;
+    static int BASE_ATTACK_DMG = 150;
+
+    static GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ATTACK;
     static GlobalUpgrade SECOND_UPGRADE = GlobalUpgrade.HEALING;
+    static GlobalUpgrade THIRD_UPGRADE = GlobalUpgrade.CAPTURING;
 
     // weights for explore
     static int EXPLORE_HIGH_WEIGHT_DIRECTION = 10;
