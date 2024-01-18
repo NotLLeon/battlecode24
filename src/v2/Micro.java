@@ -203,9 +203,7 @@ public class Micro {
             }
         }
 
-        MapLocation targetLoc;
-        if (target == null || target.getHealth() > rc.getHealth()) targetLoc = rc.getLocation();
-        else targetLoc = target.getLocation();
+        MapLocation targetLoc = target.getLocation();
 
         if (rc.canHeal(targetLoc)) rc.heal(targetLoc);
     }
