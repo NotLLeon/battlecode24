@@ -208,4 +208,6 @@ myenv/
 
 random_stuff.py
 jwt.txt
-SampleTeams.json
+
+# Ignoring this since this will store all the match links
+match_links.json
