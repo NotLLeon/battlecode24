@@ -49,11 +49,19 @@ public class MainPhase extends Robot {
         }
 
         // TODO: modify so that rushLoc doesnt change prematurely when the array changes
-        int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
+        int rushInd = 0;
         MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
-
         MapLocation curLoc = rc.getLocation();
 
+        for (int flagInd : rushFlagInds) {
+            MapLocation testLoc = FlagRecorder.getFlagLoc(flagInd);
+            if (curLoc.distanceSquaredTo(testLoc) < curLoc.distanceSquaredTo(rushLoc)) {
+                rushInd = flagInd;
+                rushLoc = testLoc;
+            }
+            // System.out.println(rushLoc);
+        }
+        
         if (curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED)) {
             Explore.exploreNewArea();
         } else moveToAdjacent(rushLoc);
