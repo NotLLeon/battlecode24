@@ -160,7 +160,6 @@ public class Micro {
     private static RobotInfo selectAttackTarget() {
         RobotInfo target = null;
         for (RobotInfo enemy : closeEnemyRobots) {
-            if(enemy.getHealth() == 0) continue;
             if (target == null || enemy.getHealth() < target.getHealth()) {
                 target = enemy;
             }
@@ -175,11 +174,12 @@ public class Micro {
 
     private static void tryAttack() throws GameActionException {
         // attack lowest health enemy
-        RobotInfo target = selectAttackTarget();
-        if (target != null && rc.isActionReady()) {
-            rc.attack(target.getLocation());
+        RobotInfo target = null;
+        while (rc.isActionReady()) {
             target = selectAttackTarget();
-            if (target != null && rc.isActionReady()) rc.attack(target.getLocation());
+            if (target == null) break;
+            rc.attack(target.getLocation());
+            sense();
         }
 
         if (!rc.isMovementReady()) return;
@@ -248,15 +248,12 @@ public class Micro {
         tryAttack();
 
         // TODO: remove from micro?
-        sense();
         tryMoveToFlag();
 
-        sense();
+        sense(); // might have moved
         tryPlaceTrap();
 
         tryAttack();
-
-        sense();
         tryHeal();
     }
 }

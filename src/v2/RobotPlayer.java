@@ -57,6 +57,7 @@ public strictfp class RobotPlayer {
         if (curRound % GameConstants.GLOBAL_UPGRADE_ROUNDS == 0) {
             if (rc.canBuyGlobal(FIRST_UPGRADE)) rc.buyGlobal(FIRST_UPGRADE);
             else if (rc.canBuyGlobal(SECOND_UPGRADE)) rc.buyGlobal(SECOND_UPGRADE);
+            else if (rc.canBuyGlobal(THIRD_UPGRADE)) rc.buyGlobal(THIRD_UPGRADE);
         }
     }
 }
