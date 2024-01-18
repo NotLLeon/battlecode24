@@ -111,10 +111,15 @@ public class MainPhase extends Robot {
 
     public static void onSpawn() throws GameActionException {
         SignalBot.tryBecomeSignalBot();
-        
+        if (Robot.role == Role.SIGNAL) {
+            Micro.setShouldMove(false);
+        } else {
+            Micro.setShouldMove(true);
+        }
     }
 
     public static void run() throws GameActionException {
+        rc.setIndicatorString(Micro.shouldMove ? "GENERAL" : "SIGNAL");
         Micro.run();
         runStrat();
         Micro.run();

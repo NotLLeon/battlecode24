@@ -15,7 +15,7 @@ public class SignalBot{
     public static void tryBecomeSignalBot() throws GameActionException {
         FlagInfo[] flags = rc.senseNearbyFlags(2);
         if (flags.length > 0) {
-            if (rc.senseNearbyRobots(flags[0].getLocation(), 0, rc.getTeam()).length > 0) {
+            if (rc.senseRobotAtLocation(flags[0].getLocation()) != null) {
                 return;
             }
             Robot.role = Role.SIGNAL;

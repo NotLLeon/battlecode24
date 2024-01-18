@@ -22,7 +22,7 @@ public class Micro {
     private static RobotInfo[] closeEnemyRobots;
     private static RobotInfo[] dangerousEnemyRobots;
     private static RobotInfo[] closeAllyRobots;
-    private static boolean shouldMove = true;
+    public static boolean shouldMove = true;
 
     public static void setShouldMove(boolean val) {
         shouldMove = val;
