@@ -22,8 +22,9 @@ public class Constants {
     static int ATTACK_RADIUS_PLUS_ONE_SQUARED = 9;
     static int BASE_ATTACK_DMG = 150;
 
-    static GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ACTION;
+    static GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ATTACK;
     static GlobalUpgrade SECOND_UPGRADE = GlobalUpgrade.HEALING;
+    static GlobalUpgrade THIRD_UPGRADE = GlobalUpgrade.CAPTURING;
 
     // weights for explore
     static int EXPLORE_HIGH_WEIGHT_DIRECTION = 10;
