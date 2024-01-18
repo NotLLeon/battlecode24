@@ -16,5 +16,12 @@ def update_unranked_accepting_teams_json():
                 myDict[teamInfo['name']] = teamInfo['id']
         currURL = json_data['next']
 
+
+    sorted_dict = dict(sorted(myDict.items(), key=lambda item: item[1]))
+
     with open("unranked_accepted_teams_id.json", "w") as json_file:
-        json.dump(myDict, json_file, indent=2)
+        json.dump(sorted_dict, json_file, indent=2)
+
+
+if __name__ == '__main__':
+    update_unranked_accepting_teams_json()

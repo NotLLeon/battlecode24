@@ -6,7 +6,7 @@ import time
 
 from get_queued_results import matchGames
 
-from read_files import *
+from file_operations import *
 from constants import *
 
 
@@ -66,6 +66,7 @@ def main():
 
     # Optional flag arguments
     parser.add_argument('-m', '--maps', nargs='+', type=str, default=DEFAULT_MAPS, help='Maps to play on')
+    parser.add_argument('-a', '--append', action='store_true', help='Append to end of match_links.json, default is overwriting the match_links.json')
 
     # Mandatory args
     oppBotsGroup = parser.add_mutually_exclusive_group(required=True)
@@ -76,6 +77,12 @@ def main():
 
     mapsList = args.maps
     oppBotsList = loadJSON(args.read) if args.read else args.bots
+    gameReplaysDict = loadMatchResults() if args.append else OrderedDict()
+
+
+    for oppBot in oppBotsList:
+        if oppBot not in TEAM_ID_DICT:
+            print(f"Selected bot {oppBot} doesn't accept unranked queue requests. Update ")
 
     gameReqs = generateGameReqsList(oppBotsList, mapsList)
 
@@ -85,8 +92,11 @@ def main():
         concurrent.futures.wait(futures)
         responseList = [future.result() for future in futures]
 
-    print(responseList)
-    matchGames(responseList)
+
+    matchGames(responseList, gameReplaysDict)
+
+    print('All games completed! Saving match results to match_links.json')
+    saveMatchResults(gameReplaysDict)
 
 
 if __name__ == '__main__':

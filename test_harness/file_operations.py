@@ -1,4 +1,6 @@
 import json
+from collections import OrderedDict
+
 
 def getTeamNameToIDDict():
     try:
@@ -31,3 +33,21 @@ def loadJSON(filePath):
         print(f"File not found: {e}")
     except json.JSONDecodeError as e:
         print(f"File not a valid JSON: {e}")
+
+
+def loadMatchResults():
+    with open('match_links.json','r') as file:
+        data = json.load(file, object_pairs_hook=OrderedDict)
+    return data
+
+def saveMatchResults(matchResults: OrderedDict):
+    with open('match_links.json','w') as file:
+        json.dump(matchResults, file, indent=2)
+
+def getCurrentGameVersion():
+    try:
+        with open('../version.txt', 'r') as file:
+            versionNum = file.readline().strip()
+            return versionNum
+    except FileNotFoundError as e:
+        print(f"Error: {e}")

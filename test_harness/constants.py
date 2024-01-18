@@ -1,7 +1,6 @@
 from enum import Enum
-from read_files import getJWTToken
+from file_operations import getJWTToken, getCurrentGameVersion
 
-DEFAULT_BOTS = ['Teh Devs']
 DEFAULT_MAPS = ["DefaultMedium", "DefaultSmall", "DefaultHuge", "DefaultLarge"]
 
 BATTLECODE_URL = "https://api.battlecode.org/api/compete/bc24/request/"
@@ -15,6 +14,8 @@ HEADERS = {"authority": "api.battlecode.org",
            "sec-fetch-mode": "cors",
            "sec-fetch-site": "same-site",
            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+
+REPLAYS_WATCH_BASE_URL = f'https://releases.battlecode.org/client/battlecode24/{getCurrentGameVersion()}/index.html?gameSource='
 
 class PlayerOrder(Enum):
     REQUESTER_FIRST = '+' # This is teamA
