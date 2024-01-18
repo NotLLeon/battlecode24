@@ -42,7 +42,7 @@ public class Micro {
         for (RobotInfo ally : visibleAllyRobots) {
             if (ally.getHealth() > RETREAT_HEALTH_THRESHOLD) numHealthyAllies++;
         }
-        return numHealthyAllies >= 2*visibleEnemyRobots.length;
+        return numHealthyAllies >= 2 * visibleEnemyRobots.length;
     }
 
     /***
@@ -203,9 +203,7 @@ public class Micro {
             }
         }
 
-        MapLocation targetLoc;
-        if (target == null || target.getHealth() > rc.getHealth()) targetLoc = rc.getLocation();
-        else targetLoc = target.getLocation();
+        MapLocation targetLoc = target.getLocation();
 
         if (rc.canHeal(targetLoc)) rc.heal(targetLoc);
     }
@@ -231,7 +229,14 @@ public class Micro {
         sense();
 
         // can prob add more conditions
-        return dangerousEnemyRobots.length > 0;
+
+        // do we think any enemies can move into attack radius (full check uses too much bytecode)
+        MapLocation curLoc = rc.getLocation();
+        for (RobotInfo enemy : dangerousEnemyRobots) {
+            Direction dirToEnemy = curLoc.directionTo(enemy.getLocation());
+            if (rc.senseMapInfo(curLoc.add(dirToEnemy)).isPassable()) return true;
+        }
+        return false;
     }
 
     public static void run() throws GameActionException {
@@ -248,9 +253,5 @@ public class Micro {
 
         tryAttack();
         tryHeal();
-        if (visibleEnemyRobots.length > 0) {
-            // TODO: coordinated move-in on enemy position
-        }
     }
-
 }
