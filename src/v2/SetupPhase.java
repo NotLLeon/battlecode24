@@ -19,7 +19,7 @@ public class SetupPhase extends Robot {
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(-1);
 
         // build traps if possible
-        placeDefensiveTraps();
+        // placeDefensiveTraps();
 
         if (crumbLocs.length > 0 && rc.getRoundNum() < 150) {
             moveTo(crumbLocs[0]);
@@ -33,7 +33,7 @@ public class SetupPhase extends Robot {
                 }
             }
 
-            if (roundsWaiting > 0) {
+            if (roundsWaiting > 0 && rc.getRoundNum() < 150) {
                 roundsWaiting--;
                 setupMeetLocation();
             }
@@ -51,7 +51,7 @@ public class SetupPhase extends Robot {
             // not adjacent yet to dam tile
             if (rc.getLocation().distanceSquaredTo(setupLoc) > 2) {
                 setupMeetLocation();
-                moveTo(setupLoc);
+                moveToAdjacent(setupLoc);
 
                 roundsWaiting++;
                 if (roundsWaiting >= 4) {
