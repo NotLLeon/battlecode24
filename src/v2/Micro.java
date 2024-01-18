@@ -15,7 +15,7 @@ public class Micro {
     // (group units?)
 
     // try not to move diagonally (messes up formation)
-    private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
+    private static final int FLAG_ESCORT_RADIUS_SQUARED = 8;
     private static final int RETREAT_HEALTH_THRESHOLD = 200;
     private static RobotInfo[] visibleAllyRobots;
     private static RobotInfo[] visibleEnemyRobots;
@@ -116,7 +116,7 @@ public class Micro {
         if (curLoc.isWithinDistanceSquared(flagLoc, FLAG_ESCORT_RADIUS_SQUARED)) moveDir = flagLoc.directionTo(curLoc);
         else moveDir = curLoc.directionTo(flagLoc);
 
-        moveInDir(moveDir, 1);
+        moveInDir(moveDir, 0);
     }
 
     private static void tryMoveToFlag() throws GameActionException {
