@@ -16,7 +16,7 @@ public class Constants {
         Direction.WEST,
         Direction.NORTHWEST,
 };
-    static GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ACTION;
+    static GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ATTACK;
     static GlobalUpgrade SECOND_UPGRADE = GlobalUpgrade.HEALING;
 
     // weights for explore
