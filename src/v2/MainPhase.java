@@ -1,7 +1,6 @@
 package v2;
 
 import static v2.Constants.*;
-import static v2.Random.*;
 
 import battlecode.common.*;
 import v2.Constants.Role;
@@ -57,10 +56,10 @@ public class MainPhase extends Robot {
         // TODO: modify so that rushLoc doesnt change prematurely when the array changes
         int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
         MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
+
         MapLocation curLoc = rc.getLocation();
 
         if (curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED)) {
-            // TODO: only explore within some radius
             Explore.exploreNewArea();
         } else moveToAdjacent(rushLoc);
     }
