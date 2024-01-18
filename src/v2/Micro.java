@@ -22,11 +22,6 @@ public class Micro {
     private static RobotInfo[] closeEnemyRobots;
     private static RobotInfo[] dangerousEnemyRobots;
     private static RobotInfo[] closeAllyRobots;
-    public static boolean shouldMove = true;
-
-    public static void setShouldMove(boolean val) {
-        shouldMove = val;
-    }
 
     public static void sense() throws GameActionException {
         // TODO only call rc.senseNearbyRobots once
@@ -187,7 +182,7 @@ public class Micro {
             sense();
         }
 
-        if (!rc.isMovementReady() || !shouldMove) return;
+        if (!rc.isMovementReady()) return;
 
         MapLocation curLoc = rc.getLocation();
         if (target != null && shouldMoveTowards(target)) {
@@ -252,10 +247,8 @@ public class Micro {
         tryAttack();
 
         // TODO: remove from micro?
-        if (shouldMove) {
-            sense();
-            tryMoveToFlag();
-        }
+        sense();
+        tryMoveToFlag();
 
         sense(); // might have moved
         tryPlaceTrap();

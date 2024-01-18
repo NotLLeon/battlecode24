@@ -66,10 +66,7 @@ public class MainPhase extends Robot {
     }
 
     private static void runStrat() throws GameActionException {
-        if (Robot.role == Role.SIGNAL) {
-            SignalBot.run();
-            return;
-        }
+        
 
         if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
@@ -109,17 +106,11 @@ public class MainPhase extends Robot {
 
     }
 
-    public static void onSpawn() throws GameActionException {
-        SignalBot.tryBecomeSignalBot();
-        if (Robot.role == Role.SIGNAL) {
-            Micro.setShouldMove(false);
-        } else {
-            Micro.setShouldMove(true);
-        }
-    }
-
     public static void run() throws GameActionException {
-        rc.setIndicatorString(Micro.shouldMove ? "GENERAL" : "SIGNAL");
+        if (Robot.role == Role.SIGNAL) {
+            SignalBot.run();
+            return;
+        }
         Micro.run();
         runStrat();
         Micro.run();

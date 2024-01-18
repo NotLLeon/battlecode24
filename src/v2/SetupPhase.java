@@ -15,9 +15,6 @@ public class SetupPhase {
     // anything that happens only once at the beginning of the game
     public static void onSpawn() throws GameActionException {
         SignalBot.tryBecomeSignalBot();
-        if (Robot.role == Role.SIGNAL) {
-            Micro.setShouldMove(false);
-        }
     }
 
     public static void run() throws GameActionException {
