@@ -44,7 +44,7 @@ public class Micro {
         for (RobotInfo ally : visibleAllyRobots) {
             if (ally.getHealth() > RETREAT_HEALTH_THRESHOLD) numHealthyAllies++;
         }
-        return numHealthyAllies >= visibleEnemyRobots.length + 2;
+        return numHealthyAllies >= 2 * visibleEnemyRobots.length;
     }
 
     /***
