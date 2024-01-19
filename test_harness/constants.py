@@ -1,7 +1,7 @@
 from enum import Enum
 from file_operations import getJWTToken, getCurrentGameVersion
 
-DEFAULT_MAPS = ["DefaultMedium", "DefaultSmall", "DefaultHuge", "DefaultLarge"]
+DEFAULT_MAPS = [ "DefaultSmall", "DefaultMedium","DefaultLarge", "DefaultHuge"]
 
 BATTLECODE_URL = "https://api.battlecode.org/api/compete/bc24/request/"
 HEADERS = {"authority": "api.battlecode.org",

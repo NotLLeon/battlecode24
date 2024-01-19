@@ -29,7 +29,7 @@ def generateGameReqBody(oppTeamName, mapsList):
 def generateGameReqsList(oppBotsList, mapsList):
     return [generateGameReqBody(oppTeam, mapsList) for oppTeam in oppBotsList]
 
-# TODO: test this
+
 def requestGamesCallback(callBackArgs):
     gameReqTeamA, gameReqTeamB = callBackArgs
 
@@ -45,8 +45,8 @@ def requestGamesCallback(callBackArgs):
                  'fullResponse': game1Response}
     responsesList.append(game1Info)
 
-    # Need to wait 1 second since we're using the creation_time as a key, which is only accurate up to the second
-    time.sleep(1)
+    # # Need to wait 1 second since we're using the creation_time as a key, which is only accurate up to the second
+    # time.sleep(1)
 
     game2Response = requests.post(BATTLECODE_URL, headers=HEADERS, json=gameReqTeamB)
 
@@ -65,8 +65,11 @@ def main():
     parser = argparse.ArgumentParser(description='Runs Battlecode games and prints out the results')
 
     # Optional flag arguments
-    parser.add_argument('-m', '--maps', nargs='+', type=str, default=DEFAULT_MAPS, help='Maps to play on')
     parser.add_argument('-a', '--append', action='store_true', help='Append to end of match_links.json, default is overwriting the match_links.json')
+
+    mapsGroup = parser.add_mutually_exclusive_group(required=False)
+    mapsGroup.add_argument('-m', '--maps', nargs='+', type=str, help='Maps to play on')
+    mapsGroup.add_argument('-mf', '--mapsfile', type=str, help='Path to a file containing list of maps to play on')
 
     # Mandatory args
     oppBotsGroup = parser.add_mutually_exclusive_group(required=True)
@@ -75,7 +78,11 @@ def main():
 
     args = parser.parse_args()
 
-    mapsList = args.maps
+    mapsList = DEFAULT_MAPS
+    if args.mapsfile:
+        mapsList = loadJSON(args.mapsfile)
+    elif args.maps:
+        mapsList = args.maps
     oppBotsList = loadJSON(args.read) if args.read else args.bots
     gameReplaysDict = loadMatchResults() if args.append else OrderedDict()
 
@@ -86,14 +93,14 @@ def main():
 
     gameReqs = generateGameReqsList(oppBotsList, mapsList)
 
+    responsesList = []
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        futures = [executor.submit(requestGamesCallback, gameReq) for gameReq in gameReqs]
-        concurrent.futures.wait(futures)
-        responseList = [future.result() for future in futures]
+    for gameRequest in gameReqs:
+        currResponsesPair = requestGamesCallback(gameRequest)
+        responsesList.append(currResponsesPair)
 
 
-    matchGames(responseList, gameReplaysDict)
+    matchGames(responsesList, gameReplaysDict)
 
     print('All games completed! Saving match results to match_links.json')
     saveMatchResults(gameReplaysDict)
