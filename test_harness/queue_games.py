@@ -29,7 +29,6 @@ def generateGameReqBody(oppTeamName, mapsList):
 def generateGameReqsList(oppBotsList, mapsList):
     return [generateGameReqBody(oppTeam, mapsList) for oppTeam in oppBotsList]
 
-
 def requestGamesCallback(callBackArgs):
     gameReqTeamA, gameReqTeamB = callBackArgs
 
