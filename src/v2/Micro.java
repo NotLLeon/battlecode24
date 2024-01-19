@@ -250,7 +250,7 @@ public class Micro {
         if (!rc.isMovementReady()) return;
 
         MapLocation curLoc = rc.getLocation();
-        MapLocation[] triggeredTraps = TrapTracker.run();
+        MapLocation[] triggeredTraps = TrapTracker.updateAndReturnTriggeredTraps();
 
         if (triggeredTraps.length > 0) {
             moveInDir(curLoc.directionTo(triggeredTraps[0]), 1);

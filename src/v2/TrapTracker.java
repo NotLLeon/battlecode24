@@ -13,19 +13,15 @@ public class TrapTracker {
         return m.distanceSquaredTo(curLoc) <= TRACK_RADIUS_SQUARED;
     }
 
-    private static MapLocation[] updateOutOfRangeTraps() throws GameActionException {
+    public static MapLocation[] updateAndReturnTriggeredTraps() throws GameActionException {
         MapLocation curLoc = rc.getLocation();
 
         nearbyTraps = Utils.filterLocArr(nearbyTraps, (i) -> inTrackRange(i, curLoc));
         MapLocation[] triggeredTraps = Utils.filterLocArr(nearbyTraps, (m) -> rc.senseMapInfo(m).getTrapType() == TrapType.NONE);
         
         MapInfo[] localLocs = rc.senseNearbyMapInfos(TRACK_RADIUS_SQUARED);
-        nearbyTraps = Utils.mapInfoToLocArr(localLocs, (i) -> i.getMapLocation().distanceSquaredTo(curLoc) <= TRACK_RADIUS_SQUARED);
+        nearbyTraps = Utils.mapInfoToLocArr(localLocs, (i) -> (i.getMapLocation().distanceSquaredTo(curLoc) <= TRACK_RADIUS_SQUARED) && i.getTrapType() != TrapType.NONE);
         return triggeredTraps;
-    }
-
-    public static MapLocation[] run() throws GameActionException {
-        return updateOutOfRangeTraps();
     }
 
 }
