@@ -32,18 +32,7 @@ public class Spawner {
     }
 
     private static boolean spawnInDir(MapLocation loc, Direction dir) throws GameActionException {
-        Direction[] tryDirs = {
-                dir,
-                dir.rotateRight(),
-                dir.rotateLeft(),
-                Direction.CENTER,
-                dir.rotateRight().rotateRight(),
-                dir.rotateLeft().rotateLeft(),
-                dir.rotateLeft().opposite(),
-                dir.rotateRight().opposite(),
-                dir.opposite()
-        };
-        for(Direction tryDir : tryDirs) {
+        for(Direction tryDir : Utils.getDirOrdered(dir)) {
             MapLocation spawnPoint = loc.add(tryDir);
             if(rc.canSpawn(spawnPoint)) {
                 rc.spawn(spawnPoint);
