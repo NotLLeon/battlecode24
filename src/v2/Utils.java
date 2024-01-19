@@ -73,4 +73,27 @@ public class Utils {
         if (key2 <= key0 && key0 <= key1) return new MapLocation[]{locs[2], locs[0], locs[1]};
         return new MapLocation[]{locs[2], locs[1], locs[0]};
     }
+
+    public static Direction[] getDirOrdered(Direction dir) {
+        return new Direction[] {
+                dir,
+                dir.rotateRight(),
+                dir.rotateLeft(),
+                Direction.CENTER,
+                dir.rotateRight().rotateRight(),
+                dir.rotateLeft().rotateLeft(),
+                dir.rotateLeft().opposite(),
+                dir.rotateRight().opposite(),
+                dir.opposite()
+        };
+    }
+
+    public static MapLocation getCentroid(MapLocation[] locs) {
+        int x = 0, y = 0;
+        for (MapLocation loc : locs) {
+            x += loc.x;
+            y += loc.y;
+        }
+        return new MapLocation(x / locs.length, y / locs.length);
+    }
 }

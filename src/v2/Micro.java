@@ -17,6 +17,8 @@ public class Micro {
     // try not to move diagonally (messes up formation)
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
     private static final int RETREAT_HEALTH_THRESHOLD = 200;
+    private final static int BASE_ATTACK_DAMAGE = 150;
+
     private static RobotInfo[] visibleAllyRobots;
     private static RobotInfo[] visibleEnemyRobots;
     private static RobotInfo[] closeEnemyRobots;
@@ -35,16 +37,18 @@ public class Micro {
     }
 
     // TODO: decide on more factors (ex. health, number of friendly/enemy units nearby, etc...)
-    private static boolean shouldMoveTowards(RobotInfo target) {
-        if (target.hasFlag()) return true;
-        if (rc.getHealth() <= RETREAT_HEALTH_THRESHOLD) return false;
-        int numHealthyAllies = 0;
-        for (RobotInfo ally : visibleAllyRobots) {
-            if (ally.getHealth() > RETREAT_HEALTH_THRESHOLD) numHealthyAllies++;
-        }
-        return numHealthyAllies >= 2 * visibleEnemyRobots.length;
-    }
+//    private static boolean shouldChase(RobotInfo target) {
+//        if (target.hasFlag()) return true;
+//        if (rc.getHealth() <= RETREAT_HEALTH_THRESHOLD) return false;
+//        if (target.getHealth() <= rc.getAttackDamage()) return true;
+//        int numHealthyAllies = 0;
+//        for (RobotInfo ally : visibleAllyRobots) {
+//            if (ally.getHealth() > RETREAT_HEALTH_THRESHOLD) numHealthyAllies++;
+//        }
+//        return numHealthyAllies >= 1.6 * visibleEnemyRobots.length;
+//    }
 
+    // TODO: take location as parameter instead and only move laterally if its closer
     /***
      * Moves in direction with some leniency
      * @param dir general direction to move in
@@ -155,20 +159,84 @@ public class Micro {
             Direction moveDir = rc.getLocation().directionTo(flagLoc);
             if (moveDir != Direction.CENTER) moveInDir(moveDir, 1);
         }
+        sense();
+    }
+
+    private static int getAttackDamage(RobotInfo robot) {
+        double mult = 1.0;
+        switch (robot.getAttackLevel()) {
+            case 0:
+                break;
+            case 1:
+                mult = 1.05;
+                break;
+            case 2:
+                mult = 1.07;
+                break;
+            case 3:
+                mult = 1.1;
+                break;
+            case 4:
+                mult = 1.3;
+                break;
+            case 5:
+                mult = 1.35;
+                break;
+            case 6:
+                mult = 1.6;
+                break;
+        }
+        return (int) Math.round(mult * BASE_ATTACK_DAMAGE);
     }
 
     private static RobotInfo selectAttackTarget() {
-        RobotInfo target = null;
-        for (RobotInfo enemy : closeEnemyRobots) {
-            if (target == null || enemy.getHealth() < target.getHealth()) {
-                target = enemy;
-            }
 
-            if (enemy.hasFlag()) {
+        // pick target we think we can kill in 1 hit,
+        // if there are multiple, break ties with sum of attack and heal spec
+        // if there are none, pick the enemy that we think we can kill in the fewest turns
+        //  considering position of friendly units and their attack lvl. Break ties with spec again.
+        RobotInfo target = null;
+        boolean canOneShot = false;
+        double minKillTime = 999999;
+        for (RobotInfo enemy : closeEnemyRobots) {
+            if (enemy.hasFlag()) { // is this correct? Another unit can immediately pick up flag
                 target = enemy;
                 break;
             }
+            if (target == null) {
+                target = enemy;
+                continue;
+            }
+
+            if (enemy.getHealLevel() <= rc.getAttackDamage()) {
+                if (canOneShot) {
+                    int enemyLvlSum = enemy.getAttackLevel() + enemy.getHealLevel();
+                    int tarLvlSum = target.getAttackLevel() + target.getHealLevel();
+                    if (enemyLvlSum > tarLvlSum) target = enemy;
+                } else {
+                    target = enemy;
+                    canOneShot = true;
+                }
+            }
+
+            if (canOneShot) continue;
+
+            MapLocation enemyLoc = enemy.getLocation();
+            int damageSum = 0;
+            for (RobotInfo friendly : visibleAllyRobots) {
+                if (enemyLoc.isWithinDistanceSquared(friendly.getLocation(), GameConstants.ATTACK_RADIUS_SQUARED)) {
+                    damageSum += getAttackDamage(friendly);
+                }
+            }
+            double killTime = enemy.getHealth() / (double) damageSum;
+            int enemyLvlSum = enemy.getAttackLevel() + enemy.getHealLevel();
+            int tarLvlSum = target.getAttackLevel() + target.getHealLevel();
+            if (killTime < minKillTime || (killTime == minKillTime && enemyLvlSum > tarLvlSum)) {
+                minKillTime = killTime;
+                target = enemy;
+            }
         }
+
         return target;
     }
 
@@ -182,13 +250,10 @@ public class Micro {
             sense();
         }
 
-        if (!rc.isMovementReady()) return;
-
-        MapLocation curLoc = rc.getLocation();
-        if (target != null && shouldMoveTowards(target)) {
-            Direction dirToTarget = curLoc.directionTo(target.getLocation());
-            moveInDirMinEnemies(dirToTarget);
-        } else moveAwayFromEnemy();
+        if (rc.isMovementReady()) {
+            moveAwayFromEnemy();
+            sense();
+        }
     }
 
     private static void tryHeal() throws GameActionException {
@@ -218,13 +283,60 @@ public class Micro {
                 Random.nextInt(3) == 0) return;
 
         TrapType trapType = TrapType.EXPLOSIVE;
-//        if (visibleAllyRobots.length > 3 || rc.getCrumbs() < TrapType.EXPLOSIVE.buildCost) {
-//            trapType = TrapType.STUN;
-//        } else trapType = TrapType.EXPLOSIVE;
-
         if (rc.canBuild(trapType, rc.getLocation())) rc.build(trapType, rc.getLocation());
 
     }
+
+    private static void tryAdvance() throws GameActionException {
+        if (rc.getRoundNum() % 2 != 0 || closeEnemyRobots.length > 0
+                || visibleEnemyRobots.length ==0 || !rc.isActionReady()) return;
+
+        int numHealthyAllies = 0;
+        int numHealthyCloseAllies = 0;
+
+        for (RobotInfo ally : visibleAllyRobots) {
+            if (ally.getHealth() < RETREAT_HEALTH_THRESHOLD) continue;
+            numHealthyAllies++;
+            if (ally.getLocation().isWithinDistanceSquared(rc.getLocation(), ATTACK_RADIUS_PLUS_ONE_SQUARED)) {
+                numHealthyCloseAllies++;
+            }
+        }
+
+        // we only move forward if we slightly outnumber the enemy at close range
+        // or if we greatly outnumber them at long range
+        // TODO: try tuning these a bit
+        if (numHealthyAllies < 2 * visibleEnemyRobots.length
+                && numHealthyCloseAllies < dangerousEnemyRobots.length + 2) return;
+
+        MapLocation[] enemyLocs = new MapLocation[visibleEnemyRobots.length];
+        for (int i = 0; i < visibleEnemyRobots.length; ++i) {
+            enemyLocs[i] = visibleEnemyRobots[i].getLocation();
+        }
+        MapLocation enemyCentroid = Utils.getCentroid(enemyLocs);
+        Direction dirToCentroid = rc.getLocation().directionTo(enemyCentroid);
+        moveMinEnemies(new Direction[] {dirToCentroid, dirToCentroid.rotateLeft(), dirToCentroid.rotateRight()});
+        sense();
+
+    }
+
+//    public static void tryFollowLeader(MapLocation rushLoc) throws GameActionException {
+//        sense();
+//
+//        if (closeAllyRobots.length >= 3) return;
+//
+//        RobotInfo leader = null;
+//        int minDisSq = 999999;
+//        for (RobotInfo friendly : visibleAllyRobots) {
+//            int disSq = friendly.getLocation().distanceSquaredTo(rushLoc);
+//            if (disSq < minDisSq) {
+//                leader = friendly;
+//            }
+//        }
+//        if (leader == null) return;
+//
+//        moveInDir(rc.getLocation().directionTo(leader.getLocation()), 1);
+//
+//    }
 
     public static boolean inCombat() throws GameActionException {
         sense();
@@ -244,14 +356,13 @@ public class Micro {
         if (rc.hasFlag()) return;
 
         sense();
+        tryAdvance();
         tryAttack();
 
         // TODO: remove from micro?
         tryMoveToFlag();
 
-        sense(); // might have moved
         tryPlaceTrap();
-
         tryAttack();
         tryHeal();
     }

@@ -13,6 +13,8 @@ public class MainPhase extends Robot {
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
     private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
+    private static MapLocation curRushLoc = null;
+    private static boolean visitedRushLoc = false;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -31,9 +33,7 @@ public class MainPhase extends Robot {
         }
     }
 
-    private static void moveToRushLoc() throws GameActionException {
-        if (!rc.isMovementReady()) return;
-
+    private static int getRushInd() throws GameActionException {
         // visit a flag that hasn't been picked up
         // if all flags are picked up, patrol default locs
         // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
@@ -49,14 +49,29 @@ public class MainPhase extends Robot {
         }
 
         // TODO: modify so that rushLoc doesnt change prematurely when the array changes
-        int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
-        MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
+        return rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
+    }
 
+    private static void moveToRushLoc() throws GameActionException {
+        if (!rc.isMovementReady()) return;
+
+        int rushInd = getRushInd();
+        MapLocation rushLoc = FlagRecorder.getFlagLoc(getRushInd());
+        if(!rushLoc.equals(curRushLoc)) {
+            curRushLoc = rushLoc;
+            visitedRushLoc = false;
+        }
         MapLocation curLoc = rc.getLocation();
 
-        if (curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED)) {
+        if (!FlagRecorder.isExactLoc(rushInd) &&
+                (visitedRushLoc || curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED))) {
+            visitedRushLoc = true;
             Explore.exploreNewArea();
-        } else moveToAdjacent(rushLoc);
+        } else {
+            // grouping attempt
+//            Micro.tryFollowLeader(rushLoc);
+            moveToAdjacent(rushLoc);
+        }
     }
 
     private static void runStrat() throws GameActionException {
