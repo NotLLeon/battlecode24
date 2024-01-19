@@ -342,6 +342,7 @@ public class Micro {
 //    }
 
     public static boolean inCombat() throws GameActionException {
+        sense();
         // can prob add more conditions
 
         // do we think any enemies can move into attack radius (full check uses too much bytecode)
@@ -357,6 +358,7 @@ public class Micro {
         if (rc.hasFlag()) return;
 
         sense();
+
         tryAdvance();
         tryAttack();
 
