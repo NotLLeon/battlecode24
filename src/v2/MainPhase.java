@@ -34,32 +34,21 @@ public class MainPhase extends Robot {
     private static void moveToRushLoc() throws GameActionException {
         if (!rc.isMovementReady()) return;
 
-        // visit a flag that hasn't been picked up
-        // if all flags are picked up, patrol default locs
-        // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
-        // and every SHORT_TARGET_ROUND_INTERVAL if we are patrolling
-        int[] rushFlagInds = Utils.filterIntArr(FLAG_INDS, (i) -> !FlagRecorder.isPickedUp(i));
-        int interval = LONG_TARGET_ROUND_INTERVAL;
-
-        // all flags are picked up, just cycle between default locs
-        // TODO: escort flags back instead
-        if (rushFlagInds.length == 0) {
-            rushFlagInds = FLAG_INDS;
-            interval = SHORT_TARGET_ROUND_INTERVAL;
+        MapLocation curLoc = rc.getLocation();
+        MapLocation rushLoc = null;
+        int minDis = 99999999;
+        for (int flagInd : FLAG_INDS) {
+            MapLocation testLoc = FlagRecorder.getFlagLoc(flagInd);
+            int testDis = curLoc.distanceSquaredTo(testLoc);
+            if (!FlagRecorder.isPickedUp(flagInd) && testDis < minDis) {
+                rushLoc = testLoc;
+                minDis = testDis;
+            }
         }
 
-        // TODO: modify so that rushLoc doesnt change prematurely when the array changes
-        int rushInd = 0;
-        MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
-        MapLocation curLoc = rc.getLocation();
-
-        for (int flagInd : rushFlagInds) {
-            MapLocation testLoc = FlagRecorder.getFlagLoc(flagInd);
-            if (curLoc.distanceSquaredTo(testLoc) < curLoc.distanceSquaredTo(rushLoc)) {
-                rushInd = flagInd;
-                rushLoc = testLoc;
-            }
-            // System.out.println(rushLoc);
+        if (rushLoc == null) {
+            int rushInd = FLAG_INDS[(rc.getRoundNum() / SHORT_TARGET_ROUND_INTERVAL) % FLAG_INDS.length];
+            rushLoc = FlagRecorder.getFlagLoc(rushInd);
         }
         
         if (curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED)) {
