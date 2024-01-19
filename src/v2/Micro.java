@@ -250,7 +250,11 @@ public class Micro {
         if (!rc.isMovementReady()) return;
 
         MapLocation curLoc = rc.getLocation();
-        if (target != null && shouldMoveTowards(target)) {
+        MapLocation[] triggeredTraps = TrapTracker.run();
+
+        if (triggeredTraps.length > 0) {
+            moveInDir(curLoc.directionTo(triggeredTraps[0]), 1);
+        } else if (target != null && shouldMoveTowards(target)) {
             Direction dirToTarget = curLoc.directionTo(target.getLocation());
             moveInDirMinEnemies(dirToTarget);
         } else moveAwayFromEnemy();
@@ -282,9 +286,35 @@ public class Micro {
                 closeEnemyRobots.length > 0 ||
                 Random.nextInt(3) == 0) return;
 
-        TrapType trapType = TrapType.EXPLOSIVE;
-        if (rc.canBuild(trapType, rc.getLocation())) rc.build(trapType, rc.getLocation());
+        MapLocation[] visibleEnemyRobotLocations = Utils.robotInfoToMapLocArr(visibleEnemyRobots);
+        MapLocation enemyCentroid = Utils.getCentroid(visibleEnemyRobotLocations);
 
+        if (visibleEnemyRobots.length >= 4) return;
+        trapInDir(rc.getLocation(), rc.getLocation().directionTo(enemyCentroid));
+
+    }
+
+    private static boolean trapInDir(MapLocation loc, Direction dir) throws GameActionException {
+        Direction[] dirsTowards = Utils.getDirOrdered(dir);
+        TrapType trapType = TrapType.STUN;
+
+        // only consider the 3 directions towards the centroid
+        for(int i = 0; i < 3; ++i) {
+            MapLocation trapPoint = loc.add(dirsTowards[i]);
+            if(rc.canBuild(trapType, trapPoint) && !adjacentToTrap(trapPoint)) {
+                rc.build(trapType, trapPoint);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean adjacentToTrap(MapLocation loc) throws GameActionException {
+        MapInfo[] adjacentToLoc = rc.senseNearbyMapInfos(loc, 2);
+        for (MapInfo info : adjacentToLoc) {
+            if (info.getTrapType() != TrapType.NONE) return true;
+        }
+        return false;
     }
 
     public static boolean inCombat() throws GameActionException {
@@ -311,9 +341,10 @@ public class Micro {
         tryMoveToFlag();
 
         sense(); // might have moved
-        tryPlaceTrap();
 
         tryAttack();
         tryHeal();
+
+        tryPlaceTrap();
     }
 }

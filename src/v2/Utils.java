@@ -13,7 +13,7 @@ public class Utils {
         R apply (T t) throws GameActionException;
     }
 
-    private static <T, R> Function<T, R> lambdaExceptionWrapper(CheckedFunction<T, R> fn, R defaultVal) {
+    public static <T, R> Function<T, R> lambdaExceptionWrapper(CheckedFunction<T, R> fn, R defaultVal) {
         return i -> {
             try { return fn.apply(i); }
             catch(GameActionException e) { return defaultVal; }
@@ -45,6 +45,28 @@ public class Utils {
 
         int i = 0;
         for (MapLocation loc : arr) if (sfn.apply(loc)) filtered[i++] = loc;
+        return filtered;
+    }
+
+    public static MapLocation[] mapInfoToLocArr(MapInfo[] arr, CheckedFunction<MapInfo, Boolean> fn) {
+        Function<MapInfo, Boolean> sfn = lambdaExceptionWrapper(fn, false);
+        int numRemaining = 0;
+
+        // idk if this is the best way to do this
+        for (MapInfo loc : arr) if (sfn.apply(loc)) ++numRemaining;
+
+        MapLocation[] filtered = new MapLocation[numRemaining];
+
+        int i = 0;
+        for (MapInfo loc : arr) if (sfn.apply(loc)) filtered[i++] = loc.getMapLocation();
+        return filtered;
+    }
+
+    public static MapLocation[] robotInfoToMapLocArr(RobotInfo[] arr) {
+        MapLocation[] filtered = new MapLocation[arr.length];
+
+        int i = 0;
+        for (RobotInfo loc : arr) filtered[i++] = loc.getLocation();
         return filtered;
     }
 
