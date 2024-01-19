@@ -1,8 +1,8 @@
-package v2;
+package v2s1;
 
 import battlecode.common.*;
 
-import static v2.Constants.*;
+import static v2s1.Constants.*;
 
 public class Micro {
 
@@ -287,16 +287,7 @@ public class Micro {
 //            trapType = TrapType.STUN;
 //        } else trapType = TrapType.EXPLOSIVE;
 
-        MapLocation[] enemyLocs = new MapLocation[visibleEnemyRobots.length];
-        for (int i = 0; i < visibleEnemyRobots.length; i++) {
-            enemyLocs[i] = visibleEnemyRobots[i].getLocation();
-        }
-        MapLocation enemyCentroid = Utils.getCentroid(enemyLocs);
-        MapLocation curLoc = rc.getLocation();
-        for (Direction buildDir : Utils.getDirOrdered(curLoc.directionTo(enemyCentroid))) {
-            MapLocation buildLoc = curLoc.add(buildDir);
-            if (rc.canBuild(trapType, buildLoc)) rc.build(trapType, buildLoc);
-        }
+        if (rc.canBuild(trapType, rc.getLocation())) rc.build(trapType, rc.getLocation());
 
     }
 

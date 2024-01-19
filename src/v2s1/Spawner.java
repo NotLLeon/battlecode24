@@ -1,9 +1,9 @@
-package v2;
+package v2s1;
 import battlecode.common.*;
 
-import static v2.Constants.*;
+import static v2s1.Constants.*;
 
-import v2.fast.*;
+import v2s1.fast.*;
 
 public class Spawner {
 
@@ -32,7 +32,18 @@ public class Spawner {
     }
 
     private static boolean spawnInDir(MapLocation loc, Direction dir) throws GameActionException {
-        for(Direction tryDir : Utils.getDirOrdered(dir)) {
+        Direction[] tryDirs = {
+                dir,
+                dir.rotateRight(),
+                dir.rotateLeft(),
+                Direction.CENTER,
+                dir.rotateRight().rotateRight(),
+                dir.rotateLeft().rotateLeft(),
+                dir.rotateLeft().opposite(),
+                dir.rotateRight().opposite(),
+                dir.opposite()
+        };
+        for(Direction tryDir : tryDirs) {
             MapLocation spawnPoint = loc.add(tryDir);
             if(rc.canSpawn(spawnPoint)) {
                 rc.spawn(spawnPoint);

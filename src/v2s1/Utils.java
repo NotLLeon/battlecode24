@@ -1,10 +1,10 @@
-package v2;
+package v2s1;
 
 import battlecode.common.*;
 
 import java.util.function.Function;
 
-import static v2.Constants.rc;
+import static v2s1.Constants.rc;
 
 public class Utils {
 
@@ -72,28 +72,5 @@ public class Utils {
         if (key1 <= key2 && key2 <= key0) return new MapLocation[]{locs[1], locs[2], locs[0]};
         if (key2 <= key0 && key0 <= key1) return new MapLocation[]{locs[2], locs[0], locs[1]};
         return new MapLocation[]{locs[2], locs[1], locs[0]};
-    }
-
-    public static Direction[] getDirOrdered(Direction dir) {
-        return new Direction[] {
-                dir,
-                dir.rotateRight(),
-                dir.rotateLeft(),
-                Direction.CENTER,
-                dir.rotateRight().rotateRight(),
-                dir.rotateLeft().rotateLeft(),
-                dir.rotateLeft().opposite(),
-                dir.rotateRight().opposite(),
-                dir.opposite()
-        };
-    }
-
-    public static MapLocation getCentroid(MapLocation[] locs) {
-        int x = 0, y = 0;
-        for (MapLocation loc : locs) {
-            x += loc.x;
-            y += loc.y;
-        }
-        return new MapLocation(x / locs.length, y / locs.length);
     }
 }

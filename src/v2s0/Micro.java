@@ -1,8 +1,8 @@
-package v2;
+package v2s0;
 
 import battlecode.common.*;
 
-import static v2.Constants.*;
+import static v2s0.Constants.*;
 
 public class Micro {
 
@@ -17,8 +17,6 @@ public class Micro {
     // try not to move diagonally (messes up formation)
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
     private static final int RETREAT_HEALTH_THRESHOLD = 200;
-    private final static int BASE_ATTACK_DAMAGE = 150;
-
     private static RobotInfo[] visibleAllyRobots;
     private static RobotInfo[] visibleEnemyRobots;
     private static RobotInfo[] closeEnemyRobots;
@@ -159,81 +157,18 @@ public class Micro {
         }
     }
 
-    private static int getAttackDamage(RobotInfo robot) {
-        double mult = 1.0;
-        switch (robot.getAttackLevel()) {
-            case 0:
-                break;
-            case 1:
-                mult = 1.05;
-                break;
-            case 2:
-                mult = 1.07;
-                break;
-            case 3:
-                mult = 1.1;
-                break;
-            case 4:
-                mult = 1.3;
-                break;
-            case 5:
-                mult = 1.35;
-                break;
-            case 6:
-                mult = 1.6;
-                break;
-        }
-        return (int) Math.round(mult * BASE_ATTACK_DAMAGE);
-    }
-
     private static RobotInfo selectAttackTarget() {
-
-        // pick target we think we can kill in 1 hit,
-        // if there are multiple, break ties with sum of attack and heal spec
-        // if there are none, pick the enemy that we think we can kill in the fewest turns
-        //  considering position of friendly units and their attack lvl. Break ties with spec again.
         RobotInfo target = null;
-        boolean canOneShot = false;
-        double minKillTime = 999999;
         for (RobotInfo enemy : closeEnemyRobots) {
-            if (enemy.hasFlag()) { // is this correct? Another unit can immediately pick up flag
+            if (target == null || enemy.getHealth() < target.getHealth()) {
+                target = enemy;
+            }
+
+            if (enemy.hasFlag()) {
                 target = enemy;
                 break;
             }
-            if (target == null) {
-                target = enemy;
-                continue;
-            }
-
-            if (enemy.getHealLevel() <= rc.getAttackDamage()) {
-                if (canOneShot) {
-                    int enemyLvlSum = enemy.getAttackLevel() + enemy.getHealLevel();
-                    int tarLvlSum = target.getAttackLevel() + target.getHealLevel();
-                    if (enemyLvlSum > tarLvlSum) target = enemy;
-                } else {
-                    target = enemy;
-                    canOneShot = true;
-                }
-            }
-
-            if (canOneShot) continue;
-
-            MapLocation enemyLoc = enemy.getLocation();
-            int damageSum = 0;
-            for (RobotInfo friendly : visibleAllyRobots) {
-                if (enemyLoc.isWithinDistanceSquared(friendly.getLocation(), GameConstants.ATTACK_RADIUS_SQUARED)) {
-                    damageSum += getAttackDamage(friendly);
-                }
-            }
-            double killTime = enemy.getHealth() / (double) damageSum;
-            int enemyLvlSum = enemy.getAttackLevel() + enemy.getHealLevel();
-            int tarLvlSum = target.getAttackLevel() + target.getHealLevel();
-            if (killTime < minKillTime || (killTime == minKillTime && enemyLvlSum > tarLvlSum)) {
-                minKillTime = killTime;
-                target = enemy;
-            }
         }
-
         return target;
     }
 
@@ -287,16 +222,7 @@ public class Micro {
 //            trapType = TrapType.STUN;
 //        } else trapType = TrapType.EXPLOSIVE;
 
-        MapLocation[] enemyLocs = new MapLocation[visibleEnemyRobots.length];
-        for (int i = 0; i < visibleEnemyRobots.length; i++) {
-            enemyLocs[i] = visibleEnemyRobots[i].getLocation();
-        }
-        MapLocation enemyCentroid = Utils.getCentroid(enemyLocs);
-        MapLocation curLoc = rc.getLocation();
-        for (Direction buildDir : Utils.getDirOrdered(curLoc.directionTo(enemyCentroid))) {
-            MapLocation buildLoc = curLoc.add(buildDir);
-            if (rc.canBuild(trapType, buildLoc)) rc.build(trapType, buildLoc);
-        }
+        if (rc.canBuild(trapType, rc.getLocation())) rc.build(trapType, rc.getLocation());
 
     }
 
