@@ -283,20 +283,7 @@ public class Micro {
                 Random.nextInt(3) == 0) return;
 
         TrapType trapType = TrapType.EXPLOSIVE;
-//        if (visibleAllyRobots.length > 3 || rc.getCrumbs() < TrapType.EXPLOSIVE.buildCost) {
-//            trapType = TrapType.STUN;
-//        } else trapType = TrapType.EXPLOSIVE;
-
-        MapLocation[] enemyLocs = new MapLocation[visibleEnemyRobots.length];
-        for (int i = 0; i < visibleEnemyRobots.length; i++) {
-            enemyLocs[i] = visibleEnemyRobots[i].getLocation();
-        }
-        MapLocation enemyCentroid = Utils.getCentroid(enemyLocs);
-        MapLocation curLoc = rc.getLocation();
-        for (Direction buildDir : Utils.getDirOrdered(curLoc.directionTo(enemyCentroid))) {
-            MapLocation buildLoc = curLoc.add(buildDir);
-            if (rc.canBuild(trapType, buildLoc)) rc.build(trapType, buildLoc);
-        }
+        if (rc.canBuild(trapType, rc.getLocation())) rc.build(trapType, rc.getLocation());
 
     }
 
