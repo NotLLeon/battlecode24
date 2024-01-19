@@ -13,6 +13,8 @@ public class MainPhase extends Robot {
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
     private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
+    private static MapLocation curRushLoc = null;
+    private static boolean visitedRushLoc = false;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -51,10 +53,16 @@ public class MainPhase extends Robot {
         // TODO: modify so that rushLoc doesnt change prematurely when the array changes
         int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
         MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
+        if(!rushLoc.equals(curRushLoc)) {
+            curRushLoc = rushLoc;
+            visitedRushLoc = false;
+        }
 
         MapLocation curLoc = rc.getLocation();
 
-        if (curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED)) {
+        if (!FlagRecorder.isExactLoc(rushInd) &&
+                (visitedRushLoc || curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED))) {
+            visitedRushLoc = true;
             Explore.exploreNewArea();
         } else moveToAdjacent(rushLoc);
     }
