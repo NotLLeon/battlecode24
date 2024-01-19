@@ -37,16 +37,16 @@ public class Micro {
     }
 
     // TODO: decide on more factors (ex. health, number of friendly/enemy units nearby, etc...)
-    private static boolean shouldChase(RobotInfo target) {
-        if (target.hasFlag()) return true;
-        if (rc.getHealth() <= RETREAT_HEALTH_THRESHOLD) return false;
-        if (target.getHealth() <= rc.getAttackDamage()) return true;
-        int numHealthyAllies = 0;
-        for (RobotInfo ally : visibleAllyRobots) {
-            if (ally.getHealth() > RETREAT_HEALTH_THRESHOLD) numHealthyAllies++;
-        }
-        return numHealthyAllies >= 1.6 * visibleEnemyRobots.length;
-    }
+//    private static boolean shouldChase(RobotInfo target) {
+//        if (target.hasFlag()) return true;
+//        if (rc.getHealth() <= RETREAT_HEALTH_THRESHOLD) return false;
+//        if (target.getHealth() <= rc.getAttackDamage()) return true;
+//        int numHealthyAllies = 0;
+//        for (RobotInfo ally : visibleAllyRobots) {
+//            if (ally.getHealth() > RETREAT_HEALTH_THRESHOLD) numHealthyAllies++;
+//        }
+//        return numHealthyAllies >= 1.6 * visibleEnemyRobots.length;
+//    }
 
     // TODO: take location as parameter instead and only move laterally if its closer
     /***
@@ -319,24 +319,24 @@ public class Micro {
 
     }
 
-    public static void tryFollowLeader(MapLocation rushLoc) throws GameActionException {
-        sense();
-
-        if (closeAllyRobots.length >= 3) return;
-
-        RobotInfo leader = null;
-        int minDisSq = 999999;
-        for (RobotInfo friendly : visibleAllyRobots) {
-            int disSq = friendly.getLocation().distanceSquaredTo(rushLoc);
-            if (disSq < minDisSq) {
-                leader = friendly;
-            }
-        }
-        if (leader == null) return;
-
-        moveInDir(rc.getLocation().directionTo(leader.getLocation()), 1);
-
-    }
+//    public static void tryFollowLeader(MapLocation rushLoc) throws GameActionException {
+//        sense();
+//
+//        if (closeAllyRobots.length >= 3) return;
+//
+//        RobotInfo leader = null;
+//        int minDisSq = 999999;
+//        for (RobotInfo friendly : visibleAllyRobots) {
+//            int disSq = friendly.getLocation().distanceSquaredTo(rushLoc);
+//            if (disSq < minDisSq) {
+//                leader = friendly;
+//            }
+//        }
+//        if (leader == null) return;
+//
+//        moveInDir(rc.getLocation().directionTo(leader.getLocation()), 1);
+//
+//    }
 
     public static boolean inCombat() throws GameActionException {
         sense();

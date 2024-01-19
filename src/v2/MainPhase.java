@@ -68,6 +68,7 @@ public class MainPhase extends Robot {
             visitedRushLoc = true;
             Explore.exploreNewArea();
         } else {
+            // grouping attempt
 //            Micro.tryFollowLeader(rushLoc);
             moveToAdjacent(rushLoc);
         }
