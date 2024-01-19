@@ -7,21 +7,21 @@ public class TrapTracker {
 
     private static int TRACK_RADIUS_SQUARED = 10;
 
-    private static MapLocation[] nearbyTraps = new MapLocation[0];
+    private static MapInfo[] nearbyTraps = new MapInfo[0];
 
-    private static boolean inTrackRange(MapLocation m, MapLocation curLoc) throws GameActionException {
-        return m.distanceSquaredTo(curLoc) <= TRACK_RADIUS_SQUARED;
+    private static boolean inTrackRange(MapLocation m) throws GameActionException {
+        return rc.getLocation().isWithinDistanceSquared(m, TRACK_RADIUS_SQUARED);
     }
 
-    public static MapLocation[] updateAndReturnTriggeredTraps() throws GameActionException {
-        MapLocation curLoc = rc.getLocation();
-
-        nearbyTraps = Utils.filterLocArr(nearbyTraps, (i) -> inTrackRange(i, curLoc));
-        MapLocation[] triggeredTraps = Utils.filterLocArr(nearbyTraps, (m) -> rc.senseMapInfo(m).getTrapType() == TrapType.NONE);
-        
+    public static void updateTraps() throws GameActionException {
         MapInfo[] localLocs = rc.senseNearbyMapInfos(TRACK_RADIUS_SQUARED);
-        nearbyTraps = Utils.mapInfoToLocArr(localLocs, (i) -> (i.getMapLocation().distanceSquaredTo(curLoc) <= TRACK_RADIUS_SQUARED) && i.getTrapType() != TrapType.NONE);
-        return triggeredTraps;
+        nearbyTraps = Utils.filterMapInfoArr(localLocs, (i) -> i.getTrapType() != TrapType.NONE);
+    }
+
+    public static MapLocation[] getTriggeredTraps() throws GameActionException {
+        MapInfo[] triggeredTraps = Utils.filterMapInfoArr(nearbyTraps,
+                (i) -> inTrackRange(i.getMapLocation()) && i.getTrapType() == TrapType.NONE);
+        return Utils.mapInfoToLocArr(triggeredTraps);
     }
 
 }

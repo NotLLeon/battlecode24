@@ -315,7 +315,14 @@ public class Micro {
 
     private static void tryAdvance() throws GameActionException {
         if (rc.getRoundNum() % 2 != 0 || closeEnemyRobots.length > 0
-                || visibleEnemyRobots.length ==0 || !rc.isActionReady()) return;
+                || visibleEnemyRobots.length == 0 || !rc.isActionReady()) return;
+
+        MapLocation[] triggeredTraps = TrapTracker.getTriggeredTraps();
+        if (triggeredTraps.length > 0) {
+            moveInDir(rc.getLocation().directionTo(triggeredTraps[0]), 1);
+            sense();
+            return;
+        }
 
         int numHealthyAllies = 0;
         int numHealthyCloseAllies = 0;
@@ -326,13 +333,6 @@ public class Micro {
             if (ally.getLocation().isWithinDistanceSquared(rc.getLocation(), ATTACK_RADIUS_PLUS_ONE_SQUARED)) {
                 numHealthyCloseAllies++;
             }
-        }
-
-        MapLocation curLoc = rc.getLocation();
-        MapLocation[] triggeredTraps = TrapTracker.updateAndReturnTriggeredTraps();
-
-        if (triggeredTraps.length > 0) {
-            moveInDir(curLoc.directionTo(triggeredTraps[0]), 1);
         }
 
         // we only move forward if we slightly outnumber the enemy at close range
@@ -349,7 +349,6 @@ public class Micro {
         Direction dirToCentroid = rc.getLocation().directionTo(enemyCentroid);
         moveMinEnemies(new Direction[] {dirToCentroid, dirToCentroid.rotateLeft(), dirToCentroid.rotateRight()});
         sense();
-
     }
 
 //    public static void tryFollowLeader(MapLocation rushLoc) throws GameActionException {
@@ -387,6 +386,7 @@ public class Micro {
 
     public static void run() throws GameActionException {
         if (rc.hasFlag()) return;
+        TrapTracker.updateTraps();
 
         sense();
         tryAdvance();

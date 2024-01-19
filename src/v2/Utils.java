@@ -13,7 +13,7 @@ public class Utils {
         R apply (T t) throws GameActionException;
     }
 
-    public static <T, R> Function<T, R> lambdaExceptionWrapper(CheckedFunction<T, R> fn, R defaultVal) {
+    private static <T, R> Function<T, R> lambdaExceptionWrapper(CheckedFunction<T, R> fn, R defaultVal) {
         return i -> {
             try { return fn.apply(i); }
             catch(GameActionException e) { return defaultVal; }
@@ -48,26 +48,32 @@ public class Utils {
         return filtered;
     }
 
-    public static MapLocation[] mapInfoToLocArr(MapInfo[] arr, CheckedFunction<MapInfo, Boolean> fn) {
+    public static MapInfo[] filterMapInfoArr(MapInfo[] arr, CheckedFunction<MapInfo, Boolean> fn) {
         Function<MapInfo, Boolean> sfn = lambdaExceptionWrapper(fn, false);
         int numRemaining = 0;
 
         // idk if this is the best way to do this
-        for (MapInfo loc : arr) if (sfn.apply(loc)) ++numRemaining;
+        for (MapInfo info : arr) if (sfn.apply(info)) ++numRemaining;
 
-        MapLocation[] filtered = new MapLocation[numRemaining];
+        MapInfo[] filtered = new MapInfo[numRemaining];
 
         int i = 0;
-        for (MapInfo loc : arr) if (sfn.apply(loc)) filtered[i++] = loc.getMapLocation();
+        for (MapInfo info : arr) if (sfn.apply(info)) filtered[i++] = info;
         return filtered;
     }
 
-    public static MapLocation[] robotInfoToMapLocArr(RobotInfo[] arr) {
-        MapLocation[] filtered = new MapLocation[arr.length];
+    public static MapLocation[] mapInfoToLocArr(MapInfo[] arr) {
+        MapLocation[] mapLocs = new MapLocation[arr.length];
+        for (int i = 0; i < arr.length; ++i) mapLocs[i] = arr[i].getMapLocation();
 
-        int i = 0;
-        for (RobotInfo loc : arr) filtered[i++] = loc.getLocation();
-        return filtered;
+        return mapLocs;
+    }
+
+    public static MapLocation[] robotInfoToMapLocArr(RobotInfo[] arr) {
+        MapLocation[] mapLocs = new MapLocation[arr.length];
+        for (int i = 0; i < arr.length; ++i) mapLocs[i] = arr[i].getLocation();
+
+        return mapLocs;
     }
 
     public static MapLocation findClosestLoc(MapLocation[] locs) {
