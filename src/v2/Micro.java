@@ -37,16 +37,18 @@ public class Micro {
     }
 
     // TODO: decide on more factors (ex. health, number of friendly/enemy units nearby, etc...)
-    private static boolean shouldMoveTowards(RobotInfo target) {
+    private static boolean shouldChase(RobotInfo target) {
         if (target.hasFlag()) return true;
         if (rc.getHealth() <= RETREAT_HEALTH_THRESHOLD) return false;
+        if (target.getHealth() <= rc.getAttackDamage()) return true;
         int numHealthyAllies = 0;
         for (RobotInfo ally : visibleAllyRobots) {
             if (ally.getHealth() > RETREAT_HEALTH_THRESHOLD) numHealthyAllies++;
         }
-        return numHealthyAllies >= 2 * visibleEnemyRobots.length;
+        return numHealthyAllies >= 1.6 * visibleEnemyRobots.length;
     }
 
+    // TODO: take location as parameter instead and only move laterally if its closer
     /***
      * Moves in direction with some leniency
      * @param dir general direction to move in
@@ -157,6 +159,7 @@ public class Micro {
             Direction moveDir = rc.getLocation().directionTo(flagLoc);
             if (moveDir != Direction.CENTER) moveInDir(moveDir, 1);
         }
+        sense();
     }
 
     private static int getAttackDamage(RobotInfo robot) {
@@ -247,13 +250,10 @@ public class Micro {
             sense();
         }
 
-        if (!rc.isMovementReady()) return;
-
-        MapLocation curLoc = rc.getLocation();
-        if (target != null && shouldMoveTowards(target)) {
-            Direction dirToTarget = curLoc.directionTo(target.getLocation());
-            moveInDirMinEnemies(dirToTarget);
-        } else moveAwayFromEnemy();
+        if (rc.isMovementReady()) {
+            moveAwayFromEnemy();
+            sense();
+        }
     }
 
     private static void tryHeal() throws GameActionException {
@@ -287,6 +287,57 @@ public class Micro {
 
     }
 
+    private static void tryAdvance() throws GameActionException {
+        if (rc.getRoundNum() % 2 != 0 || closeEnemyRobots.length > 0
+                || visibleEnemyRobots.length ==0 || !rc.isActionReady()) return;
+
+        int numHealthyAllies = 0;
+        int numHealthyCloseAllies = 0;
+
+        for (RobotInfo ally : visibleAllyRobots) {
+            if (ally.getHealth() < RETREAT_HEALTH_THRESHOLD) continue;
+            numHealthyAllies++;
+            if (ally.getLocation().isWithinDistanceSquared(rc.getLocation(), ATTACK_RADIUS_PLUS_ONE_SQUARED)) {
+                numHealthyCloseAllies++;
+            }
+        }
+
+        // we only move forward if we slightly outnumber the enemy at close range
+        // or if we greatly outnumber them at long range
+        // TODO: try tuning these a bit
+        if (numHealthyAllies < 2 * visibleEnemyRobots.length
+                && numHealthyCloseAllies < dangerousEnemyRobots.length + 2) return;
+
+        MapLocation[] enemyLocs = new MapLocation[visibleEnemyRobots.length];
+        for (int i = 0; i < visibleEnemyRobots.length; ++i) {
+            enemyLocs[i] = visibleEnemyRobots[i].getLocation();
+        }
+        MapLocation enemyCentroid = Utils.getCentroid(enemyLocs);
+        Direction dirToCentroid = rc.getLocation().directionTo(enemyCentroid);
+        moveMinEnemies(new Direction[] {dirToCentroid, dirToCentroid.rotateLeft(), dirToCentroid.rotateRight()});
+        sense();
+
+    }
+
+    public static void tryFollowLeader(MapLocation rushLoc) throws GameActionException {
+        sense();
+
+        if (closeAllyRobots.length >= 3) return;
+
+        RobotInfo leader = null;
+        int minDisSq = 999999;
+        for (RobotInfo friendly : visibleAllyRobots) {
+            int disSq = friendly.getLocation().distanceSquaredTo(rushLoc);
+            if (disSq < minDisSq) {
+                leader = friendly;
+            }
+        }
+        if (leader == null) return;
+
+        moveInDir(rc.getLocation().directionTo(leader.getLocation()), 1);
+
+    }
+
     public static boolean inCombat() throws GameActionException {
         sense();
 
@@ -305,14 +356,13 @@ public class Micro {
         if (rc.hasFlag()) return;
 
         sense();
+        tryAdvance();
         tryAttack();
 
         // TODO: remove from micro?
         tryMoveToFlag();
 
-        sense(); // might have moved
         tryPlaceTrap();
-
         tryAttack();
         tryHeal();
     }

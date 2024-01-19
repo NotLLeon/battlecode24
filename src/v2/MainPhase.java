@@ -33,9 +33,7 @@ public class MainPhase extends Robot {
         }
     }
 
-    private static void moveToRushLoc() throws GameActionException {
-        if (!rc.isMovementReady()) return;
-
+    private static int getRushInd() throws GameActionException {
         // visit a flag that hasn't been picked up
         // if all flags are picked up, patrol default locs
         // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
@@ -51,20 +49,28 @@ public class MainPhase extends Robot {
         }
 
         // TODO: modify so that rushLoc doesnt change prematurely when the array changes
-        int rushInd = rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
-        MapLocation rushLoc = FlagRecorder.getFlagLoc(rushInd);
+        return rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
+    }
+
+    private static void moveToRushLoc() throws GameActionException {
+        if (!rc.isMovementReady()) return;
+
+        int rushInd = getRushInd();
+        MapLocation rushLoc = FlagRecorder.getFlagLoc(getRushInd());
         if(!rushLoc.equals(curRushLoc)) {
             curRushLoc = rushLoc;
             visitedRushLoc = false;
         }
-
         MapLocation curLoc = rc.getLocation();
 
         if (!FlagRecorder.isExactLoc(rushInd) &&
                 (visitedRushLoc || curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED))) {
             visitedRushLoc = true;
             Explore.exploreNewArea();
-        } else moveToAdjacent(rushLoc);
+        } else {
+//            Micro.tryFollowLeader(rushLoc);
+            moveToAdjacent(rushLoc);
+        }
     }
 
     private static void runStrat() throws GameActionException {
