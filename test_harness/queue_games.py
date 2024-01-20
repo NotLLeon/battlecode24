@@ -4,7 +4,7 @@ import requests
 from concurrent.futures import ThreadPoolExecutor
 import time
 
-from get_queued_results import matchGames
+from get_queued_results import matchGamesFirstTimeTemp,outputMatchGames
 
 from file_operations import *
 from constants import *
@@ -29,6 +29,10 @@ def generateGameReqBody(oppTeamName, mapsList):
 def generateGameReqsList(oppBotsList, mapsList):
     return [generateGameReqBody(oppTeam, mapsList) for oppTeam in oppBotsList]
 
+def isValidRequest(response):
+    # Check to make sure it's a 200s status code
+    return 200 <= response.status_code < 300
+
 def requestGamesCallback(callBackArgs):
     gameReqTeamA, gameReqTeamB = callBackArgs
 
@@ -36,10 +40,16 @@ def requestGamesCallback(callBackArgs):
 
     game1Response = requests.post(BATTLECODE_URL, headers=HEADERS, json=gameReqTeamA)
     response1Body = json.loads(game1Response.text)
+
+    if not isValidRequest(game1Response):
+        print(game1Response.text)
+        return
+
     game1Info = {'oppTeamName': ID_TEAM_DICT[gameReqTeamA['requested_to']],
                  'creationDateTime': response1Body['created'],
                  'side': PlayerOrder.REQUESTER_FIRST,
                  'responseBody': response1Body,
+                 'id': response1Body['id'],
                  'statusCode': game1Response.status_code,
                  'fullResponse': game1Response}
     responsesList.append(game1Info)
@@ -50,10 +60,15 @@ def requestGamesCallback(callBackArgs):
     game2Response = requests.post(BATTLECODE_URL, headers=HEADERS, json=gameReqTeamB)
 
     response2Body = json.loads(game2Response.text)
+
+    if not isValidRequest(game2Response):
+        print(game2Response.text)
+        return
     game2Info = {'oppTeamName': ID_TEAM_DICT[gameReqTeamA['requested_to']],
                  'creationDateTime': response2Body['created'],
                  'side': PlayerOrder.REQUESTER_LAST,
                  'responseBody': response2Body,
+                 'id': response2Body['id'],
                  'statusCode': game2Response.status_code,
                  'fullResponse': game2Response}
     responsesList.append(game2Info)
@@ -98,13 +113,14 @@ def main():
     for gameRequest in gameReqs:
         currResponsesPair = requestGamesCallback(gameRequest)
         responsesList.append(currResponsesPair)
-    print('Finished queueing all games, getting results now')
+    print('Finished queueing all games, getting results now!\n')
 
+    # Looping through to match the games
+    # matchGamesFirstTimeTemp(responsesList, gameReplaysDict)
+    outputMatchGames(responsesList, gameReplaysDict)
 
-    matchGames(responsesList, gameReplaysDict)
-
-    print('All games completed! Saving match results to match_links.json')
-    saveMatchResults(gameReplaysDict)
+    # print('All games completed! Saving match results to match_links.json')
+    # saveMatchResults(gameReplaysDict)
 
 
 if __name__ == '__main__':

@@ -25,3 +25,9 @@ class PlayerOrder(Enum):
 class PlayerIndex(Enum):
     REQUESTER_FIRST = 0 # This is teamA
     REQUESTER_LAST = 1  # This is teamB
+
+# 5 seconds between refreshing and getting the results of a game
+MATCH_RESULTS_REFRESH_DELAY = 5
+
+# Difference between the response "Creation time" versus the actual Creation time is usually less than a second. Will make it 3 to be safe.
+ACCEPTED_SECONDS_DELTA = 3
