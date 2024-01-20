@@ -48,6 +48,34 @@ public class Utils {
         return filtered;
     }
 
+    public static MapInfo[] filterMapInfoArr(MapInfo[] arr, CheckedFunction<MapInfo, Boolean> fn) {
+        Function<MapInfo, Boolean> sfn = lambdaExceptionWrapper(fn, false);
+        int numRemaining = 0;
+
+        // idk if this is the best way to do this
+        for (MapInfo info : arr) if (sfn.apply(info)) ++numRemaining;
+
+        MapInfo[] filtered = new MapInfo[numRemaining];
+
+        int i = 0;
+        for (MapInfo info : arr) if (sfn.apply(info)) filtered[i++] = info;
+        return filtered;
+    }
+
+    public static MapLocation[] mapInfoToLocArr(MapInfo[] arr) {
+        MapLocation[] mapLocs = new MapLocation[arr.length];
+        for (int i = 0; i < arr.length; ++i) mapLocs[i] = arr[i].getMapLocation();
+
+        return mapLocs;
+    }
+
+    public static MapLocation[] robotInfoToLocArr(RobotInfo[] arr) {
+        MapLocation[] mapLocs = new MapLocation[arr.length];
+        for (int i = 0; i < arr.length; ++i) mapLocs[i] = arr[i].getLocation();
+
+        return mapLocs;
+    }
+
     public static MapLocation findClosestLoc(MapLocation[] locs) {
         MapLocation curLoc = rc.getLocation();
         int minDist = 10000;
