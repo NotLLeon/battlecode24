@@ -8,6 +8,7 @@ import static v2.Constants.*;
 public class Micro {
 
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
+    private static final int RETREAT_HEALTH_THRESHOLD = 250;
     private static RobotInfo[] visibleFriendlyRobots;
     private static RobotInfo[] visibleEnemyRobots;
     private static RobotInfo[] immediateEnemyRobots;
@@ -355,8 +356,8 @@ public class Micro {
             return;
         }
 
-        if (rc.getRoundNum() % 2 != 0 || closeEnemyRobots.length > 0
-                || visibleEnemyRobots.length == 0 || !rc.isActionReady()) return;
+        if (immediateEnemyRobots.length > 0 || visibleEnemyRobots.length == 0 || !rc.isActionReady()) return;
+        if (closeEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return;
 
         int sumVisibleFriendlyHealth = 0;
         int sumVisibleEnemyHealth = 0;
@@ -371,13 +372,31 @@ public class Micro {
         boolean longRangeCond = visibleFriendlyRobots.length >= 2 * visibleEnemyRobots.length;
         boolean closeRangeCond = closeFriendlyRobots.length >= closeEnemyRobots.length + 2;
 
-        if (!longRangeCond && !closeRangeCond /*&& !healthCond */) return;
+        if (!longRangeCond && !closeRangeCond && !healthCond) return;
 
-
-        RobotInfo[] enemyInfos = closeEnemyRobots.length > 0 ? closeEnemyRobots : visibleEnemyRobots;
-        MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(enemyInfos));
-        Direction dirToCentroid = rc.getLocation().directionTo(enemyCentroid);
-        moveMinEnemies(new Direction[] {dirToCentroid, dirToCentroid.rotateLeft(), dirToCentroid.rotateRight()});
+        MapLocation curLoc = rc.getLocation();
+        Direction[] moveDirs;
+        if (closeEnemyRobots.length > 0) {
+            // if we are moving into attack range, pick the direction that allows us to attack at least 1 enemy
+            //  and minimizes the number of enemies that can attack us
+            moveDirs = Utils.filterDirArr(
+                DIRECTIONS,
+                (d) -> {
+                    MapLocation newLoc = curLoc.add(d);
+                    for (RobotInfo enemy : closeEnemyRobots) {
+                        if (newLoc.isWithinDistanceSquared(enemy.getLocation(), GameConstants.ATTACK_RADIUS_SQUARED)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            );
+        } else {
+            MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(visibleEnemyRobots));
+            Direction dirToCentroid = curLoc.directionTo(enemyCentroid);
+            moveDirs = new Direction[] {dirToCentroid, dirToCentroid.rotateLeft(), dirToCentroid.rotateRight()};
+        }
+        moveMinEnemies(moveDirs);
     }
 
     private static void updateStunnedEnemies(MapLocation[] triggeredTraps) throws GameActionException {
@@ -432,7 +451,7 @@ public class Micro {
         sense();
         // can prob add more conditions
 
-        // do we think any enemies can move into attack radius (full check uses too much bytecode)
+        // do we think any enemies can move into attack radius (full check too expensive)
         MapLocation curLoc = rc.getLocation();
         for (RobotInfo enemy : closeEnemyRobots) {
             Direction dirToEnemy = curLoc.directionTo(enemy.getLocation());

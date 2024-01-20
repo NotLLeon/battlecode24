@@ -20,15 +20,12 @@ public class Utils {
         };
     }
 
+    // there has to be a better way to do this... arrays dont play nice with generics
     public static int[] filterIntArr(int[] arr, CheckedFunction<Integer, Boolean> fn) {
         Function<Integer, Boolean> sfn = lambdaExceptionWrapper(fn, false);
         int numRemaining = 0;
-
-        // idk if this is the best way to do this
         for (int ind : arr) if (sfn.apply(ind)) ++numRemaining;
-
         int[] filtered = new int[numRemaining];
-
         int i = 0;
         for (int ind : arr) if (sfn.apply(ind)) filtered[i++] = ind;
         return filtered;
@@ -37,26 +34,28 @@ public class Utils {
     public static MapLocation[] filterLocArr(MapLocation[] arr, CheckedFunction<MapLocation, Boolean> fn) {
         Function<MapLocation, Boolean> sfn = lambdaExceptionWrapper(fn, false);
         int numRemaining = 0;
-
-        // idk if this is the best way to do this
         for (MapLocation loc : arr) if (sfn.apply(loc)) ++numRemaining;
-
         MapLocation[] filtered = new MapLocation[numRemaining];
-
         int i = 0;
         for (MapLocation loc : arr) if (sfn.apply(loc)) filtered[i++] = loc;
+        return filtered;
+    }
+
+    public static Direction[] filterDirArr(Direction[] arr, CheckedFunction<Direction, Boolean> fn) {
+        Function<Direction, Boolean> sfn = lambdaExceptionWrapper(fn, false);
+        int numRemaining = 0;
+        for (Direction dir : arr) if (sfn.apply(dir)) ++numRemaining;
+        Direction[] filtered = new Direction[numRemaining];
+        int i = 0;
+        for (Direction dir : arr) if (sfn.apply(dir)) filtered[i++] = dir;
         return filtered;
     }
 
     public static MapInfo[] filterMapInfoArr(MapInfo[] arr, CheckedFunction<MapInfo, Boolean> fn) {
         Function<MapInfo, Boolean> sfn = lambdaExceptionWrapper(fn, false);
         int numRemaining = 0;
-
-        // idk if this is the best way to do this
         for (MapInfo info : arr) if (sfn.apply(info)) ++numRemaining;
-
         MapInfo[] filtered = new MapInfo[numRemaining];
-
         int i = 0;
         for (MapInfo info : arr) if (sfn.apply(info)) filtered[i++] = info;
         return filtered;
