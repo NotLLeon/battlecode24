@@ -15,8 +15,7 @@ public class Micro {
     private static RobotInfo[] immediateFriendlyRobots;
     private static RobotInfo[] closeEnemyRobots;
     private static RobotInfo[] closeFriendlyRobots;
-
-    private static FastIntIntMap stunnedEnemies;
+    private static final FastIntIntMap stunnedEnemies = new FastIntIntMap();
 
     private static void attack(MapLocation loc) throws GameActionException {
         Action.attack(loc);
@@ -410,23 +409,6 @@ public class Micro {
         }
     }
 
-//    public static void tryFollowLeader(MapLocation rushLoc) throws GameActionException {
-//
-//        if (closeAllyRobots.length >= 3) return;
-//
-//        RobotInfo leader = null;
-//        int minDisSq = 999999;
-//        for (RobotInfo friendly : visibleAllyRobots) {
-//            int disSq = friendly.getLocation().distanceSquaredTo(rushLoc);
-//            if (disSq < minDisSq) {
-//                leader = friendly;
-//            }
-//        }
-//        if (leader == null) return;
-//
-//        moveInDir(rc.getLocation().directionTo(leader.getLocation()), 1);
-//
-//    }
     public static void tryFollowLeader(MapLocation rushLoc) throws GameActionException {
         senseFriendlies();
 
@@ -460,27 +442,21 @@ public class Micro {
     }
 
     public static void run() throws GameActionException {
-        if (rc.getRoundNum() == 201) stunnedEnemies = new FastIntIntMap();
         if (rc.hasFlag()) return;
 
         TrapTracker.updateTraps();
-        // if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
         sense();
 
         tryAdvance();
-        // if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
 
         tryAttack();
-        // if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
 
         // TODO: remove from micro?
         tryMoveToFlag();
 
         tryPlaceTrap();
-        // if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
 
         tryAttack();
-        // if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
 
         tryHeal();
     }
