@@ -172,6 +172,15 @@ public class Micro {
         }
     }
 
+    private static boolean hasAttackUpgrade() {
+        int roundNum = rc.getRoundNum();
+        int mult = 1;
+        if (SECOND_UPGRADE == GlobalUpgrade.ATTACK) mult = 2;
+        else if (THIRD_UPGRADE == GlobalUpgrade.ATTACK) mult = 3;
+
+        return roundNum >= mult * GameConstants.GLOBAL_UPGRADE_ROUNDS;
+    }
+
     private static int getAttackDamage(RobotInfo robot) {
         double mult = 1.0;
         switch (robot.getAttackLevel()) {
@@ -196,7 +205,11 @@ public class Micro {
                 mult = 1.6;
                 break;
         }
-        return (int) Math.round(mult * BASE_ATTACK_DAMAGE);
+
+        int damage = (int) Math.round(mult * BASE_ATTACK_DAMAGE);
+        if (hasAttackUpgrade()) damage += GlobalUpgrade.ATTACK.baseAttackChange;
+
+        return damage;
     }
 
     private static RobotInfo selectAttackTarget() {
