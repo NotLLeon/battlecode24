@@ -21,6 +21,11 @@ public class TrapTracker {
     public static MapLocation[] getTriggeredTraps() throws GameActionException {
         MapInfo[] triggeredTraps = Utils.filterMapInfoArr(nearbyTraps,
                 (i) -> inTrackRange(i.getMapLocation()) && i.getTrapType() == TrapType.NONE);
+            
+        // MapInfo[] testTraps = Utils.filterMapInfoArr(nearbyTraps, (i) -> inTrackRange(i.getMapLocation()));
+        // System.out.println(nearbyTraps.length);
+        // System.out.println(testTraps.length);
+        // System.out.println(triggeredTraps.length);
         return Utils.mapInfoToLocArr(triggeredTraps);
     }
 

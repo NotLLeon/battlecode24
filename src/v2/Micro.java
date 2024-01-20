@@ -15,8 +15,7 @@ public class Micro {
     private static RobotInfo[] closeEnemyRobots;
     private static RobotInfo[] closeFriendlyRobots;
 
-    private static FastIntIntMap stunnedEnemies = new FastIntIntMap();
-    private static int lastHP = 1000;
+    private static FastIntIntMap stunnedEnemies;
 
     private static void attack(MapLocation loc) throws GameActionException {
         Action.attack(loc);
@@ -255,13 +254,6 @@ public class Micro {
 
     private static void tryAttack() throws GameActionException {
         // attack lowest health enemy
-        while (rc.isActionReady()) {
-            RobotInfo target = selectAttackTarget();
-            if (target == null) break;
-            attack(target.getLocation());
-        }
-        if (rc.getHealth() < lastHP) stunnedEnemies.clear();
-
         int largestRoundNum = 0;
         int lastStunnedEnemy = -1;
         for (int robID : stunnedEnemies.getKeys()) {
@@ -270,13 +262,22 @@ public class Micro {
                 lastStunnedEnemy = robID;
             }
         }
+
+        while (rc.isActionReady()) {
+            RobotInfo target = selectAttackTarget();
+            if (target == null) break;
+            attack(target.getLocation());
+        }
+
         if (rc.isMovementReady() && rc.getRoundNum() - largestRoundNum > 3) {
+            // System.out.println(rc.getRoundNum() - largestRoundNum);
             moveAwayFromEnemy();
         }
         else if (rc.isMovementReady()) {
+            // System.out.println("HERE");
             try {
                 RobotInfo stunnedRobot = rc.senseRobot(lastStunnedEnemy);
-                System.out.println(stunnedRobot.getLocation().toString());
+                // System.out.println(stunnedRobot.getLocation().toString());
                 moveInDir(rc.getLocation().directionTo(stunnedRobot.getLocation()), 1);
             } catch (GameActionException e) {
                 moveAwayFromEnemy();
@@ -311,10 +312,9 @@ public class Micro {
 
         // TODO: use ID instead of random?
         if (visibleEnemyRobots.length == 0 ||
-                immediateEnemyRobots.length > 0 ||
-                Random.nextInt(3) == 0) return;
+                immediateEnemyRobots.length > 0) return;
 
-        MapLocation[] dangerousEnemyRobotLocations = Utils.robotInfoToLocArr(immediateEnemyRobots);
+        MapLocation[] dangerousEnemyRobotLocations = Utils.robotInfoToLocArr(closeEnemyRobots);
         if (dangerousEnemyRobotLocations.length == 0) return;
         MapLocation enemyCentroid = Utils.getCentroid(dangerousEnemyRobotLocations);
 
@@ -346,6 +346,7 @@ public class Micro {
 
     private static void tryAdvance() throws GameActionException {
         MapLocation[] triggeredTraps = TrapTracker.getTriggeredTraps();
+        // System.out.println(triggeredTraps.length);
         updateStunnedEnemies(triggeredTraps);
         
         if (triggeredTraps.length > 0) {
@@ -380,11 +381,13 @@ public class Micro {
     }
 
     private static void updateStunnedEnemies(MapLocation[] triggeredTraps) throws GameActionException {
+        // System.out.println("UPDATE STUN ENEMIES");
         for (MapLocation trap : triggeredTraps) {
             RobotInfo[] adjStunned = rc.senseNearbyRobots(trap, 2, rc.getTeam().opponent());
+            // System.out.println("TRAP TRIGG");
             for (RobotInfo adj : adjStunned) {
                 stunnedEnemies.add(adj.getID(), rc.getRoundNum());
-                System.out.println("Stunned: " + adj.getID());
+                // System.out.println("Stunned: " + adj.getID());
             }
         }
     }
@@ -439,28 +442,28 @@ public class Micro {
     }
 
     public static void run() throws GameActionException {
+        if (rc.getRoundNum() == 201) stunnedEnemies = new FastIntIntMap();
         if (rc.hasFlag()) return;
+
         TrapTracker.updateTraps();
-        if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
+        // if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
         sense();
 
         tryAdvance();
-        if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
+        // if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
 
         tryAttack();
-        if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
+        // if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
 
         // TODO: remove from micro?
         tryMoveToFlag();
 
         tryPlaceTrap();
-        if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
+        // if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
 
         tryAttack();
-        if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
+        // if (rc.getRoundNum() < 250 && rc.getID() % 25 == 0) System.out.println(rc.isMovementReady());
 
         tryHeal();
-
-        lastHP = rc.getHealth();
     }
 }
