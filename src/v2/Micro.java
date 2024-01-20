@@ -19,7 +19,7 @@ public class Micro {
     private static int lastHP = 1000;
 
     private static void attack(MapLocation loc) throws GameActionException {
-        rc.attack(loc);
+        Action.attack(loc);
         senseEnemies();
     }
 
@@ -29,7 +29,7 @@ public class Micro {
     }
 
     private static void heal(MapLocation loc) throws GameActionException {
-        rc.heal(loc);
+        Action.heal(loc);
         senseFriendlies();
     }
 
@@ -158,7 +158,7 @@ public class Micro {
         MapLocation flagLoc = targetFlag.getLocation();
 
         if (rc.canPickupFlag(flagLoc)) {
-            rc.pickupFlag(flagLoc);
+            Action.pickupFlag(flagLoc);
             FlagRecorder.setPickedUp(targetFlag.getID());
         } else {
             Direction moveDir = rc.getLocation().directionTo(flagLoc);
