@@ -363,7 +363,7 @@ public class Micro {
         sense();
         // can prob add more conditions
 
-        // do we think any enemies can move into attack radius (full check uses too much bytecode)
+        // do we think any enemies can move into attack radius (full check too expensive)
         MapLocation curLoc = rc.getLocation();
         for (RobotInfo enemy : closeEnemyRobots) {
             Direction dirToEnemy = curLoc.directionTo(enemy.getLocation());
