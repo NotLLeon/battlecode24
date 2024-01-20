@@ -91,7 +91,7 @@ public class Action {
     }
 
     private static double getHealCooldownMult() {
-        switch (rc.getLevel(SkillType.BUILD)) {
+        switch (rc.getLevel(SkillType.HEAL)) {
             case 0:
                 return 1.0;
             case 1:
