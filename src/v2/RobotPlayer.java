@@ -25,8 +25,10 @@ public strictfp class RobotPlayer {
 
             try {
                 curRound = rc.getRoundNum();
-                boolean isSetupPhase = curRound <= GameConstants.SETUP_ROUNDS;
+                Action.decCooldown();
                 tryBuyUpgrade();
+
+                boolean isSetupPhase = curRound <= GameConstants.SETUP_ROUNDS;
                 if (!rc.isSpawned()) {
                     boolean isSpawned = Spawner.spawn();
                     if (!isSpawned) continue;
