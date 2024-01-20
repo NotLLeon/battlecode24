@@ -15,7 +15,7 @@ public class Micro {
     private static RobotInfo[] closeFriendlyRobots;
 
     private static void attack(MapLocation loc) throws GameActionException {
-        rc.attack(loc);
+        Action.attack(loc);
         senseEnemies();
     }
 
@@ -25,7 +25,7 @@ public class Micro {
     }
 
     private static void heal(MapLocation loc) throws GameActionException {
-        rc.heal(loc);
+        Action.heal(loc);
         senseFriendlies();
     }
 
@@ -154,7 +154,7 @@ public class Micro {
         MapLocation flagLoc = targetFlag.getLocation();
 
         if (rc.canPickupFlag(flagLoc)) {
-            rc.pickupFlag(flagLoc);
+            Action.pickupFlag(flagLoc);
             FlagRecorder.setPickedUp(targetFlag.getID());
         } else {
             Direction moveDir = rc.getLocation().directionTo(flagLoc);
@@ -291,7 +291,7 @@ public class Micro {
                 Random.nextInt(3) == 0) return;
 
         TrapType trapType = TrapType.EXPLOSIVE;
-        if (rc.canBuild(trapType, rc.getLocation())) rc.build(trapType, rc.getLocation());
+        if (rc.canBuild(trapType, rc.getLocation())) Action.build(trapType, rc.getLocation());
 
     }
 
