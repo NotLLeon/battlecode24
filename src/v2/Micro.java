@@ -7,23 +7,12 @@ import static v2.Constants.*;
 
 public class Micro {
 
-    // ROUGH STRATEGY:
-    // if you can see flag, move towards flag
-    // if there are no enemys in vision radius, heal friendly (move toward and heal?)
-    // if there is an enemy in attack range, attack, then move away or chase
-    // if there is an enemy in vision radius, move away or closer, attack if possible
-    // (friendly carrying flag?)
-    // (group units?)
-
-    // try not to move diagonally (messes up formation)
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
-    private static final int RETREAT_HEALTH_THRESHOLD = 200;
-    private final static int BASE_ATTACK_DAMAGE = 150;
-
     private static RobotInfo[] visibleFriendlyRobots;
     private static RobotInfo[] visibleEnemyRobots;
+    private static RobotInfo[] immediateEnemyRobots;
+    private static RobotInfo[] immediateFriendlyRobots;
     private static RobotInfo[] closeEnemyRobots;
-    private static RobotInfo[] dangerousEnemyRobots;
     private static RobotInfo[] closeFriendlyRobots;
 
     private static FastIntIntMap stunnedEnemies = new FastIntIntMap();
@@ -47,14 +36,15 @@ public class Micro {
     private static void senseEnemies() throws GameActionException {
         Team enemyTeam = rc.getTeam().opponent();
         visibleEnemyRobots = rc.senseNearbyRobots(-1, enemyTeam);
-        closeEnemyRobots = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, enemyTeam);
-        dangerousEnemyRobots = rc.senseNearbyRobots(ATTACK_RADIUS_PLUS_ONE_SQUARED, enemyTeam);
+        closeEnemyRobots = rc.senseNearbyRobots(ATTACK_RADIUS_PLUS_ONE_SQUARED, enemyTeam);
+        immediateEnemyRobots = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, enemyTeam);
     }
 
     private static void senseFriendlies() throws GameActionException {
         Team ownTeam = rc.getTeam();
         visibleFriendlyRobots = rc.senseNearbyRobots(-1, ownTeam);
-        closeFriendlyRobots = rc.senseNearbyRobots(GameConstants.HEAL_RADIUS_SQUARED, ownTeam);
+        closeFriendlyRobots = rc.senseNearbyRobots(ATTACK_RADIUS_PLUS_ONE_SQUARED, ownTeam);
+        immediateFriendlyRobots = rc.senseNearbyRobots(GameConstants.HEAL_RADIUS_SQUARED, ownTeam);
     }
 
     private static void sense() throws GameActionException {
@@ -176,15 +166,6 @@ public class Micro {
         }
     }
 
-    private static boolean hasAttackUpgrade() {
-        int roundNum = rc.getRoundNum();
-        int mult = 1;
-        if (SECOND_UPGRADE == GlobalUpgrade.ATTACK) mult = 2;
-        else if (THIRD_UPGRADE == GlobalUpgrade.ATTACK) mult = 3;
-
-        return roundNum >= mult * GameConstants.GLOBAL_UPGRADE_ROUNDS;
-    }
-
     private static int getAttackDamage(RobotInfo robot) {
         double mult = 1.0;
         switch (robot.getAttackLevel()) {
@@ -210,10 +191,16 @@ public class Micro {
                 break;
         }
 
-        int damage = (int) Math.round(mult * BASE_ATTACK_DAMAGE);
-        if (hasAttackUpgrade()) damage += GlobalUpgrade.ATTACK.baseAttackChange;
+        int damage = (int) Math.round(mult * BASE_ATTACK_DMG);
+
+        // just assume everyone gets attack upgrade first
+        if (rc.getRoundNum() >= GameConstants.GLOBAL_UPGRADE_ROUNDS) damage += GlobalUpgrade.ATTACK.baseAttackChange;
 
         return damage;
+    }
+
+    private static int getLevelSum(RobotInfo robot) {
+        return robot.getAttackLevel() + robot.getHealLevel();
     }
 
     private static RobotInfo selectAttackTarget() {
@@ -224,8 +211,8 @@ public class Micro {
         //  considering position of friendly units and their attack lvl. Break ties with spec again.
         RobotInfo target = null;
         boolean canOneShot = false;
-        double minKillTime = 999999;
-        for (RobotInfo enemy : closeEnemyRobots) {
+        int minKillTime = 999999;
+        for (RobotInfo enemy : immediateEnemyRobots) {
             if (enemy.hasFlag()) { // is this correct? Another unit can immediately pick up flag
                 target = enemy;
                 break;
@@ -235,11 +222,9 @@ public class Micro {
                 continue;
             }
 
-            if (enemy.getHealLevel() <= rc.getAttackDamage()) {
+            if (enemy.getHealth() <= rc.getAttackDamage()) {
                 if (canOneShot) {
-                    int enemyLvlSum = enemy.getAttackLevel() + enemy.getHealLevel();
-                    int tarLvlSum = target.getAttackLevel() + target.getHealLevel();
-                    if (enemyLvlSum > tarLvlSum) target = enemy;
+                    if (getLevelSum(enemy) > getLevelSum(target)) target = enemy;
                 } else {
                     target = enemy;
                     canOneShot = true;
@@ -249,16 +234,17 @@ public class Micro {
             if (canOneShot) continue;
 
             MapLocation enemyLoc = enemy.getLocation();
-            int damageSum = 0;
+            int damageSum = rc.getAttackDamage();
+            int numFriendlyRobots = 1;
             for (RobotInfo friendly : visibleFriendlyRobots) {
                 if (enemyLoc.isWithinDistanceSquared(friendly.getLocation(), GameConstants.ATTACK_RADIUS_SQUARED)) {
                     damageSum += getAttackDamage(friendly);
+                    numFriendlyRobots++;
                 }
             }
-            double killTime = enemy.getHealth() / (double) damageSum;
-            int enemyLvlSum = enemy.getAttackLevel() + enemy.getHealLevel();
-            int tarLvlSum = target.getAttackLevel() + target.getHealLevel();
-            if (killTime < minKillTime || (killTime == minKillTime && enemyLvlSum > tarLvlSum)) {
+            int avgDmg = damageSum / numFriendlyRobots;
+            int killTime = (enemy.getHealth() + avgDmg - 1) / avgDmg;
+            if (killTime < minKillTime || (killTime == minKillTime && getLevelSum(enemy) > getLevelSum(target))) {
                 minKillTime = killTime;
                 target = enemy;
             }
@@ -269,9 +255,8 @@ public class Micro {
 
     private static void tryAttack() throws GameActionException {
         // attack lowest health enemy
-        RobotInfo target = null;
         while (rc.isActionReady()) {
-            target = selectAttackTarget();
+            RobotInfo target = selectAttackTarget();
             if (target == null) break;
             attack(target.getLocation());
         }
@@ -301,13 +286,17 @@ public class Micro {
 
     private static void tryHeal() throws GameActionException {
         if (!rc.isActionReady()) return;
-        if (closeEnemyRobots.length > 0) return;
-        if (dangerousEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
+        if (immediateEnemyRobots.length > 0) return;
+        if (closeEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
 
         RobotInfo target = null;
-        for (RobotInfo friendly : closeFriendlyRobots) {
-            if (target == null || friendly.getHealth() < target.getHealth()) {
+        int minBaseHits = 9999999;
+        for (RobotInfo friendly : immediateFriendlyRobots) {
+            int baseHits = friendly.getHealth() / BASE_ATTACK_DMG;
+            if (baseHits < minBaseHits
+                || (baseHits == minBaseHits && getLevelSum(friendly) > getLevelSum(target))) {
                 target = friendly;
+                minBaseHits = baseHits;
             }
         }
 
@@ -322,9 +311,10 @@ public class Micro {
 
         // TODO: use ID instead of random?
         if (visibleEnemyRobots.length == 0 ||
-                closeEnemyRobots.length > 0) return;
+                immediateEnemyRobots.length > 0 ||
+                Random.nextInt(3) == 0) return;
 
-        MapLocation[] dangerousEnemyRobotLocations = Utils.robotInfoToMapLocArr(dangerousEnemyRobots);
+        MapLocation[] dangerousEnemyRobotLocations = Utils.robotInfoToLocArr(immediateEnemyRobots);
         if (dangerousEnemyRobotLocations.length == 0) return;
         MapLocation enemyCentroid = Utils.getCentroid(dangerousEnemyRobotLocations);
 
@@ -367,28 +357,24 @@ public class Micro {
         if (rc.getRoundNum() % 2 != 0 || closeEnemyRobots.length > 0
                 || visibleEnemyRobots.length == 0 || !rc.isActionReady()) return;
 
-        int numHealthyAllies = 0;
-        int numHealthyCloseAllies = 0;
+        int sumVisibleFriendlyHealth = 0;
+        int sumVisibleEnemyHealth = 0;
+        for (RobotInfo friendly : visibleFriendlyRobots) sumVisibleFriendlyHealth += friendly.getHealth();
+        for (RobotInfo enemy : visibleEnemyRobots) sumVisibleEnemyHealth += enemy.getHealth();
 
-        for (RobotInfo friendly : visibleFriendlyRobots) {
-            if (friendly.getHealth() < RETREAT_HEALTH_THRESHOLD) continue;
-            numHealthyAllies++;
-            if (friendly.getLocation().isWithinDistanceSquared(rc.getLocation(), ATTACK_RADIUS_PLUS_ONE_SQUARED)) {
-                numHealthyCloseAllies++;
-            }
-        }
+        double avgFriendlyHealth = sumVisibleFriendlyHealth / (double) visibleFriendlyRobots.length;
+        double avgEnemyHealth = sumVisibleEnemyHealth / (double) visibleEnemyRobots.length;
 
-        // we only move forward if we slightly outnumber the enemy at close range
-        // or if we greatly outnumber them at long range
-        // TODO: try tuning these a bit
-        if (numHealthyAllies < 2 * visibleEnemyRobots.length
-                && numHealthyCloseAllies < dangerousEnemyRobots.length + 2) return;
+        boolean healthCond = visibleFriendlyRobots.length >= visibleEnemyRobots.length
+                && avgFriendlyHealth >= 2 * avgEnemyHealth;
+        boolean longRangeCond = visibleFriendlyRobots.length >= 2 * visibleEnemyRobots.length;
+        boolean closeRangeCond = closeFriendlyRobots.length >= closeEnemyRobots.length + 2;
 
-        MapLocation[] enemyLocs = new MapLocation[visibleEnemyRobots.length];
-        for (int i = 0; i < visibleEnemyRobots.length; ++i) {
-            enemyLocs[i] = visibleEnemyRobots[i].getLocation();
-        }
-        MapLocation enemyCentroid = Utils.getCentroid(enemyLocs);
+        if (!longRangeCond && !closeRangeCond /*&& !healthCond */) return;
+
+
+        RobotInfo[] enemyInfos = closeEnemyRobots.length > 0 ? closeEnemyRobots : visibleEnemyRobots;
+        MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(enemyInfos));
         Direction dirToCentroid = rc.getLocation().directionTo(enemyCentroid);
         moveMinEnemies(new Direction[] {dirToCentroid, dirToCentroid.rotateLeft(), dirToCentroid.rotateRight()});
     }
@@ -420,6 +406,24 @@ public class Micro {
 //        moveInDir(rc.getLocation().directionTo(leader.getLocation()), 1);
 //
 //    }
+    public static void tryFollowLeader(MapLocation rushLoc) throws GameActionException {
+        senseFriendlies();
+
+        if (immediateFriendlyRobots.length >= 3) return;
+
+        RobotInfo leader = null;
+        int minDisSq = 999999;
+        for (RobotInfo friendly : visibleFriendlyRobots) {
+            int disSq = friendly.getLocation().distanceSquaredTo(rushLoc);
+            if (disSq < minDisSq) {
+                leader = friendly;
+            }
+        }
+        if (leader == null) return;
+
+        moveInDir(rc.getLocation().directionTo(leader.getLocation()), 1);
+
+    }
 
     public static boolean inCombat() throws GameActionException {
         sense();
@@ -427,7 +431,7 @@ public class Micro {
 
         // do we think any enemies can move into attack radius (full check uses too much bytecode)
         MapLocation curLoc = rc.getLocation();
-        for (RobotInfo enemy : dangerousEnemyRobots) {
+        for (RobotInfo enemy : closeEnemyRobots) {
             Direction dirToEnemy = curLoc.directionTo(enemy.getLocation());
             if (rc.senseMapInfo(curLoc.add(dirToEnemy)).isPassable()) return true;
         }

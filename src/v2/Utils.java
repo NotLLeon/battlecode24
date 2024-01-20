@@ -69,7 +69,7 @@ public class Utils {
         return mapLocs;
     }
 
-    public static MapLocation[] robotInfoToMapLocArr(RobotInfo[] arr) {
+    public static MapLocation[] robotInfoToLocArr(RobotInfo[] arr) {
         MapLocation[] mapLocs = new MapLocation[arr.length];
         for (int i = 0; i < arr.length; ++i) mapLocs[i] = arr[i].getLocation();
 
