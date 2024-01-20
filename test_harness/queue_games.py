@@ -88,7 +88,8 @@ def main():
 
     for oppBot in oppBotsList:
         if oppBot not in TEAM_ID_DICT:
-            print(f"Selected bot {oppBot} doesn't accept unranked queue requests. Update ")
+            print(f"Selected bot {oppBot} doesn't accept unranked queue requests. "
+                  f"Run `python3 update_other_team_info.py` to update the cache if you think this is wrong")
 
     gameReqs = generateGameReqsList(oppBotsList, mapsList)
 
@@ -97,6 +98,7 @@ def main():
     for gameRequest in gameReqs:
         currResponsesPair = requestGamesCallback(gameRequest)
         responsesList.append(currResponsesPair)
+    print('Finished queueing all games, getting results now')
 
 
     matchGames(responsesList, gameReplaysDict)
