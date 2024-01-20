@@ -20,7 +20,6 @@ public class Constants {
     static final int ATTACK_RADIUS_PLUS_ONE_SQUARED = 9;
     static final int BASE_ATTACK_DMG = 150;
 
-    // ***** YOU MUST ALSO UPDATE ACTION CLASS IF YOU CHANGE THESE *****
     static final GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ATTACK;
     static final GlobalUpgrade SECOND_UPGRADE = GlobalUpgrade.HEALING;
     static final GlobalUpgrade THIRD_UPGRADE = GlobalUpgrade.CAPTURING;
