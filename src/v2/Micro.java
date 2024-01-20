@@ -330,7 +330,7 @@ public class Micro {
         for(int i = 0; i < 3; ++i) {
             MapLocation trapPoint = loc.add(dirsTowards[i]);
             if(rc.canBuild(trapType, trapPoint) && !adjacentToTrap(trapPoint)) {
-                rc.build(trapType, trapPoint);
+                Action.build(trapType, trapPoint);
                 return true;
             }
         }
@@ -352,7 +352,6 @@ public class Micro {
         
         if (triggeredTraps.length > 0) {
             moveInDir(rc.getLocation().directionTo(triggeredTraps[0]), 1);
-            sense();
             return;
         }
 
