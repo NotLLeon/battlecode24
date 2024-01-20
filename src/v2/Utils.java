@@ -48,6 +48,34 @@ public class Utils {
         return filtered;
     }
 
+    public static MapInfo[] filterMapInfoArr(MapInfo[] arr, CheckedFunction<MapInfo, Boolean> fn) {
+        Function<MapInfo, Boolean> sfn = lambdaExceptionWrapper(fn, false);
+        int numRemaining = 0;
+
+        // idk if this is the best way to do this
+        for (MapInfo info : arr) if (sfn.apply(info)) ++numRemaining;
+
+        MapInfo[] filtered = new MapInfo[numRemaining];
+
+        int i = 0;
+        for (MapInfo info : arr) if (sfn.apply(info)) filtered[i++] = info;
+        return filtered;
+    }
+
+    public static MapLocation[] mapInfoToLocArr(MapInfo[] arr) {
+        MapLocation[] mapLocs = new MapLocation[arr.length];
+        for (int i = 0; i < arr.length; ++i) mapLocs[i] = arr[i].getMapLocation();
+
+        return mapLocs;
+    }
+
+    public static MapLocation[] robotInfoToLocArr(RobotInfo[] arr) {
+        MapLocation[] mapLocs = new MapLocation[arr.length];
+        for (int i = 0; i < arr.length; ++i) mapLocs[i] = arr[i].getLocation();
+
+        return mapLocs;
+    }
+
     public static MapLocation findClosestLoc(MapLocation[] locs) {
         MapLocation curLoc = rc.getLocation();
         int minDist = 10000;
@@ -72,5 +100,28 @@ public class Utils {
         if (key1 <= key2 && key2 <= key0) return new MapLocation[]{locs[1], locs[2], locs[0]};
         if (key2 <= key0 && key0 <= key1) return new MapLocation[]{locs[2], locs[0], locs[1]};
         return new MapLocation[]{locs[2], locs[1], locs[0]};
+    }
+
+    public static Direction[] getDirOrdered(Direction dir) {
+        return new Direction[] {
+                dir,
+                dir.rotateRight(),
+                dir.rotateLeft(),
+                Direction.CENTER,
+                dir.rotateRight().rotateRight(),
+                dir.rotateLeft().rotateLeft(),
+                dir.rotateLeft().opposite(),
+                dir.rotateRight().opposite(),
+                dir.opposite()
+        };
+    }
+
+    public static MapLocation getCentroid(MapLocation[] locs) {
+        int x = 0, y = 0;
+        for (MapLocation loc : locs) {
+            x += loc.x;
+            y += loc.y;
+        }
+        return new MapLocation(x / locs.length, y / locs.length);
     }
 }

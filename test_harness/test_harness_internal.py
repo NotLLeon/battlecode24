@@ -7,7 +7,6 @@ from collections import defaultdict
 # NOTE: Try not to modify this file!
 # If you must, then only modify the if __name__ == '__main__' part.
 
-
 def get_winner_info(input_string, retDict):
     match = re.search(r'(\w+) \(A\) wins \(round (\d+)\)|(\w+) \(B\) wins \(round (\d+)\)', input_string)
     if not match:

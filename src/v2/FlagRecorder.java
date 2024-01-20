@@ -109,7 +109,7 @@ public class FlagRecorder {
         return isIndBitSet(ind, IND_PICKED_UP);
     }
 
-    private static boolean isExactLoc(int ind) throws GameActionException {
+    public static boolean isExactLoc(int ind) throws GameActionException {
         return isIndBitSet(ind, IND_EXACT_LOC);
     }
 
