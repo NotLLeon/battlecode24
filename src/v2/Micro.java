@@ -13,6 +13,8 @@ public class Micro {
     private static RobotInfo[] immediateFriendlyRobots;
     private static RobotInfo[] closeEnemyRobots;
     private static RobotInfo[] closeFriendlyRobots;
+    private static int lastRoundRun = 0;
+    private static MapLocation lastLocRun = null;
 
     private static void attack(MapLocation loc) throws GameActionException {
         Action.attack(loc);
@@ -390,9 +392,20 @@ public class Micro {
 
     public static void run() throws GameActionException {
         if (rc.hasFlag()) return;
+
+        // if we already ran this round and didnt move, we dont need to run again
+        MapLocation mapLoc = rc.getLocation();
+        int roundNum = rc.getRoundNum();
+        if (mapLoc.equals(lastLocRun) && roundNum == lastRoundRun) return;
+
+        lastLocRun = mapLoc;
+        lastRoundRun = roundNum;
+
+        // must be called even if rest of micro doesnt run in order to have accurate stun timestamps
+        TrapTracker.senseTriggeredTraps();
+
         if (!rc.isMovementReady() && !rc.isActionReady()) return;
 
-        TrapTracker.senseTriggeredTraps();
         sense();
 
         tryAdvance();
