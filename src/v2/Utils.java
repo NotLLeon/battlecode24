@@ -20,32 +20,69 @@ public class Utils {
         };
     }
 
+    // there has to be a better way to do this... arrays dont play nice with generics
     public static int[] filterIntArr(int[] arr, CheckedFunction<Integer, Boolean> fn) {
         Function<Integer, Boolean> sfn = lambdaExceptionWrapper(fn, false);
-        int numRemaining = 0;
-
-        // idk if this is the best way to do this
-        for (int ind : arr) if (sfn.apply(ind)) ++numRemaining;
-
-        int[] filtered = new int[numRemaining];
-
-        int i = 0;
-        for (int ind : arr) if (sfn.apply(ind)) filtered[i++] = ind;
-        return filtered;
+        int[] filtered = new int[arr.length];
+        int ind = 0;
+        for (int i = arr.length; --i >= 0;) if (sfn.apply(arr[i])) filtered[ind++] = arr[i];
+        int[] filteredTrimmed = new int[ind];
+        for (int i = ind; --i >= 0;) filteredTrimmed[i] = filtered[ind - i - 1];
+        return filteredTrimmed;
     }
 
     public static MapLocation[] filterLocArr(MapLocation[] arr, CheckedFunction<MapLocation, Boolean> fn) {
         Function<MapLocation, Boolean> sfn = lambdaExceptionWrapper(fn, false);
-        int numRemaining = 0;
+        MapLocation[] filtered = new MapLocation[arr.length];
+        int ind = 0;
+        for (int i = arr.length; --i >= 0;) if (sfn.apply(arr[i])) filtered[ind++] = arr[i];
+        MapLocation[] filteredTrimmed = new MapLocation[ind];
+        for (int i = ind; --i >= 0;) filteredTrimmed[i] = filtered[ind - i - 1];
+        return filteredTrimmed;
+    }
 
-        // idk if this is the best way to do this
-        for (MapLocation loc : arr) if (sfn.apply(loc)) ++numRemaining;
+    public static Direction[] filterDirArr(Direction[] arr, CheckedFunction<Direction, Boolean> fn) {
+        Function<Direction, Boolean> sfn = lambdaExceptionWrapper(fn, false);
+        Direction[] filtered = new Direction[arr.length];
+        int ind = 0;
+        for (int i = arr.length; --i >= 0;) if (sfn.apply(arr[i])) filtered[ind++] = arr[i];
+        Direction[] filteredTrimmed = new Direction[ind];
+        for (int i = ind; --i >= 0;) filteredTrimmed[i] = filtered[ind - i - 1];
+        return filteredTrimmed;
+    }
 
-        MapLocation[] filtered = new MapLocation[numRemaining];
+    public static MapInfo[] filterMapInfoArr(MapInfo[] arr, CheckedFunction<MapInfo, Boolean> fn) {
+        Function<MapInfo, Boolean> sfn = lambdaExceptionWrapper(fn, false);
+        MapInfo[] filtered = new MapInfo[arr.length];
+        int ind = 0;
+        for (int i = arr.length; --i >= 0;) if (sfn.apply(arr[i])) filtered[ind++] = arr[i];
+        MapInfo[] filteredTrimmed = new MapInfo[ind];
+        for (int i = ind; --i >= 0;) filteredTrimmed[i] = filtered[ind - i - 1];
+        return filteredTrimmed;
+    }
 
-        int i = 0;
-        for (MapLocation loc : arr) if (sfn.apply(loc)) filtered[i++] = loc;
-        return filtered;
+    public static RobotInfo[] filterRobotInfoArr(RobotInfo[] arr, CheckedFunction<RobotInfo, Boolean> fn) {
+        Function<RobotInfo, Boolean> sfn = lambdaExceptionWrapper(fn, false);
+        RobotInfo[] filtered = new RobotInfo[arr.length];
+        int ind = 0;
+        for (int i = arr.length; --i >= 0;) if (sfn.apply(arr[i])) filtered[ind++] = arr[i];
+        RobotInfo[] filteredTrimmed = new RobotInfo[ind];
+        for (int i = ind; --i >= 0;) filteredTrimmed[i] = filtered[ind - i - 1];
+        return filteredTrimmed;
+    }
+
+    public static MapLocation[] mapInfoToLocArr(MapInfo[] arr) {
+        MapLocation[] mapLocs = new MapLocation[arr.length];
+        for (int i = arr.length; --i >= 0;) mapLocs[i] = arr[i].getMapLocation();
+
+        return mapLocs;
+    }
+
+    public static MapLocation[] robotInfoToLocArr(RobotInfo[] arr) {
+        MapLocation[] mapLocs = new MapLocation[arr.length];
+        for (int i = arr.length; --i >= 0;) mapLocs[i] = arr[i].getLocation();
+
+        return mapLocs;
     }
 
     public static MapLocation findClosestLoc(MapLocation[] locs) {

@@ -19,14 +19,16 @@ public strictfp class RobotPlayer {
         
         Constants.rc = rc;
         Spawner.init();
-        Random.initRandom();
+        Random.init();
 
         while (true) {
 
             try {
                 curRound = rc.getRoundNum();
-                boolean isSetupPhase = curRound <= GameConstants.SETUP_ROUNDS;
+                Action.decCooldown();
                 tryBuyUpgrade();
+
+                boolean isSetupPhase = curRound <= GameConstants.SETUP_ROUNDS;
                 if (!rc.isSpawned()) {
                     boolean isSpawned = Spawner.spawn();
                     if (!isSpawned) continue;
@@ -47,7 +49,7 @@ public strictfp class RobotPlayer {
                 if (curRound != rc.getRoundNum()) {
                     System.out.println("Went over bc limit");
                 }
-
+//                if(Clock.getBytecodeNum() > 20000) System.out.println("used: " + Clock.getBytecodeNum() + " bc");
                 Clock.yield();
             }
         }
