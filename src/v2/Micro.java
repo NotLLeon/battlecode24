@@ -78,18 +78,14 @@ public class Micro {
     }
 
     private static boolean isStunned(int id) {
-//        return false;
-        return rc.getRoundNum() - TrapTracker.getLastStunnedRound(id) <= 2;
+        return rc.getRoundNum() - TrapTracker.getLastStunnedRound(id) <= 3; // TODO: tune
     }
 
     private static int getNumAttackableEnemies(MapLocation loc) {
         int numAttackableEnemies = 0;
         for (RobotInfo enemy : visibleEnemyRobots) {
             if (!enemy.getLocation().isWithinDistanceSquared(loc, GameConstants.ATTACK_RADIUS_SQUARED)) continue;
-
-            // dont count enemies that were stunned <= 2 turns ago
-//            if (!isStunned(enemy.getID()))
-            numAttackableEnemies++;
+            if (!isStunned(enemy.getID())) numAttackableEnemies++;
         }
         return numAttackableEnemies;
     }
@@ -268,8 +264,7 @@ public class Micro {
     }
 
     private static void tryHeal() throws GameActionException {
-        if (!rc.isActionReady()) return;
-        if (immediateEnemyRobots.length > 0) return;
+        if (!rc.isActionReady() || immediateEnemyRobots.length > 0) return;
         if (closeEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
 
         RobotInfo target = null;

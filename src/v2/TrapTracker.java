@@ -6,13 +6,19 @@ import static v2.Constants.*;
 
 public class TrapTracker {
 
-    // try using max vision radius?
-    private static int TRACK_RADIUS_SQUARED = 10;
+    // TODO: tune these
+    // we store all stun traps in this radius
+    private static int TRAP_TRACK_RADIUS_SQUARED = 10;
+    // we check for stunned enemies in this radius
+    private static int STUN_TRACK_RADIUS_SQUARED = GameConstants.VISION_RADIUS_SQUARED;
+
     private static MapInfo[] nearbyTraps = new MapInfo[0];
-    private static final FastIntIntMap stunnedEnemies = new FastIntIntMap();
+    private static FastIntIntMap stunnedEnemies = new FastIntIntMap();
+//    private static final int STUNNED_ENEMIES_MAX_SIZE = 10;
+//    private static final int STUN_ROUNDS = 5;
 
     private static boolean inTrackRange(MapLocation m) {
-        return rc.getLocation().isWithinDistanceSquared(m, TRACK_RADIUS_SQUARED);
+        return rc.getLocation().isWithinDistanceSquared(m, TRAP_TRACK_RADIUS_SQUARED);
     }
 
     public static void senseTriggeredTraps() throws GameActionException {
@@ -22,7 +28,7 @@ public class TrapTracker {
                 return inTrackRange(loc) && rc.senseMapInfo(loc).getTrapType() == TrapType.NONE;
             }
         );
-        RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+        RobotInfo[] enemyRobots = rc.senseNearbyRobots(STUN_TRACK_RADIUS_SQUARED, rc.getTeam().opponent());
         MapLocation[] triggeredLocs = Utils.mapInfoToLocArr(triggeredTraps);
         for (RobotInfo enemy : enemyRobots) {
             for (MapLocation trap : triggeredLocs) {
@@ -34,10 +40,19 @@ public class TrapTracker {
                 }
             }
         }
+//        if (stunnedEnemies.size > STUNNED_ENEMIES_MAX_SIZE) {
+//            FastIntIntMap newStunnedEnemies = new FastIntIntMap();
+//            int curRound = rc.getRoundNum();
+//            for (int id : stunnedEnemies.getKeys()) {
+//                int round = stunnedEnemies.getVal(id);
+//                if (curRound - round <= STUN_ROUNDS) newStunnedEnemies.add(id, round);
+//            }
+//            stunnedEnemies = newStunnedEnemies;
+//        }
     }
 
     public static void sensePlacedTraps() throws GameActionException {
-        MapInfo[] localLocs = rc.senseNearbyMapInfos(TRACK_RADIUS_SQUARED);
+        MapInfo[] localLocs = rc.senseNearbyMapInfos(TRAP_TRACK_RADIUS_SQUARED);
         nearbyTraps = Utils.filterMapInfoArr(localLocs, (i) -> i.getTrapType() == TrapType.STUN);
     }
 
