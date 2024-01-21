@@ -39,6 +39,7 @@ Example usages:
 
 `python3 queue_games.py -mf ./SampleMaps.json -b "Teh Devs" "camel_case" `
 
+`python3 queue_games.py -mf ./SampleMaps.json -b "Teh Devs" "camel_case" -a`
 
 
 The arguments are as follows:
@@ -50,6 +51,6 @@ There is a maximum of 10 maps that can be chosen at once.
 `-b` and `-r` are mutually exclusive, and are required. Either pass in a list of bot names (with double quotes), or pass
 in a json file path that contains a list of team names. See `SampleTeams.json` for what this file should look like.
 
-`-a` is "append-mode", for the replay links. All replays are stored in `match_links.json`,
+`-a` is optional, and is "append-mode", for the replay links. All replays are stored in `match_links.json`,
 and by default this file will be overwritten with each call to this script. Append mode just appends
 new replays to the end of the json, instead of overwriting it.
