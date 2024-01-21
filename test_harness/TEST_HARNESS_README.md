@@ -25,9 +25,7 @@ These are printed to the console upon being called
 3) Which games did the outcome change based on the side? This is prob helpful for detecting symmetry.
 
 ## How to use the queuing tool
-NOTE: Do NOT have multiple people queueing up games at the same time! This script can tolerate up to 10 additional games being queued
-while it's running, before it doesn't get the output of the initially queued games correctly! Only have a single person use this tool at once.
-Carlos will fix this in the future if it becomes a problem.
+We can now have multiple users calling this script at once without issue! 
 
 Call `queue_games.py` as a console command
 
@@ -45,7 +43,9 @@ Example usages:
 
 The arguments are as follows:
 
-`-m` `-mf` are mutually exclusive, and is optional. Either pass in a list of maps (with -m flag) or a path to a json file that contains a list of maps (with -mf flag). If neither argument is used, then it defaults to DEFAULT_MAPS, which is a variable in the constants.py file. There is a maximum of 10 maps that can be chosen at once.
+`-m` `-mf` are mutually exclusive, and is optional. Either pass in a list of maps (with -m flag) or a path to a json file that contains a list of maps (with -mf flag). See what `SampleMaps.json` looks like for passing in a list of maps 
+If neither argument is used, then it defaults to DEFAULT_MAPS, which is a variable in the constants.py file.
+There is a maximum of 10 maps that can be chosen at once.
 
 `-b` and `-r` are mutually exclusive, and are required. Either pass in a list of bot names (with double quotes), or pass
 in a json file path that contains a list of team names. See `SampleTeams.json` for what this file should look like.
