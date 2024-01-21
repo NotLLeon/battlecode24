@@ -19,7 +19,7 @@ public strictfp class RobotPlayer {
         
         Constants.rc = rc;
         Spawner.init();
-        Random.initRandom();
+        Random.init();
 
         while (true) {
 
