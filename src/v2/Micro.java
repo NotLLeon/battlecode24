@@ -88,7 +88,8 @@ public class Micro {
             if (!enemy.getLocation().isWithinDistanceSquared(loc, GameConstants.ATTACK_RADIUS_SQUARED)) continue;
 
             // dont count enemies that were stunned <= 2 turns ago
-            if (!isStunned(enemy.getID())) numAttackableEnemies++;
+//            if (!isStunned(enemy.getID()))
+            numAttackableEnemies++;
         }
         return numAttackableEnemies;
     }
@@ -291,9 +292,7 @@ public class Micro {
     private static void tryPlaceTrap() throws GameActionException {
         if (!rc.isActionReady()) return;
 
-        // TODO: use ID instead of random?
-        if (visibleEnemyRobots.length == 0 ||
-                immediateEnemyRobots.length > 0) return;
+        if (visibleEnemyRobots.length == 0 || immediateEnemyRobots.length > 0) return;
 
         MapLocation[] dangerousEnemyRobotLocations = Utils.robotInfoToLocArr(closeEnemyRobots);
         if (dangerousEnemyRobotLocations.length == 0) return;
@@ -329,17 +328,15 @@ public class Micro {
         // TODO: allow moving towards stunned enemies
         if (immediateEnemyRobots.length > 0 || visibleEnemyRobots.length == 0 || !rc.isActionReady()) return;
 
-        RobotInfo[] unstunnedVisibleEnemyRobots = visibleEnemyRobots;
-//                Utils.filterRobotInfoArr(
-//                visibleEnemyRobots,
-//                (r) -> !isStunned(r.getID())
-//        );
+        RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
+                visibleEnemyRobots,
+                (r) -> !isStunned(r.getID())
+        );
 
-        RobotInfo[] unstunnedCloseEnemyRobots = closeEnemyRobots;
-//                Utils.filterRobotInfoArr(
-//                closeEnemyRobots,
-//                (r) -> !isStunned(r.getID())
-//        );
+        RobotInfo[] unstunnedCloseEnemyRobots = Utils.filterRobotInfoArr(
+                closeEnemyRobots,
+                (r) -> !isStunned(r.getID())
+        );
 
         if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return;
 
@@ -400,12 +397,12 @@ public class Micro {
         if (rc.hasFlag()) return;
         if (!rc.isMovementReady() && !rc.isActionReady()) return;
 
-        sense();
         TrapTracker.senseTriggeredTraps();
+        sense();
 
         tryAdvance();
 
-        // if we can place trap and still attack, try place trap first
+        // if we can place trap and still do something else, try place trap first
         // FIXME: doesnt consider level 6 attack spec, which allows unit to attack twice in 1 turn
         if (Action.getCooldown() + Action.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
         tryAttack();

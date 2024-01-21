@@ -9,8 +9,7 @@ public class TrapTracker {
     // try using max vision radius?
     private static int TRACK_RADIUS_SQUARED = 10;
     private static MapInfo[] nearbyTraps = new MapInfo[0];
-    private static FastIntIntMap stunnedEnemies = new FastIntIntMap();
-    private static final int STUNNED_ENEMIES_MAP_MAX_SIZE = 10;
+    private static final FastIntIntMap stunnedEnemies = new FastIntIntMap();
 
     private static boolean inTrackRange(MapLocation m) {
         return rc.getLocation().isWithinDistanceSquared(m, TRACK_RADIUS_SQUARED);
@@ -18,8 +17,11 @@ public class TrapTracker {
 
     public static void senseTriggeredTraps() throws GameActionException {
         MapInfo[] triggeredTraps = Utils.filterMapInfoArr(nearbyTraps,
-                (i) -> inTrackRange(i.getMapLocation()) && i.getTrapType() == TrapType.NONE);
-
+            (i) -> {
+                MapLocation loc = i.getMapLocation();
+                return inTrackRange(loc) && rc.senseMapInfo(loc).getTrapType() == TrapType.NONE;
+            }
+        );
         RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
         MapLocation[] triggeredLocs = Utils.mapInfoToLocArr(triggeredTraps);
         for (RobotInfo enemy : enemyRobots) {
