@@ -21,6 +21,7 @@ public class TrapTracker {
         return rc.getLocation().isWithinDistanceSquared(m, TRAP_TRACK_RADIUS_SQUARED);
     }
 
+    // should be called at beginning of turn
     public static void senseTriggeredTraps() throws GameActionException {
         MapInfo[] triggeredTraps = Utils.filterMapInfoArr(nearbyTraps,
             (i) -> {
@@ -51,6 +52,7 @@ public class TrapTracker {
 //        }
     }
 
+    // should be called at end of turn
     public static void sensePlacedTraps() throws GameActionException {
         MapInfo[] localLocs = rc.senseNearbyMapInfos(TRAP_TRACK_RADIUS_SQUARED);
         nearbyTraps = Utils.filterMapInfoArr(localLocs, (i) -> i.getTrapType() == TrapType.STUN);

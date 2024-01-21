@@ -23,7 +23,7 @@ public class Micro {
 
     private static void move(Direction dir) throws GameActionException {
         rc.move(dir);
-        sense();
+        senseUnits();
     }
 
     private static void heal(MapLocation loc) throws GameActionException {
@@ -45,11 +45,10 @@ public class Micro {
         immediateFriendlyRobots = rc.senseNearbyRobots(GameConstants.HEAL_RADIUS_SQUARED, ownTeam);
     }
 
-    private static void sense() throws GameActionException {
+    private static void senseUnits() throws GameActionException {
         // TODO only call rc.senseNearbyRobots once
         senseFriendlies();
         senseEnemies();
-        TrapTracker.sensePlacedTraps();
     }
 
     // TODO: take location as parameter instead and only move laterally if its closer
@@ -289,11 +288,10 @@ public class Micro {
     private static void tryPlaceTrap() throws GameActionException {
         if (!rc.isActionReady()) return;
 
-        if (visibleEnemyRobots.length == 0 || immediateEnemyRobots.length > 0) return;
+        if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0) return;
 
-        MapLocation[] dangerousEnemyRobotLocations = Utils.robotInfoToLocArr(closeEnemyRobots);
-        if (dangerousEnemyRobotLocations.length == 0) return;
-        MapLocation enemyCentroid = Utils.getCentroid(dangerousEnemyRobotLocations);
+        MapLocation[] closeEnemyLocs = Utils.robotInfoToLocArr(closeEnemyRobots);
+        MapLocation enemyCentroid = Utils.getCentroid(closeEnemyLocs);
 
         MapLocation curLoc = rc.getLocation();
         trapInDir(curLoc, curLoc.directionTo(enemyCentroid));
@@ -378,7 +376,7 @@ public class Micro {
     }
 
     public static boolean inCombat() throws GameActionException {
-        sense();
+        senseEnemies();
         // can prob add more conditions
 
         // do we think any enemies can move into attack radius (full check too expensive)
@@ -404,9 +402,12 @@ public class Micro {
         // must be called even if rest of micro doesnt run in order to have accurate stun timestamps
         TrapTracker.senseTriggeredTraps();
 
-        if (!rc.isMovementReady() && !rc.isActionReady()) return;
+        if (!rc.isMovementReady() && !rc.isActionReady()) {
+            TrapTracker.sensePlacedTraps();
+            return;
+        }
 
-        sense();
+        senseUnits();
 
         tryAdvance();
 
@@ -421,5 +422,7 @@ public class Micro {
         tryAttack();
         tryHeal();
         tryPlaceTrap();
+
+        TrapTracker.sensePlacedTraps();
     }
 }
