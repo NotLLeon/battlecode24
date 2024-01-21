@@ -4,7 +4,7 @@ import requests
 from concurrent.futures import ThreadPoolExecutor
 import time
 
-from get_queued_results import matchGamesFirstTimeTemp,outputMatchGames
+from get_queued_results import outputMatchGames
 
 from file_operations import *
 from constants import *
@@ -119,8 +119,8 @@ def main():
     # matchGamesFirstTimeTemp(responsesList, gameReplaysDict)
     outputMatchGames(responsesList, gameReplaysDict)
 
-    # print('All games completed! Saving match results to match_links.json')
-    # saveMatchResults(gameReplaysDict)
+    print('All games completed! Saving match results to match_links.json')
+    saveMatchResults(gameReplaysDict)
 
 
 if __name__ == '__main__':
