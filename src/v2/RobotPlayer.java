@@ -19,7 +19,7 @@ public strictfp class RobotPlayer {
         
         Constants.rc = rc;
         Spawner.init();
-        Random.initRandom();
+        Random.init();
 
         while (true) {
 
@@ -49,7 +49,7 @@ public strictfp class RobotPlayer {
                 if (curRound != rc.getRoundNum()) {
                     System.out.println("Went over bc limit");
                 }
-
+//                if(Clock.getBytecodeNum() > 20000) System.out.println("used: " + Clock.getBytecodeNum() + " bc");
                 Clock.yield();
             }
         }

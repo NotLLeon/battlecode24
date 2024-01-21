@@ -8,7 +8,7 @@ public class Random {
 
     private static java.util.Random rng = null;
 
-    static void initRandom() {
+    static void init() {
         rng = new java.util.Random(rc.getID());
     }
 
