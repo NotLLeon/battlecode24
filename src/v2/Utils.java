@@ -61,6 +61,16 @@ public class Utils {
         return filtered;
     }
 
+    public static RobotInfo[] filterRobotInfoArr(RobotInfo[] arr, CheckedFunction<RobotInfo, Boolean> fn) {
+        Function<RobotInfo, Boolean> sfn = lambdaExceptionWrapper(fn, false);
+        int numRemaining = 0;
+        for (RobotInfo info : arr) if (sfn.apply(info)) ++numRemaining;
+        RobotInfo[] filtered = new RobotInfo[numRemaining];
+        int i = 0;
+        for (RobotInfo info : arr) if (sfn.apply(info)) filtered[i++] = info;
+        return filtered;
+    }
+
     public static MapLocation[] mapInfoToLocArr(MapInfo[] arr) {
         MapLocation[] mapLocs = new MapLocation[arr.length];
         for (int i = 0; i < arr.length; ++i) mapLocs[i] = arr[i].getMapLocation();

@@ -18,17 +18,17 @@ public class Action {
     }
 
     public static void attack(MapLocation loc) throws GameActionException {
-        cooldown += (int) Math.round(GameConstants.ATTACK_COOLDOWN * getAttackCooldownMult());
+        cooldown += getAttackCooldown();
         rc.attack(loc);
     }
 
     public static void heal(MapLocation loc) throws GameActionException {
-        cooldown += (int) Math.round(GameConstants.HEAL_COOLDOWN * getHealCooldownMult());
+        cooldown += getHealCooldown();
         rc.heal(loc);
     }
 
     public static void build(TrapType trap, MapLocation loc) throws GameActionException {
-        cooldown += (int) Math.round(BUILD_COOLDOWN * getBuildCooldownMult());
+        cooldown += getBuildCooldown();
         rc.build(trap, loc);
     }
 
@@ -50,6 +50,18 @@ public class Action {
     public static void dropFlag(MapLocation loc) throws GameActionException {
         cooldown += GameConstants.PICKUP_DROP_COOLDOWN;
         rc.dropFlag(loc);
+    }
+
+    public static int getAttackCooldown() {
+        return (int) Math.round(GameConstants.ATTACK_COOLDOWN * getAttackCooldownMult());
+    }
+
+    public static int getHealCooldown() {
+        return (int) Math.round(GameConstants.HEAL_COOLDOWN * getHealCooldownMult());
+    }
+
+    public static int getBuildCooldown() {
+        return (int) Math.round(BUILD_COOLDOWN * getBuildCooldownMult());
     }
 
     private static double getAttackCooldownMult() {
