@@ -116,6 +116,8 @@ public class MainPhase extends Robot {
     public static void run() throws GameActionException {
         Micro.run();
         runStrat();
+
+        // FIXME: do we need a full second run? runStrat should not put us in attack range. Its very expensive
         Micro.run();
     }
 }
