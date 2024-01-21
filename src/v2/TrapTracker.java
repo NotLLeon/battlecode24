@@ -20,25 +20,18 @@ public class TrapTracker {
         MapInfo[] triggeredTraps = Utils.filterMapInfoArr(nearbyTraps,
                 (i) -> inTrackRange(i.getMapLocation()) && i.getTrapType() == TrapType.NONE);
 
-        for (MapLocation trap : Utils.mapInfoToLocArr(triggeredTraps)) {
-            // FIXME: very expensive
-            RobotInfo[] stunned = rc.senseNearbyRobots(trap, 2, rc.getTeam().opponent());
-            for (RobotInfo enemy : stunned) {
-                int id = enemy.getID();
-                stunnedEnemies.remove(id);
-                stunnedEnemies.add(id, rc.getRoundNum());
+        RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+        MapLocation[] triggeredLocs = Utils.mapInfoToLocArr(triggeredTraps);
+        for (RobotInfo enemy : enemyRobots) {
+            for (MapLocation trap : triggeredLocs) {
+                if (enemy.getLocation().isWithinDistanceSquared(trap, TrapType.STUN.enterRadius)) {
+                    int id = enemy.getID();
+                    stunnedEnemies.remove(id);
+                    stunnedEnemies.add(id, rc.getRoundNum());
+                    break;
+                }
             }
         }
-
-//        if (stunnedEnemies.size > STUNNED_ENEMIES_MAP_MAX_SIZE) {
-//            FastIntIntMap temp = new FastIntIntMap();
-//            int curRound = rc.getRoundNum();
-//            for (int id : stunnedEnemies.getKeys()) {
-//                int lastStunned = stunnedEnemies.getVal(id);
-//                if (curRound - lastStunned < 5) temp.add(id, stunnedEnemies.getVal(id));
-//            }
-//            stunnedEnemies = temp;
-//         }
     }
 
     public static void sensePlacedTraps() throws GameActionException {

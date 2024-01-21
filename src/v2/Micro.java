@@ -1,15 +1,12 @@
 package v2;
 
 import battlecode.common.*;
-import battlecode.world.Trap;
-import v2.fast.FastIntIntMap;
 
 import static v2.Constants.*;
 
 public class Micro {
 
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
-    private static final int RETREAT_HEALTH_THRESHOLD = 250;
     private static RobotInfo[] visibleFriendlyRobots;
     private static RobotInfo[] visibleEnemyRobots;
     private static RobotInfo[] immediateEnemyRobots;
@@ -81,6 +78,7 @@ public class Micro {
     }
 
     private static boolean isStunned(int id) {
+//        return false;
         return rc.getRoundNum() - TrapTracker.getLastStunnedRound(id) <= 2;
     }
 
@@ -320,10 +318,9 @@ public class Micro {
     }
 
     private static boolean adjacentToTrap(MapLocation loc) throws GameActionException {
-        // FIXME: dont call this every time
-        MapInfo[] adjacentToLoc = rc.senseNearbyMapInfos(loc, 2);
-        for (MapInfo info : adjacentToLoc) {
-            if (info.getTrapType() != TrapType.NONE) return true;
+        for (Direction dir : DIRECTIONS) {
+            MapLocation adjLoc = loc.add(dir);
+            if (rc.canSenseLocation(adjLoc) && rc.senseMapInfo(adjLoc).getTrapType() != TrapType.NONE) return true;
         }
         return false;
     }
@@ -332,15 +329,17 @@ public class Micro {
         // TODO: allow moving towards stunned enemies
         if (immediateEnemyRobots.length > 0 || visibleEnemyRobots.length == 0 || !rc.isActionReady()) return;
 
-        RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
-                visibleEnemyRobots,
-                (r) -> !isStunned(r.getID())
-        );
+        RobotInfo[] unstunnedVisibleEnemyRobots = visibleEnemyRobots;
+//                Utils.filterRobotInfoArr(
+//                visibleEnemyRobots,
+//                (r) -> !isStunned(r.getID())
+//        );
 
-        RobotInfo[] unstunnedCloseEnemyRobots = Utils.filterRobotInfoArr(
-                closeEnemyRobots,
-                (r) -> !isStunned(r.getID())
-        );
+        RobotInfo[] unstunnedCloseEnemyRobots = closeEnemyRobots;
+//                Utils.filterRobotInfoArr(
+//                closeEnemyRobots,
+//                (r) -> !isStunned(r.getID())
+//        );
 
         if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return;
 
@@ -399,6 +398,7 @@ public class Micro {
 
     public static void run() throws GameActionException {
         if (rc.hasFlag()) return;
+        if (!rc.isMovementReady() && !rc.isActionReady()) return;
 
         sense();
         TrapTracker.senseTriggeredTraps();
