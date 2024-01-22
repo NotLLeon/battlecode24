@@ -346,17 +346,17 @@ public class Micro {
 
         // approach damaged friendlies for healing/grouping
         if (visibleEnemyRobots.length == 0) {
-            MapLocation followLoc = null;
-            int minDis = 999999;
-            for (RobotInfo friendly : visibleFriendlyRobots) {
-                MapLocation friendlyLoc = friendly.getLocation();
-                int dis = friendlyLoc.distanceSquaredTo(curLoc);
-                if (friendly.getHealth() <= RETREAT_HEALTH_THRESHOLD && dis < minDis) {
-                    followLoc = friendlyLoc;
-                    minDis = dis;
-                }
-            }
-            if (followLoc != null) moveInDir(curLoc.directionTo(followLoc), 1);
+//            MapLocation followLoc = null;
+//            int minDis = 999999;
+//            for (RobotInfo friendly : visibleFriendlyRobots) {
+//                MapLocation friendlyLoc = friendly.getLocation();
+//                int dis = friendlyLoc.distanceSquaredTo(curLoc);
+//                if (friendly.getHealth() <= RETREAT_HEALTH_THRESHOLD && dis < minDis) {
+//                    followLoc = friendlyLoc;
+//                    minDis = dis;
+//                }
+//            }
+//            if (followLoc != null) moveInDir(curLoc.directionTo(followLoc), 1);
             return;
         }
 
