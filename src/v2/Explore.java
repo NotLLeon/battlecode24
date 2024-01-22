@@ -2,18 +2,21 @@ package v2;
 
 import battlecode.common.*;
 
-import static v2.Constants.rc;
-import static v2.Constants.DIRECTIONS;
-import static v2.Constants.EXPLORE_NUM_TRACKED_LOCATIONS;
-import static v2.Constants.EXPLORE_HIGH_WEIGHT_DIRECTION;
-import static v2.Constants.EXPLORE_MOVES_TO_TRACK_LOCATION;
+import static v2.Constants.*;
 
 public class Explore {
-    static int prevlocIdx = 0;
-    static int numMoves = 0;
-    static MapLocation[] prevLocs = new MapLocation[EXPLORE_NUM_TRACKED_LOCATIONS];
+    private static int prevlocIdx = 0;
+    private static int numMoves = 0;
+    private static MapLocation[] prevLocs = new MapLocation[EXPLORE_NUM_TRACKED_LOCATIONS];
 
-    static Direction prevDir;
+    private static final int FILLERS_RATIO = 3;
+    private static final int MIN_CRUMBS_TO_FILL = 5 * GameConstants.FILL_COST;
+
+    private static Direction prevDir;
+
+    private static boolean shouldFill() {
+        return (rc.getID() % FILLERS_RATIO == 0) && (rc.getCrumbs() >= MIN_CRUMBS_TO_FILL);
+    }
 
     public static MapLocation [] getAllDetectableWalls() throws GameActionException {
         MapLocation [] detectedAreas = rc.getAllLocationsWithinRadiusSquared(rc.getLocation(), 4);
@@ -84,21 +87,22 @@ public class Explore {
         }
 
         if (numClosePrevLocs == EXPLORE_NUM_TRACKED_LOCATIONS) {
-            rc.setIndicatorString("TRAPPED");
             numMoves = 0;
         }
 
         if (prevLocs[0] == null) {
             Direction dir = Random.nextDir();
             for (int i = 0; i < 8; ++i) {
+                if (shouldFill() && rc.canFill(rc.getLocation().add(dir))) {
+                    Action.fill(rc.getLocation().add(dir));
+                }
                 if (rc.canMove(dir)) {
                     if ((++numMoves) % EXPLORE_MOVES_TO_TRACK_LOCATION == 0) {
                         prevLocs[prevlocIdx] = rc.getLocation();
                         prevlocIdx++;
                     }
+                    prevDir = dir;
                     rc.move(dir);
-                    // for empty carriers
-                    exploreNewArea();
                     break;
                 }
                 dir = dir.rotateLeft();
@@ -108,6 +112,9 @@ public class Explore {
             Direction dir = prevDir;
             RobotInfo [] robots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
             boolean nearbyEnemy = robots.length > 0 ? true : false;
+            if (shouldFill() && rc.canFill(rc.getLocation().add(dir))) {
+                Action.fill(rc.getLocation().add(dir));
+            }
             if (numMoves % EXPLORE_MOVES_TO_TRACK_LOCATION == 0 || !rc.canMove(dir) || nearbyEnemy) {
                 dir = exploreAwayFromLoc(getAvgLocation(prevLocs));
             }
@@ -119,7 +126,6 @@ public class Explore {
                 }
                 prevDir = dir;
                 rc.move(dir);
-                exploreNewArea();
             }
         }
     }
