@@ -15,13 +15,13 @@ public class Pathfinding {
         return (rc.getID() % FILLERS_RATIO == 0) && (rc.getCrumbs() >= MIN_CRUMBS_TO_FILL);
     }
 
-    public static void moveTo(MapLocation dest, boolean adj, int radius) throws GameActionException {
+    public static Direction getNextDir(MapLocation dest, boolean adj, int radius) throws GameActionException {
         MapLocation curLoc = rc.getLocation();
         if(!rc.isMovementReady()
                 || curLoc.equals(dest)
                 || (adj && curLoc.isAdjacentTo(dest))
                 || (radius != -1 && curLoc.distanceSquaredTo(dest) <= radius)) {
-            return;
+            return Direction.CENTER;
         }
 
         // use BFS when possible, otherwise use BugNav until the obstacle is cleared
@@ -34,6 +34,11 @@ public class Pathfinding {
         if(dir == Direction.CENTER) {
             dir = BugNav.getDir(dest);
         }
+        return dir;
+    }
+
+    public static void moveTo(MapLocation dest, boolean adj, int radius) throws GameActionException {
+        Direction dir = getNextDir(dest, adj, radius);
         if(rc.canMove(dir)) rc.move(dir);
     }
 }

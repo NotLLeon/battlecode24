@@ -15,6 +15,8 @@ public class MainPhase extends Robot {
     private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
     private static MapLocation curRushLoc = null;
     private static boolean visitedRushLoc = false;
+    private static final int FLAG_CONVOY_CONGESTION_THRESHOLD = 4;
+    private static boolean shouldPickUpFlag = true;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -33,7 +35,7 @@ public class MainPhase extends Robot {
         }
     }
 
-    private static int getRushInd() throws GameActionException {
+    private static int getRushInd() {
         // visit a flag that hasn't been picked up
         // if all flags are picked up, patrol default locs
         // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
@@ -81,6 +83,8 @@ public class MainPhase extends Robot {
 
         FlagDefense.scanAndSignal();
 
+        shouldPickUpFlag = true;
+
         if (rc.hasFlag()) {
             FlagInfo[] enemyFlags = rc.senseNearbyFlags(0, rc.getTeam().opponent());
 
@@ -92,11 +96,36 @@ public class MainPhase extends Robot {
                 }
             }
 
-            moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
+            MapLocation curLoc = rc.getLocation();
 
-            int flagId = pickedUpFlag.getID();
-            if (!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
-            else FlagRecorder.notifyCarryingFlag(flagId);
+            // check if path ahead is congested and drop flag if so
+            MapLocation targetLoc = Utils.findClosestLoc(Spawner.getSpawnCenters());
+            RobotInfo[] nearbyBots = rc.senseNearbyRobots(16, rc.getTeam()); // TODO: test diff ranges
+            Direction intendedDir = curLoc.directionTo(targetLoc);
+            int numBlockingBots = 0;
+
+            for (RobotInfo bot : nearbyBots) {
+                if (Utils.inGeneralDirection(curLoc.directionTo(bot.getLocation()), intendedDir)) {
+                    numBlockingBots++;
+                }
+            }
+
+            // TODO: test this number and fix this omega condition
+            // if (rc.canDropFlag(curLoc.add(intendedDir)) && (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD ||
+            //         (intendedDir != Direction.CENTER && rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null))) {
+
+            MapLocation intendedLoc = curLoc.add(intendedDir);
+            if ((numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD || rc.senseRobotAtLocation(intendedLoc) != null)
+                    && rc.canDropFlag(intendedLoc)) {
+                shouldPickUpFlag = false;
+                
+                Action.dropFlag(intendedLoc);
+            } else {
+                moveTo(targetLoc);
+                int flagId = pickedUpFlag.getID();
+                if (!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
+                else FlagRecorder.notifyCarryingFlag(flagId);
+            }
 
         } else {
 
@@ -113,11 +142,14 @@ public class MainPhase extends Robot {
 
     }
 
+    public static boolean getShouldPickUpFlag() {
+        // TODO: only pick up flag if you're closer to spawn or something like that
+        return shouldPickUpFlag;
+    }
+
     public static void run() throws GameActionException {
         Micro.run();
         runStrat();
-
-        // FIXME: do we need a full second run? runStrat should not put us in attack range. Its very expensive
         Micro.run();
     }
 }

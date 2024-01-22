@@ -452,7 +452,7 @@ public class Micro {
         tryAttack();
 
         // TODO: remove from micro?
-        tryMoveToFlag();
+        if (MainPhase.getShouldPickUpFlag()) tryMoveToFlag();
 
         tryAttack();
         tryHeal();
