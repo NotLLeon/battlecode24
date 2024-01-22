@@ -321,11 +321,59 @@ public class Micro {
         return false;
     }
 
+    // TODO: all enemy position stuff neads tuning
+    // we consider 2 enemy positions unique if they are greater than this distance squared from each other
+    private static final int ENEMY_POSITION_UNIQUE_DIS_THRESHOLD = 9;
+    private static void recordEnemyPosition() throws GameActionException {
+        MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(visibleEnemyRobots));
+        int insertionInd = -1;
+        int curRound = rc.getRoundNum();
+        for (int i = MAX_NUM_COMMS_ENEMY_POSITIONS ; --i >= 0;) {
+            MapLocation existingLoc = Comms.readLoc(COMMS_ENEMY_POSITIONS + i);
+            if (existingLoc == null) {
+                if (insertionInd == -1) insertionInd = i;
+                continue;
+            }
+            if (enemyCentroid.isWithinDistanceSquared(existingLoc, ENEMY_POSITION_UNIQUE_DIS_THRESHOLD)) {
+                insertionInd = i;
+                break;
+            }
+        }
+//        rc.setIndicatorString("recorded enemy position at " + enemyCentroid);
+        Comms.writeLoc(COMMS_ENEMY_POSITIONS + insertionInd, enemyCentroid);
+        Comms.write(COMMS_ENEMY_POSITIONS_LAST_UPDATED + insertionInd, curRound);
+    }
+
+    // we will move to enemy positions in this range
+    private static final int ENEMY_POSITION_RESPOND_DIS_THRESHOLD = 100;
+    // we will move to enemy positions if they were updated in this many rounds
+    private static final int ENEMY_POSITION_RESPOND_ROUND_THRESHOLD = 5;
+    private static MapLocation getEnemyPosition() throws GameActionException {
+        int curRound = rc.getRoundNum();
+        MapLocation curLoc = rc.getLocation();
+        MapLocation respondLoc = null;
+        int minDis = 999999;
+        for (int i = MAX_NUM_COMMS_ENEMY_POSITIONS; --i >= 0; ) {
+            MapLocation loc = Comms.readLoc(COMMS_ENEMY_POSITIONS + i);
+            if (loc == null) continue;
+            int disToPos = curLoc.distanceSquaredTo(loc);
+            if (disToPos > ENEMY_POSITION_RESPOND_DIS_THRESHOLD) continue;
+            int lastUpdated = Comms.read(COMMS_ENEMY_POSITIONS_LAST_UPDATED + i);
+            if (curRound - lastUpdated > ENEMY_POSITION_RESPOND_ROUND_THRESHOLD) continue;
+            if (disToPos < minDis) {
+                minDis = disToPos;
+                respondLoc = loc;
+            }
+        }
+        return respondLoc;
+    }
+
     private static void tryMove() throws GameActionException {
         if(!rc.isMovementReady()) return;
 
         MapLocation curLoc = rc.getLocation();
 
+        // retreat if low health
 //        if (rc.getHealth() <= RETREAT_HEALTH_THRESHOLD) {
 //            // FIXME: for testing, not precise
 //            if (closeEnemyRobots.length == 0) return;
@@ -337,6 +385,7 @@ public class Micro {
 
         // retreat if heavily outnumbered
 //        if (visibleEnemyRobots.length > 2 * visibleFriendlyRobots.length) {
+//            // FIXME: for testing, not precise
 //            MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(visibleEnemyRobots));
 //            moveInDirMinEnemies(enemyCentroid.directionTo(curLoc));
 //            return;
@@ -346,6 +395,14 @@ public class Micro {
 
         // approach damaged friendlies for healing/grouping
         if (visibleEnemyRobots.length == 0) {
+            MapLocation enemyPosLoc = getEnemyPosition();
+            if (enemyPosLoc != null) {
+//                rc.setIndicatorString("responding to enemy position " + enemyPosLoc);
+                moveInDir(curLoc.directionTo(enemyPosLoc), 1);
+            }
+
+            return;
+
 //            MapLocation followLoc = null;
 //            int minDis = 999999;
 //            for (RobotInfo friendly : visibleFriendlyRobots) {
@@ -357,8 +414,9 @@ public class Micro {
 //                }
 //            }
 //            if (followLoc != null) moveInDir(curLoc.directionTo(followLoc), 1);
-            return;
         }
+
+//        if (visibleEnemyRobots.length == 0) return;
 
         RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
                 visibleEnemyRobots,
@@ -443,6 +501,7 @@ public class Micro {
         }
 
         senseUnits();
+        if (visibleEnemyRobots.length > visibleFriendlyRobots.length + 2) recordEnemyPosition();
 
         tryMove();
 
