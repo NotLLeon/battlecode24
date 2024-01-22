@@ -115,11 +115,11 @@ public class MainPhase extends Robot {
             //         (intendedDir != Direction.CENTER && rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null))) {
 
             MapLocation intendedLoc = curLoc.add(intendedDir);
-            if ((numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD || rc.senseRobotAtLocation(intendedLoc) != null)
-                    && rc.canDropFlag(intendedLoc)) {
-                shouldPickUpFlag = false;
-                
-                Action.dropFlag(intendedLoc);
+            if (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD && rc.senseRobotAtLocation(intendedLoc) != null) {
+                if (rc.canDropFlag(intendedLoc)) {
+                    Action.dropFlag(intendedLoc);
+                    shouldPickUpFlag = false;
+                }
             } else {
                 moveTo(targetLoc);
                 int flagId = pickedUpFlag.getID();
