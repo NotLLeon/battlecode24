@@ -113,9 +113,9 @@ public class MainPhase extends Robot {
             // TODO: test this number and fix this omega condition
             // if (rc.canDropFlag(curLoc.add(intendedDir)) && (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD || 
             //         (intendedDir != Direction.CENTER && rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null))) {
-            if (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD
-                    && rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null) {
+            if (rc.canDropFlag(curLoc.add(intendedDir)) && (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD || rc.senseRobotAtLocation    (curLoc.add(intendedDir)) != null)) {
                 shouldPickUpFlag = false;
+                
                 Action.dropFlag(curLoc.add(intendedDir));
             } else {
                 moveTo(targetLoc);
