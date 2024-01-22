@@ -15,6 +15,9 @@ public class MainPhase extends Robot {
     private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
     private static MapLocation curRushLoc = null;
     private static boolean visitedRushLoc = false;
+    private static final int FLAG_CONVOY_CONGESTION_THRESHOLD = 4;
+
+    private static boolean shouldPickUpFlag = true;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -81,6 +84,8 @@ public class MainPhase extends Robot {
 
         FlagDefense.scanAndSignal();
 
+        shouldPickUpFlag = true;
+
         if (rc.hasFlag()) {
             FlagInfo[] enemyFlags = rc.senseNearbyFlags(0, rc.getTeam().opponent());
 
@@ -92,11 +97,36 @@ public class MainPhase extends Robot {
                 }
             }
 
-            moveTo(Utils.findClosestLoc(Spawner.getSpawnCenters()));
+            MapLocation curLoc = rc.getLocation();
 
-            int flagId = pickedUpFlag.getID();
-            if (!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
-            else FlagRecorder.notifyCarryingFlag(flagId);
+            MapLocation targetLoc = Utils.findClosestLoc(Spawner.getSpawnCenters());
+            RobotInfo[] nearbyBots = rc.senseNearbyRobots(16, rc.getTeam()); // TODO: need to test diff ranges
+            // Direction intendedDir = getNextDirection(targetLoc);
+            Direction intendedDir = curLoc.directionTo(targetLoc);
+            int numBlockingBots = 0;
+
+            // rc.setIndicatorString(intendedDir.toString() + Action.getCooldown());
+
+            for (RobotInfo bot : nearbyBots) {
+                if (Utils.inGeneralDirection(curLoc.directionTo(bot.getLocation()), intendedDir)) {
+                    numBlockingBots++;
+                }
+            }
+
+            rc.setIndicatorString((rc.canDropFlag(curLoc.add(intendedDir)) ? "CANDROP" : "CANNOT") + intendedDir);
+            
+            // TODO: test this number and fix this omega condition
+            // if (rc.canDropFlag(curLoc.add(intendedDir)) && (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD || 
+            //         (intendedDir != Direction.CENTER && rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null))) {
+            if (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD && rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null) {
+                shouldPickUpFlag = false;
+                Action.dropFlag(curLoc.add(intendedDir));
+            } else {
+                moveTo(targetLoc);
+                int flagId = pickedUpFlag.getID();
+                if (!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
+                else FlagRecorder.notifyCarryingFlag(flagId);
+            }
 
         } else {
 
@@ -111,6 +141,10 @@ public class MainPhase extends Robot {
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
         for (FlagInfo flag : visibleEnemyFlags) FlagRecorder.foundFlag(flag);
 
+    }
+
+    public static boolean getShouldPickUpFlag() {
+        return shouldPickUpFlag;
     }
 
     public static void run() throws GameActionException {
