@@ -7,6 +7,8 @@ import static v2.Constants.*;
 public class Micro {
 
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
+    // if your health is <= this number, back away from enemy and friendlies will approach you
+    private static final int RETREAT_HEALTH_THRESHOLD = 250;
     private static RobotInfo[] visibleFriendlyRobots;
     private static RobotInfo[] visibleEnemyRobots;
     private static RobotInfo[] immediateEnemyRobots;
@@ -319,9 +321,44 @@ public class Micro {
         return false;
     }
 
-    private static void tryAdvance() throws GameActionException {
-        // TODO: allow moving towards stunned enemies
-        if (immediateEnemyRobots.length > 0 || visibleEnemyRobots.length == 0 || !rc.isActionReady()) return;
+    private static void tryMove() throws GameActionException {
+        if(!rc.isMovementReady()) return;
+
+        MapLocation curLoc = rc.getLocation();
+
+//        if (rc.getHealth() <= RETREAT_HEALTH_THRESHOLD) {
+//            // FIXME: for testing, not precise
+//            if (closeEnemyRobots.length == 0) return;
+//            MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(closeEnemyRobots));
+//            Direction dirFromCentroid = enemyCentroid.directionTo(curLoc);
+//            moveInDir(dirFromCentroid, 1);
+//            return;
+//        }
+
+        // retreat if heavily outnumbered
+//        if (visibleEnemyRobots.length > 2 * visibleFriendlyRobots.length) {
+//            MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(visibleEnemyRobots));
+//            moveInDirMinEnemies(enemyCentroid.directionTo(curLoc));
+//            return;
+//        }
+
+        if (immediateEnemyRobots.length > 0 || !rc.isActionReady()) return;
+
+        // approach damaged friendlies for healing/grouping
+        if (visibleEnemyRobots.length == 0) {
+            MapLocation followLoc = null;
+            int minDis = 999999;
+            for (RobotInfo friendly : visibleFriendlyRobots) {
+                MapLocation friendlyLoc = friendly.getLocation();
+                int dis = friendlyLoc.distanceSquaredTo(curLoc);
+                if (friendly.getHealth() <= RETREAT_HEALTH_THRESHOLD && dis < minDis) {
+                    followLoc = friendlyLoc;
+                    minDis = dis;
+                }
+            }
+            if (followLoc != null) moveInDir(curLoc.directionTo(followLoc), 1);
+            return;
+        }
 
         RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
                 visibleEnemyRobots,
@@ -350,7 +387,6 @@ public class Micro {
 
         if (!longRangeCond && !closeRangeCond && !healthCond) return;
 
-        MapLocation curLoc = rc.getLocation();
         Direction[] moveDirs;
         if (closeEnemyRobots.length > 0) {
             // if we are moving into attack range, pick the direction that allows us to attack at least 1 enemy
@@ -377,7 +413,6 @@ public class Micro {
 
     public static boolean inCombat() throws GameActionException {
         senseEnemies();
-        // can prob add more conditions
 
         // do we think any enemies can move into attack radius (full check too expensive)
         MapLocation curLoc = rc.getLocation();
@@ -409,7 +444,7 @@ public class Micro {
 
         senseUnits();
 
-        tryAdvance();
+        tryMove();
 
         // if we can place trap and still do something else, try place trap first
         // FIXME: doesnt consider level 6 attack spec, which allows unit to attack twice in 1 turn
