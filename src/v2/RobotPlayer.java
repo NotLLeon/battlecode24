@@ -33,6 +33,8 @@ public strictfp class RobotPlayer {
                     boolean isSpawned = Spawner.spawn();
                     if (!isSpawned) continue;
                 }
+                if (curRound == GameConstants.SETUP_ROUNDS + 1) Comms.clearSetup();
+
                 if (isSetupPhase) SetupPhase.run();
                 else MainPhase.run();
 

@@ -12,24 +12,33 @@ public class SetupPhase extends Robot {
     public static MapLocation setupLoc = null;
 
     public static void run() throws GameActionException {
+        SetupCommunication.init();
         // for now just explore, try to path to crumbs, then if dam found, gather around dam
         // to prepare attack
+        SetupCommunication.setupMeetup();
+
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(-1);
-        if (crumbLocs.length > 0) {
+        if (SetupCommunication.hasMeetup() && rc.getRoundNum() > 100) {
+            MapInfo[] adjMap = rc.senseNearbyMapInfos(2);
+            boolean stopMoving = false;
+            for (MapInfo info : adjMap) {
+                if (info.isDam()) {
+                    stopMoving = true;
+                }
+            }
+            if (!stopMoving) moveTo(SetupCommunication.meetLocation);
+        } else if (crumbLocs.length > 0) {
             moveTo(crumbLocs[0]);
-        } else if (exploring){
+        } else {
             MapInfo[] nearbyMap = rc.senseNearbyMapInfos();
             for (MapInfo info : nearbyMap) {
                 if (info.isDam()) {
-                    exploring = false;
-                    setupLoc = info.getMapLocation();
-                    moveTo(setupLoc);
+                    SetupCommunication.writeMeetupLoc(info.getMapLocation());
+                    moveTo(SetupCommunication.meetLocation);
                     break;
                 }
             }
             if (exploring) Explore.exploreNewArea();
-        } else {
-            moveTo(setupLoc);
         }
     }
 }
