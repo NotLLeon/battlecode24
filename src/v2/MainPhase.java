@@ -111,12 +111,15 @@ public class MainPhase extends Robot {
             }
 
             // TODO: test this number and fix this omega condition
-            // if (rc.canDropFlag(curLoc.add(intendedDir)) && (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD || 
+            // if (rc.canDropFlag(curLoc.add(intendedDir)) && (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD ||
             //         (intendedDir != Direction.CENTER && rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null))) {
-            if (rc.canDropFlag(curLoc.add(intendedDir)) && (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD || rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null)) {
+
+            MapLocation intendedLoc = curLoc.add(intendedDir);
+            if ((numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD || rc.senseRobotAtLocation(intendedLoc) != null)
+                    && rc.canDropFlag(intendedLoc)) {
                 shouldPickUpFlag = false;
                 
-                Action.dropFlag(curLoc.add(intendedDir));
+                Action.dropFlag(intendedLoc);
             } else {
                 moveTo(targetLoc);
                 int flagId = pickedUpFlag.getID();
