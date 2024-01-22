@@ -133,4 +133,9 @@ public class Utils {
         }
         return new MapLocation(x / locs.length, y / locs.length);
     }
+
+    // Gets if dir1 is within 45 degrees of dir2
+    public static boolean inGeneralDirection(Direction dir1, Direction dir2) {
+        return dir1.rotateLeft() == dir2 || dir1.rotateRight() == dir2 || dir1 == dir2;
+    }
 }

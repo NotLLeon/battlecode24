@@ -11,6 +11,10 @@ public abstract class Robot {
         Pathfinding.moveTo(dest, false, -1);
     }
 
+    public static Direction getNextDirection(MapLocation dest) throws GameActionException {
+        return Pathfinding.getNextDir(dest, false, -1);
+    }
+
     public static void moveToRadius(MapLocation dest, int radius) throws GameActionException {
         Pathfinding.moveTo(dest, false, radius);
     }

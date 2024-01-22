@@ -208,6 +208,7 @@ myenv/
 
 random_stuff.py
 jwt.txt
+__pycache__
 
 # Ignoring this since this will store all the match links
 match_links.json
