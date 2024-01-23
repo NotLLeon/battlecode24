@@ -30,7 +30,12 @@ public class Constants {
     static final int EXPLORE_NUM_TRACKED_LOCATIONS = 10;
     static final int EXPLORE_MOVES_TO_TRACK_LOCATION = 5;
 
-    // Comms indices
+    // SETUP PHASE Comms indices
+    static final int COMMS_MEETUP_LOCS = 0; // uses 0 - 2
+    static final int COMMS_SETUP_CLEARED = 63; // uses 63
+    static final int COMMS_UNIT_IDS = 62; // uses 13 - 62
+    
+    // MAIN PHASE Comms indices
     static final int COMMS_ENEMY_FLAG_LOCS_START_IND = 0; // uses 0 - 2
     static final int COMMS_ENEMY_FLAG_IDS_START_IND = 3; // uses 3 - 5
     static final int COMMS_ENEMY_FLAG_LAST_ROUND_CARRYING_START_IND = 6; // uses 6 - 8
