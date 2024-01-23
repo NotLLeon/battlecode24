@@ -37,3 +37,5 @@ ACCEPTED_SECONDS_DELTA = 3
 
 OUR_TEAM_NAME = "It's A Trap?"
 OUR_TEAM_ID = 766
+
+MAX_MAPS_PER_MATCH = 10 # Up to 10 maps played at a single time

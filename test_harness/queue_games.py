@@ -27,7 +27,14 @@ def generateGameReqBody(oppTeamName, mapsList):
     return (reqBodyTeamA, reqBodyTeamB)
 
 def generateGameReqsList(oppBotsList, mapsList):
-    return [generateGameReqBody(oppTeam, mapsList) for oppTeam in oppBotsList]
+    retList = []
+    #Handling queuing > 10 maps at a time
+    for i in range(0, len(mapsList), MAX_MAPS_PER_MATCH):
+        currMapsSubsetList = mapsList[i:i+MAX_MAPS_PER_MATCH]
+
+        for oppTeam in oppBotsList:
+            retList.append(generateGameReqBody(oppTeam, currMapsSubsetList))
+    return retList
 
 def isValidRequest(response):
     # Check to make sure it's a 200s status code
