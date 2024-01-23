@@ -1,7 +1,7 @@
 package v2;
 
 import battlecode.common.*;
-import static v2.Constants.rc;
+import static v2.Constants.*;
 
 public class Comms {
 

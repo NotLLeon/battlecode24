@@ -1,8 +1,8 @@
 package v2;
 
-import battlecode.common.*;
-
 import static v2.Constants.*;
+
+import battlecode.common.*;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
@@ -33,6 +33,7 @@ public strictfp class RobotPlayer {
                     boolean isSpawned = Spawner.spawn();
                     if (!isSpawned) continue;
                 }
+
                 if (isSetupPhase) SetupPhase.run();
                 else MainPhase.run();
 
