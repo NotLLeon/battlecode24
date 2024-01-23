@@ -6,9 +6,10 @@ import static v2.Constants.*;
 
 public class Micro {
 
-    private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
+    private static final int INF = 999999999;
+//    private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
     // if your health is <= this number, back away from enemy and friendlies will approach you
-    private static final int RETREAT_HEALTH_THRESHOLD = 250;
+//    private static final int RETREAT_HEALTH_THRESHOLD = 250;
     // we report any group of enemies >= this number, unless we greatly outnumber them
     private static final int ENEMY_REPORT_SIZE_THRESHOLD = 5;
     private static RobotInfo[] visibleFriendlyRobots;
@@ -216,7 +217,7 @@ public class Micro {
         //  considering position of friendly units and their attack lvl. Break ties with spec again.
         RobotInfo target = null;
         boolean canOneShot = false;
-        int minKillTime = 999999;
+        int minKillTime = INF;
         for (RobotInfo enemy : immediateEnemyRobots) {
             if (enemy.hasFlag()) { // is this correct? Another unit can immediately pick up flag
                 target = enemy;
@@ -273,7 +274,7 @@ public class Micro {
         if (closeEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
 
         RobotInfo target = null;
-        int minBaseHits = 9999999;
+        int minBaseHits = INF;
         for (RobotInfo friendly : immediateFriendlyRobots) {
             int baseHits = friendly.getHealth() / BASE_ATTACK_DMG;
             if (baseHits < minBaseHits
@@ -354,7 +355,7 @@ public class Micro {
         int curRound = rc.getRoundNum();
         MapLocation curLoc = rc.getLocation();
         MapLocation respondLoc = null;
-        int minDis = 999999;
+        int minDis = INF;
         for (int i = MAX_NUM_COMMS_ENEMY_POSITIONS; --i >= 0; ) {
             MapLocation loc = Comms.readLoc(COMMS_ENEMY_POSITIONS + i);
             if (loc == null) continue;
