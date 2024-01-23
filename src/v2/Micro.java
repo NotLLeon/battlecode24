@@ -7,7 +7,7 @@ import static v2.Constants.*;
 public class Micro {
 
     private static final int INF = 999999999;
-//    private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
+    private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
     // if your health is <= this number, back away from enemy and friendlies will approach you
 //    private static final int RETREAT_HEALTH_THRESHOLD = 250;
     // we report any group of enemies >= this number, unless we greatly outnumber them
