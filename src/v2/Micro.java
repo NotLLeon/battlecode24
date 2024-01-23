@@ -341,7 +341,7 @@ public class Micro {
                 break;
             }
         }
-//        rc.setIndicatorString("recorded enemy position at " + enemyCentroid);
+
         Comms.writeLoc(COMMS_ENEMY_POSITIONS + insertionInd, enemyCentroid);
         Comms.write(COMMS_ENEMY_POSITIONS_LAST_UPDATED + insertionInd, curRound);
     }
@@ -398,27 +398,10 @@ public class Micro {
         // approach damaged friendlies for healing/grouping
         if (visibleEnemyRobots.length == 0) {
             MapLocation enemyPosLoc = getEnemyPosition();
-            if (enemyPosLoc != null) {
-//                rc.setIndicatorString("responding to enemy position " + enemyPosLoc);
-                moveInDir(curLoc.directionTo(enemyPosLoc), 1);
-            }
-
+            if (enemyPosLoc != null) moveInDir(curLoc.directionTo(enemyPosLoc), 1);
             return;
-
-//            MapLocation followLoc = null;
-//            int minDis = 999999;
-//            for (RobotInfo friendly : visibleFriendlyRobots) {
-//                MapLocation friendlyLoc = friendly.getLocation();
-//                int dis = friendlyLoc.distanceSquaredTo(curLoc);
-//                if (friendly.getHealth() <= RETREAT_HEALTH_THRESHOLD && dis < minDis) {
-//                    followLoc = friendlyLoc;
-//                    minDis = dis;
-//                }
-//            }
-//            if (followLoc != null) moveInDir(curLoc.directionTo(followLoc), 1);
         }
 
-//        if (visibleEnemyRobots.length == 0) return;
 
         RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
                 visibleEnemyRobots,
