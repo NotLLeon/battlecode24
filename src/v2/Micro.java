@@ -9,6 +9,8 @@ public class Micro {
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
     // if your health is <= this number, back away from enemy and friendlies will approach you
     private static final int RETREAT_HEALTH_THRESHOLD = 250;
+    // we report any group of enemies >= this number, unless we greatly outnumber them
+    private static final int ENEMY_REPORT_SIZE_THRESHOLD = 5;
     private static RobotInfo[] visibleFriendlyRobots;
     private static RobotInfo[] visibleEnemyRobots;
     private static RobotInfo[] immediateEnemyRobots;
@@ -501,7 +503,8 @@ public class Micro {
         }
 
         senseUnits();
-        if (visibleEnemyRobots.length > visibleFriendlyRobots.length + 2) recordEnemyPosition();
+        if (visibleEnemyRobots.length > ENEMY_REPORT_SIZE_THRESHOLD
+                && 2 * visibleEnemyRobots.length > visibleFriendlyRobots.length) recordEnemyPosition();
 
         tryMove();
 
