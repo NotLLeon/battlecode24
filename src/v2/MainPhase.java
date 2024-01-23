@@ -3,6 +3,7 @@ package v2;
 import static v2.Constants.*;
 
 import battlecode.common.*;
+import v2.fast.FastIntIntMap;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
@@ -17,6 +18,7 @@ public class MainPhase extends Robot {
     private static boolean visitedRushLoc = false;
     private static final int FLAG_CONVOY_CONGESTION_THRESHOLD = 4;
     private static boolean shouldPickUpFlag = true;
+    private static final FastIntIntMap idToTurnOrder = new FastIntIntMap();
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -145,6 +147,11 @@ public class MainPhase extends Robot {
     public static boolean getShouldPickUpFlag() {
         // TODO: only pick up flag if you're closer to spawn or something like that
         return shouldPickUpFlag;
+    }
+
+    // called in setup phase after IDs are read
+    public static void setTurnOrder(int[] orderedIDs) {
+        for (int i = orderedIDs.length; --i >= 0;) idToTurnOrder.add(orderedIDs[i], i);
     }
 
     public static void run() throws GameActionException {

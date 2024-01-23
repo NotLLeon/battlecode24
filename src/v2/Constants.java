@@ -33,6 +33,7 @@ public class Constants {
     // SETUP PHASE Comms indices
     static final int COMMS_MEETUP_LOCS = 0; // uses 0 - 2
     static final int COMMS_SETUP_CLEARED = 63; // uses 63
+    static final int COMMS_UNIT_IDS = 62; // uses 13 - 62
     
     // MAIN PHASE Comms indices
     static final int COMMS_ENEMY_FLAG_LOCS_START_IND = 0; // uses 0 - 2
