@@ -65,6 +65,8 @@ public class MainPhase extends Robot {
         }
         MapLocation curLoc = rc.getLocation();
 
+        if (curLoc.distanceSquaredTo(rushLoc) >= GameConstants.FLAG_BROADCAST_NOISE_RADIUS) visitedRushLoc = false;
+
         if (!FlagRecorder.isExactLoc(rushInd) &&
                 (visitedRushLoc || curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED))) {
             visitedRushLoc = true;
