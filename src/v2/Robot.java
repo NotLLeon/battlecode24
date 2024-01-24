@@ -2,8 +2,7 @@ package v2;
 
 
 import battlecode.common.*;
-import v2.Pathfinding.*;
-import static v2.Constants.rc;
+import v2.pathfinding.*;
 
 public abstract class Robot {
 

@@ -1,4 +1,4 @@
-package v2.Pathfinding;
+package v2.pathfinding;
 
 import battlecode.common.*;
 import v2.Action;
@@ -32,9 +32,7 @@ public class Pathfinding {
             MapLocation nextLoc = curLoc.add(dir);
             if (rc.canFill(nextLoc)) Action.fill(nextLoc);
         }
-        if(dir == Direction.CENTER) {
-            dir = BugNav.getDir(dest);
-        }
+        if(!rc.canMove(dir)) dir = BugNav.getDir(dest);
         return dir;
     }
 
