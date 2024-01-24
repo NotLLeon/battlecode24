@@ -12,6 +12,7 @@ public class Pathfinding {
     private static final int MIN_CRUMBS_TO_FILL = 5 * GameConstants.FILL_COST;
 
     private static boolean shouldFill() {
+        if (rc.hasFlag()) return false;
         return (rc.getID() % FILLERS_RATIO == 0) && (rc.getCrumbs() >= MIN_CRUMBS_TO_FILL);
     }
 

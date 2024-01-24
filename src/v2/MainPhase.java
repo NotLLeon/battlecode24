@@ -3,7 +3,6 @@ package v2;
 import static v2.Constants.*;
 
 import battlecode.common.*;
-import v2.fast.FastIntIntMap;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
@@ -14,11 +13,9 @@ public class MainPhase extends Robot {
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
     private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
-    private static MapLocation curRushLoc = null;
-    private static boolean visitedRushLoc = false;
+    private static boolean shouldExplore = false;
     private static final int FLAG_CONVOY_CONGESTION_THRESHOLD = 4;
     private static boolean shouldPickUpFlag = true;
-    private static final FastIntIntMap idToTurnOrder = new FastIntIntMap();
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -61,15 +58,13 @@ public class MainPhase extends Robot {
 
         int rushInd = getRushInd();
         MapLocation rushLoc = FlagRecorder.getFlagLoc(getRushInd());
-        if(!rushLoc.equals(curRushLoc)) {
-            curRushLoc = rushLoc;
-            visitedRushLoc = false;
-        }
         MapLocation curLoc = rc.getLocation();
 
+        if (curLoc.distanceSquaredTo(rushLoc) >= GameConstants.FLAG_BROADCAST_NOISE_RADIUS) shouldExplore = false;
+
         if (!FlagRecorder.isExactLoc(rushInd) &&
-                (visitedRushLoc || curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED))) {
-            visitedRushLoc = true;
+                (shouldExplore || curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED))) {
+            shouldExplore = true;
             Explore.exploreNewArea();
         } else {
             // grouping attempt
@@ -147,11 +142,6 @@ public class MainPhase extends Robot {
     public static boolean getShouldPickUpFlag() {
         // TODO: only pick up flag if you're closer to spawn or something like that
         return shouldPickUpFlag;
-    }
-
-    // called in setup phase after IDs are read
-    public static void setTurnOrder(int[] orderedIDs) {
-        for (int i = orderedIDs.length; --i >= 0;) idToTurnOrder.add(orderedIDs[i], i);
     }
 
     public static void run() throws GameActionException {
