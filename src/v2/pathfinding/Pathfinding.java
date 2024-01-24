@@ -30,9 +30,12 @@ public class Pathfinding {
         if(!BugNav.isTracingObstacle()) {
             dir = BFS.getDir(dest, shouldFill());
             MapLocation nextLoc = curLoc.add(dir);
-            if (rc.canFill(nextLoc)) Action.fill(nextLoc);
+            if (rc.canFill(nextLoc)) {
+                Action.fill(nextLoc);
+                return dir;
+            }
         }
-        if(!rc.canMove(dir)) dir = BugNav.getDir(dest);
+        if (!rc.canMove(dir)) dir = BugNav.getDir(dest);
         return dir;
     }
 
