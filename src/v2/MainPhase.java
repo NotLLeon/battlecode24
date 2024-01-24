@@ -18,7 +18,7 @@ public class MainPhase extends Robot {
     private static final int FLAG_CONVOY_CONGESTION_THRESHOLD = 4;
     private static boolean shouldPickUpFlag = true;
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
-    private static Direction flagBearerDir = Direction.CENTER;
+    private static MapLocation flagBearer = null;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -78,6 +78,54 @@ public class MainPhase extends Robot {
         }
     }
 
+    private static boolean isGoodFlagPickup(MapLocation flagLoc) throws GameActionException {
+        MapLocation curLoc = rc.getLocation();
+        if (flagBearer == null) return false;
+        Direction flagBearerDir = flagBearer.directionTo(flagLoc);
+        MapLocation[] goodSpots = {flagLoc.add(flagBearerDir), 
+                                   flagLoc.add(flagBearerDir.rotateLeft()), 
+                                   flagLoc.add(flagBearerDir.rotateRight())};
+        boolean goodBotExists = false;
+        for (MapLocation spot : goodSpots) {
+            RobotInfo bot = rc.senseRobotAtLocation(spot);
+            if (curLoc.equals(spot)) {
+                return true;
+            } else if (bot != null && bot.getTeam() == rc.getTeam()) {
+                goodBotExists = true;
+            }
+        }
+
+        if (goodBotExists) return false;
+        else return curLoc.equals(flagLoc);
+    }
+
+    private static void tryPickupFlag() throws GameActionException {
+        RobotInfo[] nearbyBots = rc.senseNearbyRobots(4);
+        int numEnemies = 0;
+        for (RobotInfo bot : nearbyBots) {
+            if (bot.getTeam() == rc.getTeam().opponent()) {
+                numEnemies++;
+            }
+        }
+        // TODO: SIMULATD ANNEALING
+        if (nearbyBots.length - numEnemies > 0.75 * numEnemies || !shouldPickUpFlag) return;
+        FlagInfo[] nearbyFlags = rc.senseNearbyFlags(4);
+        for (FlagInfo flag : nearbyFlags) {
+            MapLocation flagLoc = flag.getLocation();
+            if (isDroppedFlag(flagLoc) && !isGoodFlagPickup(flagLoc)) {
+                continue;
+            } else if (flag.getTeam() != rc.getTeam()) {
+                if (!rc.canPickupFlag(flagLoc)) {
+                    moveTo(flag.getLocation());
+                }
+                if (rc.canPickupFlag(flagLoc)) {
+                    Action.pickupFlag(flagLoc);
+                    if (isDroppedFlag(flagLoc)) clearFlagDropLoc(flagLoc);
+                }
+            }
+        }
+    }
+
     // private static void escortFlag(FlagInfo flag) throws GameActionException {
     //     MapLocation flagLoc = flag.getLocation();
     //     MapLocation curLoc = rc.getLocation();
@@ -104,16 +152,18 @@ public class MainPhase extends Robot {
 
     private static boolean isDroppedFlag(MapLocation flag) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
-            if (Comms.readLoc(COMMS_FLAG_DROP_LOC + i) != null && Comms.readLoc(COMMS_FLAG_DROP_LOC + i).equals(flag)) {
+            MapLocation loc = Comms.readLoc(COMMS_FLAG_DROP_LOC + i);
+            if (loc != null && loc.equals(flag)) {
                 return true;
             }
         }
         return false;
     }
 
-    private static void clearFlagDropLoc(MapLocation loc) throws GameActionException {
+    private static void clearFlagDropLoc(MapLocation flag) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
-            if (Comms.readLoc(COMMS_FLAG_DROP_LOC + i).equals(loc)) {
+            MapLocation loc = Comms.readLoc(COMMS_FLAG_DROP_LOC + i);
+            if (loc != null && loc.equals(flag)) {
                 Comms.write(COMMS_FLAG_DROP_LOC + i, 0);
             }
         }
@@ -121,7 +171,7 @@ public class MainPhase extends Robot {
 
     private static void tryMoveToFlag() throws GameActionException {
         // move towards dropped enemy flags and picked up friendly flags
-        if (!rc.isMovementReady()) return;
+        if (!rc.isMovementReady() || !shouldPickUpFlag) return;
         FlagInfo[] nearbyFlags = rc.senseNearbyFlags(-1);
 
         FlagInfo targetFlag = null;
@@ -142,13 +192,15 @@ public class MainPhase extends Robot {
         if (targetFlag == null) return;
 
         MapLocation flagLoc = targetFlag.getLocation();
+        
+        //if (flagBearer != null) rc.setIndicatorString(isGoodFlagPickup(flagLoc) ? "true" : "false");
 
         if (targetFlag.getTeam() != rc.getTeam() && targetFlag.isPickedUp()) {
-            flagBearerDir = rc.getLocation().directionTo(flagLoc);
+            flagBearer = flagLoc;
             moveTo(flagLoc);
         } else if (rc.canPickupFlag(flagLoc)) {
             if (isDroppedFlag(flagLoc)) {
-                if (Utils.inGeneralDirection(flagBearerDir, rc.getLocation().directionTo(flagLoc))) {
+                if (isGoodFlagPickup(flagLoc)) {
                     clearFlagDropLoc(flagLoc);
                 } else {
                     return;
@@ -168,8 +220,6 @@ public class MainPhase extends Robot {
 
         FlagDefense.scanAndSignal();
 
-        shouldPickUpFlag = true;
-
         if (rc.hasFlag()) {
             FlagInfo[] enemyFlags = rc.senseNearbyFlags(0, rc.getTeam().opponent());
 
@@ -187,6 +237,7 @@ public class MainPhase extends Robot {
             MapLocation targetLoc = Utils.findClosestLoc(Spawner.getSpawnCenters());
             RobotInfo[] nearbyBots = rc.senseNearbyRobots(16, rc.getTeam()); // TODO: test diff ranges
             Direction intendedDir = Robot.getNextDirection(targetLoc);
+            rc.setIndicatorString(intendedDir.toString());
             int numBlockingBots = 0;
 
             for (RobotInfo bot : nearbyBots) {
@@ -200,7 +251,11 @@ public class MainPhase extends Robot {
             //         (intendedDir != Direction.CENTER && rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null))) {
 
             MapLocation intendedLoc = curLoc.add(intendedDir);
-            if (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD || rc.senseRobotAtLocation(intendedLoc) != null) {
+            RobotInfo blockingBot = rc.senseRobotAtLocation(intendedLoc);
+
+            if (intendedDir != Direction.CENTER &&
+                (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD || 
+                (blockingBot != null && blockingBot.getTeam() == rc.getTeam()))) {
                 if (rc.canDropFlag(intendedLoc)) {
                     Action.dropFlag(intendedLoc);
                     setFlagDropLoc(intendedLoc);
@@ -222,7 +277,10 @@ public class MainPhase extends Robot {
 
             tryMoveToFlag();
 
+            shouldPickUpFlag = true;
+
             if (!Micro.inCombat()) moveToRushLoc();
+
         }
 
         FlagInfo[] visibleEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
@@ -230,12 +288,8 @@ public class MainPhase extends Robot {
 
     }
 
-    public static boolean getShouldPickUpFlag() {
-        // TODO: only pick up flag if you're closer to spawn or something like that
-        return shouldPickUpFlag;
-    }
-
     public static void run() throws GameActionException {
+        // tryPickupFlag();
         Micro.run();
         runStrat();
         Micro.run();
