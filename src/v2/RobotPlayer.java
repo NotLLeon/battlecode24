@@ -37,6 +37,8 @@ public strictfp class RobotPlayer {
                 if (isSetupPhase) SetupPhase.run();
                 else MainPhase.run();
 
+                if (curRound == GameConstants.SETUP_ROUNDS) Comms.clearSetup();
+
             } catch (GameActionException e) {
                 System.out.println("GameActionException");
                 e.printStackTrace();
