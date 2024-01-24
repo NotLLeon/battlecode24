@@ -34,4 +34,10 @@ public class Comms {
     public static void write(int index, int data) throws GameActionException {
         rc.writeSharedArray(index, data);
     }
+
+    public static void clearSetup() throws GameActionException {
+        for (int i = 0; i < SETUP_COMMS_INDICES; i++) {
+            write(i, 0);
+        }
+    }
 }
