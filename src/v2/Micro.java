@@ -160,7 +160,9 @@ public class Micro {
 
         if (rc.canPickupFlag(flagLoc)) {
             Action.pickupFlag(flagLoc);
-            FlagRecorder.setPickedUp(targetFlag.getID());
+            int flagID = targetFlag.getID();
+            FlagRecorder.setPickedUp(flagID);
+            if (!rc.hasFlag()) FlagRecorder.setCaptured(flagID); // in case you capture by picking up
         } else {
             Direction moveDir = rc.getLocation().directionTo(flagLoc);
             if (moveDir != Direction.CENTER) moveInDir(moveDir, 1);
