@@ -9,7 +9,6 @@ import static v2.Constants.rc;
 public class SetupPhase extends Robot {
 
     public static boolean exploring = true;
-    public static MapLocation setupLoc = null;
 
     public static void run() throws GameActionException {
         SetupCommunication.init();
@@ -26,7 +25,7 @@ public class SetupPhase extends Robot {
                     stopMoving = true;
                 }
             }
-            if (!stopMoving) moveTo(SetupCommunication.meetLocation);
+            if (!stopMoving || rc.getRoundNum() < 150) moveTo(SetupCommunication.meetLocation);
         } else if (crumbLocs.length > 0) {
             moveTo(crumbLocs[0]);
         } else {

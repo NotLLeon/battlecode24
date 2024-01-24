@@ -9,6 +9,7 @@ import static v2.Constants.rc;
 public class SetupCommunication {
     public static MapLocation meetLocation;
     private static int index = -1;
+    private final static MapLocation center = new MapLocation(rc.getMapHeight() / 2, rc.getMapWidth() / 2);
 
     public static void writeMeetupLoc(MapLocation damLoc) throws GameActionException {
         int writeIndex = COMMS_MEETUP_LOCS + index;
@@ -19,6 +20,10 @@ public class SetupCommunication {
         } else {
             // can consider doing something else when it sees a dam tile
             meetLocation = Comms.readLoc(writeIndex);
+
+            if (center.distanceSquaredTo(damLoc) < center.distanceSquaredTo(meetLocation)) {
+                meetLocation = damLoc;
+            }
         }
     }
 
