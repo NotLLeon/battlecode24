@@ -73,10 +73,14 @@ public class BugNav {
         return rc.onTheMap(loc);
     }
 
-
-    private static boolean isPassable(Direction dir, int strictness) throws GameActionException {
+    private static boolean isUnitPassable;
+    private static boolean isPassable(Direction dir) throws GameActionException {
         MapLocation loc = rc.getLocation().add(dir);
         if(!rc.onTheMap(loc)) return false;
+        if (isUnitPassable) {
+            RobotInfo robot = rc.senseRobotAtLocation(loc);
+            return robot != null && robot.getTeam() == rc.getTeam();
+        }
         return rc.canMove(dir);
     }
 
@@ -87,7 +91,8 @@ public class BugNav {
     }
 
 
-    public static Direction getDir(MapLocation dest) throws GameActionException {
+    public static Direction getDir(MapLocation dest, boolean unitPassable) throws GameActionException {
+        isUnitPassable = unitPassable;
         MapLocation curLoc = rc.getLocation();
 
         // probably stuck in same place
@@ -116,7 +121,7 @@ public class BugNav {
 
         Direction nextDir = null;
         if(!obstacle) {
-            if (isPassable(dir, 0)) {
+            if (isPassable(dir)) {
                 return dir;
             }
             obstacle = true;
@@ -131,7 +136,7 @@ public class BugNav {
 
             if(onLine(curLoc) && curDis < dis - 1) {
                 reset();
-                return getDir(dest);
+                return getDir(dest, unitPassable);
             }
 
             if(curLoc.equals(collisionLoc)) {
@@ -146,16 +151,14 @@ public class BugNav {
 
         Direction prevDir;
         for(int i = 0; i < 8; ++i) {
-            int strictness = 0;
-            if(nextDir != traceDir) ++ strictness;
-            if(isPassable(nextDir, strictness)) {
+            if(isPassable(nextDir)) {
                 traceDir = nextDir;
                 if(traceLeft) prevDir = traceDir.rotateRight().rotateRight();
                 else prevDir = traceDir.rotateLeft().rotateLeft();
                 if(!changeWallTrace && !onTheMap(prevDir)) {
                     changeWallTrace = true;
                     changeTraceDir();
-                    return getDir(dest);
+                    return getDir(dest, unitPassable);
                 }
                 return traceDir;
             } else {
