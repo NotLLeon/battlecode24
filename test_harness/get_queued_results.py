@@ -152,19 +152,10 @@ def displayGames(gameProgInfo):
 
 
 
-<<<<<<< HEAD
     dataMatrix = []
     for oppBot in gameProgInfo:
         requesterFirstGamesHM = gameProgInfo[oppBot][1]
         requesterLastGamesHM = gameProgInfo[oppBot][0]
-=======
-# Where gameProgInfo: [oppBot][sideOfOpponent] = ResultString
-def displayGames(gameProgInfo):
-    dataMatrix = []
-    for oppBot in gameProgInfo:
-        requesterFirstGameStr = gameProgInfo[oppBot][1]
-        requesterLastGameStr = gameProgInfo[oppBot][0]
->>>>>>> main
 
         rowStr = [oppBot, getGamesTotalResultStr(requesterFirstGamesHM), getGamesTotalResultStr(requesterLastGamesHM)]
         dataMatrix.append(rowStr)
