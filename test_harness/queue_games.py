@@ -40,6 +40,10 @@ def isValidRequest(response):
     # Check to make sure it's a 200s status code
     return 200 <= response.status_code < 300
 
+def isValidRequest(response):
+    # Check to make sure it's a 200s status code
+    return 200 <= response.status_code < 300
+
 def requestGamesCallback(callBackArgs):
     gameReqTeamA, gameReqTeamB = callBackArgs
 

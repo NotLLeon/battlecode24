@@ -160,7 +160,9 @@ public class Micro {
 
         if (rc.canPickupFlag(flagLoc)) {
             Action.pickupFlag(flagLoc);
-            FlagRecorder.setPickedUp(targetFlag.getID());
+            int flagID = targetFlag.getID();
+            FlagRecorder.setPickedUp(flagID);
+            if (!rc.hasFlag()) FlagRecorder.setCaptured(flagID); // in case you capture by picking up
         } else {
             Direction moveDir = rc.getLocation().directionTo(flagLoc);
             if (moveDir != Direction.CENTER) moveInDir(moveDir, 1);
@@ -288,7 +290,7 @@ public class Micro {
     private static void tryPlaceTrap() throws GameActionException {
         if (!rc.isActionReady()) return;
 
-        if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0) return;
+        if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0 || visibleEnemyRobots.length < 6) return;
 
         MapLocation[] closeEnemyLocs = Utils.robotInfoToLocArr(closeEnemyRobots);
         MapLocation enemyCentroid = Utils.getCentroid(closeEnemyLocs);
@@ -417,7 +419,7 @@ public class Micro {
         tryAttack();
 
         // TODO: remove from micro?
-        tryMoveToFlag();
+        if (MainPhase.getShouldPickUpFlag()) tryMoveToFlag();
 
         tryAttack();
         tryHeal();

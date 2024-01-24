@@ -93,6 +93,8 @@ def gamesAreMatched(queuedGameResponse, currentGameStatus):
     expectedOppPlayerIndex = 1 if queuedGameResponse['side'] == PlayerOrder.REQUESTER_FIRST else 0
     return oppBotTeamInfo['player_index'] == expectedOppPlayerIndex
 
+    expectedOppPlayerIndex = 1 if queuedGameResponse['side'] == PlayerOrder.REQUESTER_FIRST else 0
+    return oppBotTeamInfo['player_index'] == expectedOppPlayerIndex
 
 
 def setGameResultObj(gameProgInfo, currGameResult):
@@ -150,10 +152,19 @@ def displayGames(gameProgInfo):
 
 
 
+<<<<<<< HEAD
     dataMatrix = []
     for oppBot in gameProgInfo:
         requesterFirstGamesHM = gameProgInfo[oppBot][1]
         requesterLastGamesHM = gameProgInfo[oppBot][0]
+=======
+# Where gameProgInfo: [oppBot][sideOfOpponent] = ResultString
+def displayGames(gameProgInfo):
+    dataMatrix = []
+    for oppBot in gameProgInfo:
+        requesterFirstGameStr = gameProgInfo[oppBot][1]
+        requesterLastGameStr = gameProgInfo[oppBot][0]
+>>>>>>> main
 
         rowStr = [oppBot, getGamesTotalResultStr(requesterFirstGamesHM), getGamesTotalResultStr(requesterLastGamesHM)]
         dataMatrix.append(rowStr)
@@ -197,6 +208,7 @@ def matchGamesFirstTime(requestedGamesResponse, gameProgInfo):
             # These are the actual games information
             for currGameResult in allGamesInfo:
 
+                oppTeamInfo = currGameResult['participants'][0] if currGameResult['participants'][0]['team'] != OUR_TEAM_ID else currGameResult['participants'][1]
                 # Match games based on opponent name, player_index, creation time
                 if gamesAreMatched(game1Info, currGameResult):
 
