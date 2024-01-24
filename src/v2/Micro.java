@@ -285,26 +285,39 @@ public class Micro {
         if (rc.canHeal(targetLoc)) heal(targetLoc);
     }
 
+    private static int getVisibleThreshold() {
+        int breadcrumbs = rc.getCrumbs();
+        if (breadcrumbs < 7500) return 6;
+        else if (breadcrumbs < 10000) return 5;
+        else if (breadcrumbs < 20000) return 3;
+        else return 1;
+    }
+
     private static void tryPlaceTrap() throws GameActionException {
         if (!rc.isActionReady()) return;
 
-        if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0 || visibleEnemyRobots.length < 6) return;
+        if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0 || visibleEnemyRobots.length < getVisibleThreshold()) return;
 
         MapLocation[] closeEnemyLocs = Utils.robotInfoToLocArr(closeEnemyRobots);
         MapLocation enemyCentroid = Utils.getCentroid(closeEnemyLocs);
 
         MapLocation curLoc = rc.getLocation();
-        trapInDir(curLoc, curLoc.directionTo(enemyCentroid));
+        if (3 * closeFriendlyRobots.length <= closeEnemyRobots.length) {
+            trapInDir(curLoc, curLoc.directionTo(enemyCentroid), TrapType.EXPLOSIVE);
+            moveAwayFromEnemy();
+        } else {
+            trapInDir(curLoc, curLoc.directionTo(enemyCentroid), TrapType.STUN);
+        }
     }
 
-    private static void trapInDir(MapLocation loc, Direction dir) throws GameActionException {
+    private static void trapInDir(MapLocation loc, Direction dir, TrapType trapType) throws GameActionException {
         Direction[] dirsTowards = Utils.getDirOrdered(dir);
-        TrapType trapType = TrapType.STUN;
 
         // only consider the 3 directions towards the centroid
         for(int i = 0; i < 3; ++i) {
             MapLocation trapPoint = loc.add(dirsTowards[i]);
-            if(rc.canBuild(trapType, trapPoint) && !adjacentToTrap(trapPoint)) {
+            // if explosive, we do not care about adjacency
+            if(rc.canBuild(trapType, trapPoint) && (!adjacentToTrap(trapPoint) || trapType == TrapType.EXPLOSIVE)) {
                 Action.build(trapType, trapPoint);
                 return;
             }
