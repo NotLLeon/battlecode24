@@ -20,6 +20,7 @@ public class MainPhase extends Robot {
     private static boolean shouldPickUpFlag = true;
     private static final FastIntIntMap idToTurnOrder = new FastIntIntMap();
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
+    private static Direction flagBearerDir = Direction.CENTER;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -89,6 +90,37 @@ public class MainPhase extends Robot {
     //     moveInDir(moveDir, 1);
     // }
 
+    private static int getFlagDropInd(MapLocation loc) throws GameActionException {
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            if (Comms.readLoc(COMMS_FLAG_DROP_LOC + i) == null) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static void setFlagDropLoc(MapLocation loc) throws GameActionException {
+        int ind = getFlagDropInd(loc);
+        Comms.writeLoc(COMMS_FLAG_DROP_LOC + ind, loc);
+    }
+
+    private static boolean isDroppedFlag(MapLocation flag) throws GameActionException {
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            if (Comms.readLoc(COMMS_FLAG_DROP_LOC + i) != null && Comms.readLoc(COMMS_FLAG_DROP_LOC + i).equals(flag)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void clearFlagDropLoc(MapLocation loc) throws GameActionException {
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            if (Comms.readLoc(COMMS_FLAG_DROP_LOC + i).equals(loc)) {
+                Comms.write(COMMS_FLAG_DROP_LOC + i, 0);
+            }
+        }
+    }
+
     private static void tryMoveToFlag() throws GameActionException {
         // move towards dropped enemy flags and picked up friendly flags
         if (!rc.isMovementReady()) return;
@@ -111,14 +143,19 @@ public class MainPhase extends Robot {
 
         if (targetFlag == null) return;
 
-        if (targetFlag.getTeam() != rc.getTeam() && targetFlag.isPickedUp()) {
-            moveTo(targetFlag.getLocation());
-            return;
-        }
-
         MapLocation flagLoc = targetFlag.getLocation();
 
-        if (rc.canPickupFlag(flagLoc)) {
+        if (targetFlag.getTeam() != rc.getTeam() && targetFlag.isPickedUp()) {
+            flagBearerDir = rc.getLocation().directionTo(flagLoc);
+            moveTo(flagLoc);
+        } else if (rc.canPickupFlag(flagLoc)) {
+            if (isDroppedFlag(flagLoc)) {
+                if (Utils.inGeneralDirection(flagBearerDir, rc.getLocation().directionTo(flagLoc))) {
+                    clearFlagDropLoc(flagLoc);
+                } else {
+                    return;
+                }
+            }
             Action.pickupFlag(flagLoc);
             FlagRecorder.setPickedUp(targetFlag.getID());
         } else {
@@ -151,7 +188,7 @@ public class MainPhase extends Robot {
             // check if path ahead is congested and drop flag if so
             MapLocation targetLoc = Utils.findClosestLoc(Spawner.getSpawnCenters());
             RobotInfo[] nearbyBots = rc.senseNearbyRobots(16, rc.getTeam()); // TODO: test diff ranges
-            Direction intendedDir = curLoc.directionTo(targetLoc);
+            Direction intendedDir = Robot.getNextDirection(targetLoc);
             int numBlockingBots = 0;
 
             for (RobotInfo bot : nearbyBots) {
@@ -165,9 +202,10 @@ public class MainPhase extends Robot {
             //         (intendedDir != Direction.CENTER && rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null))) {
 
             MapLocation intendedLoc = curLoc.add(intendedDir);
-            if (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD && rc.senseRobotAtLocation(intendedLoc) != null) {
+            if (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD || rc.senseRobotAtLocation(intendedLoc) != null) {
                 if (rc.canDropFlag(intendedLoc)) {
                     Action.dropFlag(intendedLoc);
+                    setFlagDropLoc(intendedLoc);
                     shouldPickUpFlag = false;
                 }
             } else {
