@@ -77,11 +77,12 @@ public class BugNav {
     private static boolean isPassable(Direction dir) throws GameActionException {
         MapLocation loc = rc.getLocation().add(dir);
         if(!rc.onTheMap(loc)) return false;
+        boolean isPassable = rc.canMove(dir);
         if (isUnitPassable) {
             RobotInfo robot = rc.senseRobotAtLocation(loc);
-            return robot != null && robot.getTeam() == rc.getTeam();
+            isPassable |= robot != null && robot.getTeam() == rc.getTeam();
         }
-        return rc.canMove(dir);
+        return isPassable;
     }
 
     private static void changeTraceDir() {

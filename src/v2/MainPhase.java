@@ -237,7 +237,7 @@ public class MainPhase extends Robot {
             MapLocation targetLoc = Utils.findClosestLoc(Spawner.getSpawnCenters());
             RobotInfo[] nearbyBots = rc.senseNearbyRobots(16, rc.getTeam()); // TODO: test diff ranges
             Direction intendedDir = Robot.getNextDirection(targetLoc);
-            rc.setIndicatorString(intendedDir.toString());
+            rc.setIndicatorString(intendedDir.toString() + " " + targetLoc + " " + curLoc);
             int numBlockingBots = 0;
 
             for (RobotInfo bot : nearbyBots) {
