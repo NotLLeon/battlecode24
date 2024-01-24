@@ -77,6 +77,12 @@ def gamesAreMatched(queuedGameResponse, currentGameStatus):
     if not isCreationTimeMatching(queuedGameResponse['creationDateTime'], currentGameStatus['created']):
         return False
 
+    queuedMaps, currGameMaps = queuedGameResponse['mapsList'], currentGameStatus['maps']
+
+    if set(queuedMaps) != set(currGameMaps):
+        return False
+
+
     # oppBotExpectedIndex = 1 if queuedGameResponse['side'] == PlayerOrder.REQUESTER_FIRST else 0 # This has issue, since we need player_index, not just position in list
 
     team1Info, team2Info = currentGameStatus['participants']
@@ -102,7 +108,7 @@ def setGameResultObj(gameProgInfo, currGameResult):
     if gameID not in gameProgInfo[oppBotName][oppBotPlayerIndex]:
         newGameResultObj = GameResultInfo()
         newGameResultObj.setGameID(gameID)
-        gameProgInfo[oppBotName][oppBotPlayerIndex][gameID] = GameResultInfo()
+        gameProgInfo[oppBotName][oppBotPlayerIndex][gameID] = newGameResultObj
 
     if currGameResult['status'] != 'OK!':
         gameProgInfo[oppBotName][oppBotPlayerIndex][gameID].setGameStatusStr(currGameResult['status'])
@@ -117,7 +123,6 @@ def setGameResultObj(gameProgInfo, currGameResult):
         gameInfoObj.setGameStatusStr('OK!')
         gameInfoObj.setGameInfo(numGamesWon, numGamesLost)
         gameInfoObj.setReplayURL(currGameResult['replay_url'])
-
 
 # Where gameProgInfo: [oppBot][sideOfOpponent][gameID] = GameResultInfo
 # TODO: reformat the output display here!
@@ -137,7 +142,7 @@ def displayGames(gameProgInfo):
                 currWinsCount, currLossesCount = currGameResultObj.getGameInfo()
                 numWins += currWinsCount
                 numLosses += currLossesCount
-                gameIDList.append(currGameResultObj.getGameID())
+                gameIDList.append(str(currGameResultObj.getGameID()))
 
             gameStatusCode = 'T' if numWins == numLosses else ('W' if numWins > numLosses else 'L')
 
