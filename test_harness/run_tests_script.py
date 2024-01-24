@@ -29,8 +29,8 @@ def main():
     gamesResultsList = runGamesMain(currBot=currBot,
                            botsVersusList=oppBots,
                            mapsList=mapsList)
-    gameAnalyticsInfo = getGameAnalytics(gamesResultsList)
-    print(gameAnalyticsInfo)
+    # gameAnalyticsInfo = getGameAnalytics(gamesResultsList)
+    # print(gameAnalyticsInfo)
 
     resDictTransformed = transformGameDataAsNestedMap(gamesResultsList)
     printTabulateAsGrid(resDictTransformed, mapsList=mapsList)
