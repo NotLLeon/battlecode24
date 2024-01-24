@@ -9,7 +9,7 @@ public class Micro {
     private static final int INF = 999999999;
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
     // if your health is <= this number, back away from enemy and friendlies will approach you
-//    private static final int RETREAT_HEALTH_THRESHOLD = 250;
+    private static final int RETREAT_HEALTH_THRESHOLD = 250;
     // we report any group of enemies >= this number, unless we greatly outnumber them
     private static final int ENEMY_REPORT_SIZE_THRESHOLD = 5;
     private static RobotInfo[] visibleFriendlyRobots;
@@ -276,13 +276,13 @@ public class Micro {
         if (closeEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
 
         RobotInfo target = null;
-        int minBaseHits = INF;
+        int maxPrio = -1;
         for (RobotInfo friendly : immediateFriendlyRobots) {
-            int baseHits = friendly.getHealth() / BASE_ATTACK_DMG;
-            if (baseHits < minBaseHits
-                    || (baseHits == minBaseHits && getLevelSum(friendly) > getLevelSum(target))) {
+            if (friendly.getHealth() == GameConstants.DEFAULT_HEALTH) continue;
+            int priority =  1000 - friendly.getHealth() / 150 + 2 * friendly.getAttackLevel() + friendly.getHealLevel();
+            if (priority > maxPrio) {
                 target = friendly;
-                minBaseHits = baseHits;
+                maxPrio = priority;
             }
         }
 
@@ -408,7 +408,8 @@ public class Micro {
         MapLocation curLoc = rc.getLocation();
 
         // retreat if low health
-//        if (rc.getHealth() <= RETREAT_HEALTH_THRESHOLD) {
+//        if (rc.getHealth() <= RETREAT_HEALTH_THRESHOLD
+//                && rc.senseMapInfo(curLoc).getTeamTerritory() == rc.getTeam().opponent()) {
 //            // FIXME: for testing, not precise
 //            if (closeEnemyRobots.length == 0) return;
 //            MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(closeEnemyRobots));
@@ -426,11 +427,7 @@ public class Micro {
 
         if (immediateEnemyRobots.length > 0 || !rc.isActionReady()) return;
 
-        if (visibleEnemyRobots.length == 0) {
-            MapLocation enemyPosLoc = getEnemyPosition();
-            if (enemyPosLoc != null) moveInDir(curLoc.directionTo(enemyPosLoc), 1);
-            return;
-        }
+        if (visibleEnemyRobots.length == 0) return;
 
         if (!shouldMoveToEnemy()) return;
 
