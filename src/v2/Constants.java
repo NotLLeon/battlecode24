@@ -43,8 +43,6 @@ public class Constants {
     static final int COMMS_FLAG_RECORDER = 9; // uses 9
     static final int COMMS_FLAG_DISTRESS_FLAGS = 10; // uses 10 - 12
     static final int COMMS_FLAG_DISTRESS_LOCS = 13; // uses 13 - 15
-    static final int COMMS_ENEMY_POSITIONS = 16; // uses 16 - 25
-    static final int COMMS_ENEMY_POSITIONS_LAST_UPDATED = 26; // uses 26 - 35
 
     // Comms misc
     static final int MAX_NUM_COMMS_ENEMY_POSITIONS = 10;

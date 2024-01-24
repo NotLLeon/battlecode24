@@ -9,9 +9,7 @@ public class Micro {
     private static final int INF = 999999999;
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
     // if your health is <= this number, back away from enemy and friendlies will approach you
-    private static final int RETREAT_HEALTH_THRESHOLD = 250;
-    // we report any group of enemies >= this number, unless we greatly outnumber them
-    private static final int ENEMY_REPORT_SIZE_THRESHOLD = 5;
+//    private static final int RETREAT_HEALTH_THRESHOLD = 250;
     private static RobotInfo[] visibleFriendlyRobots;
     private static RobotInfo[] visibleEnemyRobots;
     private static RobotInfo[] immediateEnemyRobots;
@@ -326,53 +324,6 @@ public class Micro {
         return false;
     }
 
-    // TODO: all enemy position stuff neads tuning
-    // we consider 2 enemy positions unique if they are greater than this distance squared from each other
-    private static final int ENEMY_POSITION_UNIQUE_DIS_THRESHOLD = 9;
-    private static void recordEnemyPosition() throws GameActionException {
-        MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(visibleEnemyRobots));
-        int insertionInd = -1;
-        int curRound = rc.getRoundNum();
-        for (int i = MAX_NUM_COMMS_ENEMY_POSITIONS ; --i >= 0;) {
-            MapLocation existingLoc = Comms.readLoc(COMMS_ENEMY_POSITIONS + i);
-            if (existingLoc == null) {
-                if (insertionInd == -1) insertionInd = i;
-                continue;
-            }
-            if (enemyCentroid.isWithinDistanceSquared(existingLoc, ENEMY_POSITION_UNIQUE_DIS_THRESHOLD)) {
-                insertionInd = i;
-                break;
-            }
-        }
-
-        Comms.writeLoc(COMMS_ENEMY_POSITIONS + insertionInd, enemyCentroid);
-        Comms.write(COMMS_ENEMY_POSITIONS_LAST_UPDATED + insertionInd, curRound);
-    }
-
-    // we will move to enemy positions in this range
-    private static final int ENEMY_POSITION_RESPOND_DIS_THRESHOLD = 100;
-    // we will move to enemy positions if they were updated in this many rounds
-    private static final int ENEMY_POSITION_RESPOND_ROUND_THRESHOLD = 5;
-    private static MapLocation getEnemyPosition() throws GameActionException {
-        int curRound = rc.getRoundNum();
-        MapLocation curLoc = rc.getLocation();
-        MapLocation respondLoc = null;
-        int minDis = INF;
-        for (int i = MAX_NUM_COMMS_ENEMY_POSITIONS; --i >= 0; ) {
-            MapLocation loc = Comms.readLoc(COMMS_ENEMY_POSITIONS + i);
-            if (loc == null) continue;
-            int disToPos = curLoc.distanceSquaredTo(loc);
-            if (disToPos > ENEMY_POSITION_RESPOND_DIS_THRESHOLD) continue;
-            int lastUpdated = Comms.read(COMMS_ENEMY_POSITIONS_LAST_UPDATED + i);
-            if (curRound - lastUpdated > ENEMY_POSITION_RESPOND_ROUND_THRESHOLD) continue;
-            if (disToPos < minDis) {
-                minDis = disToPos;
-                respondLoc = loc;
-            }
-        }
-        return respondLoc;
-    }
-
     private static boolean shouldMoveToEnemy() {
         RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
                 visibleEnemyRobots,
@@ -487,8 +438,6 @@ public class Micro {
         }
 
         senseUnits();
-        if (visibleEnemyRobots.length > ENEMY_REPORT_SIZE_THRESHOLD
-                && 2 * visibleEnemyRobots.length > visibleFriendlyRobots.length) recordEnemyPosition();
 
         tryMove();
 
