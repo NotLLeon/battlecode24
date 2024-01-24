@@ -93,8 +93,7 @@ def gamesAreMatched(queuedGameResponse, currentGameStatus):
     expectedOppPlayerIndex = 1 if queuedGameResponse['side'] == PlayerOrder.REQUESTER_FIRST else 0
     return oppBotTeamInfo['player_index'] == expectedOppPlayerIndex
 
-    expectedOppPlayerIndex = 1 if queuedGameResponse['side'] == PlayerOrder.REQUESTER_FIRST else 0
-    return oppBotTeamInfo['player_index'] == expectedOppPlayerIndex
+
 
 
 def setGameResultObj(gameProgInfo, currGameResult):
