@@ -371,6 +371,35 @@ public class Micro {
         return respondLoc;
     }
 
+    private static boolean shouldMoveToEnemy() {
+        RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
+                visibleEnemyRobots,
+                (r) -> !isStunned(r.getID())
+        );
+
+        RobotInfo[] unstunnedCloseEnemyRobots = Utils.filterRobotInfoArr(
+                closeEnemyRobots,
+                (r) -> !isStunned(r.getID())
+        );
+
+        if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return false;
+
+        int sumVisibleFriendlyHealth = 0;
+        int sumVisibleEnemyHealth = 0;
+        for (RobotInfo friendly : visibleFriendlyRobots) sumVisibleFriendlyHealth += friendly.getHealth();
+        for (RobotInfo enemy : unstunnedVisibleEnemyRobots) sumVisibleEnemyHealth += enemy.getHealth();
+
+        double avgFriendlyHealth = sumVisibleFriendlyHealth / (double) visibleFriendlyRobots.length;
+        double avgEnemyHealth = sumVisibleEnemyHealth / (double) unstunnedVisibleEnemyRobots.length;
+
+        boolean healthCond = visibleFriendlyRobots.length >= unstunnedVisibleEnemyRobots.length
+                && avgFriendlyHealth >= 2 * avgEnemyHealth;
+        boolean longRangeCond = visibleFriendlyRobots.length >= 2 * unstunnedVisibleEnemyRobots.length;
+        boolean closeRangeCond = closeFriendlyRobots.length >= unstunnedCloseEnemyRobots.length + 2;
+
+        return longRangeCond || closeRangeCond || healthCond;
+    }
+
     private static void tryMove() throws GameActionException {
         if(!rc.isMovementReady()) return;
 
@@ -395,40 +424,13 @@ public class Micro {
 
         if (immediateEnemyRobots.length > 0 || !rc.isActionReady()) return;
 
-        // approach damaged friendlies for healing/grouping
         if (visibleEnemyRobots.length == 0) {
             MapLocation enemyPosLoc = getEnemyPosition();
             if (enemyPosLoc != null) moveInDir(curLoc.directionTo(enemyPosLoc), 1);
             return;
         }
 
-
-        RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
-                visibleEnemyRobots,
-                (r) -> !isStunned(r.getID())
-        );
-
-        RobotInfo[] unstunnedCloseEnemyRobots = Utils.filterRobotInfoArr(
-                closeEnemyRobots,
-                (r) -> !isStunned(r.getID())
-        );
-
-        if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return;
-
-        int sumVisibleFriendlyHealth = 0;
-        int sumVisibleEnemyHealth = 0;
-        for (RobotInfo friendly : visibleFriendlyRobots) sumVisibleFriendlyHealth += friendly.getHealth();
-        for (RobotInfo enemy : unstunnedVisibleEnemyRobots) sumVisibleEnemyHealth += enemy.getHealth();
-
-        double avgFriendlyHealth = sumVisibleFriendlyHealth / (double) visibleFriendlyRobots.length;
-        double avgEnemyHealth = sumVisibleEnemyHealth / (double) unstunnedVisibleEnemyRobots.length;
-
-        boolean healthCond = visibleFriendlyRobots.length >= unstunnedVisibleEnemyRobots.length
-                && avgFriendlyHealth >= 2 * avgEnemyHealth;
-        boolean longRangeCond = visibleFriendlyRobots.length >= 2 * unstunnedVisibleEnemyRobots.length;
-        boolean closeRangeCond = closeFriendlyRobots.length >= unstunnedCloseEnemyRobots.length + 2;
-
-        if (!longRangeCond && !closeRangeCond && !healthCond) return;
+        if (!shouldMoveToEnemy()) return;
 
         Direction[] moveDirs;
         if (closeEnemyRobots.length > 0) {
