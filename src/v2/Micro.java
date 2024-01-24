@@ -96,8 +96,8 @@ public class Micro {
         return numAttackableEnemies;
     }
 
-    // moves in first direction in dirs that minimizes number of attackable enemies
-    private static void moveMinEnemies(Direction[] dirs) throws GameActionException {
+    // moves in first direction in dirs that maximizes the min distance to enemies
+    private static void moveAwayFromEnemy(Direction[] dirs) throws GameActionException {
         if (!rc.isMovementReady()) return;
         Direction bestDir = null;
         int minAttackableEnemies = 10000;
@@ -116,12 +116,12 @@ public class Micro {
     private static Direction[] dirOrder = {Direction.CENTER, Direction.NORTH, Direction.EAST, Direction.SOUTH,
             Direction.WEST, Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHWEST, Direction.SOUTHEAST};
     private static void moveAwayFromEnemy() throws GameActionException {
-        moveMinEnemies(dirOrder);
+        moveAwayFromEnemy(dirOrder);
     }
 
     private static void moveInDirMinEnemies(Direction dir) throws GameActionException {
         Direction[] dirs = {dir, dir.rotateLeft(), dir.rotateRight()};
-        moveMinEnemies(dirs);
+        moveAwayFromEnemy(dirs);
     }
 
     private static void escortFlag(FlagInfo flag) throws GameActionException {
@@ -278,7 +278,7 @@ public class Micro {
         for (RobotInfo friendly : immediateFriendlyRobots) {
             int baseHits = friendly.getHealth() / BASE_ATTACK_DMG;
             if (baseHits < minBaseHits
-                || (baseHits == minBaseHits && getLevelSum(friendly) > getLevelSum(target))) {
+                    || (baseHits == minBaseHits && getLevelSum(friendly) > getLevelSum(target))) {
                 target = friendly;
                 minBaseHits = baseHits;
             }
@@ -389,8 +389,7 @@ public class Micro {
         // retreat if heavily outnumbered
 //        if (visibleEnemyRobots.length > 2 * visibleFriendlyRobots.length) {
 //            // FIXME: for testing, not precise
-//            MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(visibleEnemyRobots));
-//            moveInDirMinEnemies(enemyCentroid.directionTo(curLoc));
+//            moveAwayFromEnemy();
 //            return;
 //        }
 
@@ -452,7 +451,7 @@ public class Micro {
             Direction dirToCentroid = curLoc.directionTo(enemyCentroid);
             moveDirs = new Direction[] {dirToCentroid, dirToCentroid.rotateLeft(), dirToCentroid.rotateRight()};
         }
-        moveMinEnemies(moveDirs);
+        moveAwayFromEnemy(moveDirs);
     }
 
     public static boolean inCombat() throws GameActionException {
