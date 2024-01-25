@@ -173,6 +173,8 @@ public class FlagRecorder {
     public static void checkFlagReturned(int ind) throws GameActionException {
         if (isCaptured(ind) || !isPickedUp(ind)) return;
         int lastRoundCarrying = Comms.read(COMMS_ENEMY_FLAG_LAST_ROUND_CARRYING_START_IND + ind);
+        int flagDroppedResetRounds = GameConstants.FLAG_DROPPED_RESET_ROUNDS 
+                                        + (rc.getRoundNum() >= 1800 ? 1 : 0) * GlobalUpgrade.CAPTURING.flagReturnDelayChange;
         if (lastRoundCarrying < rc.getRoundNum() - GameConstants.FLAG_DROPPED_RESET_ROUNDS - 1) {
 
             unSetPickedUp(ind);
