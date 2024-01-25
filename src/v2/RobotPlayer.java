@@ -25,7 +25,7 @@ public strictfp class RobotPlayer {
 
             try {
                 curRound = rc.getRoundNum();
-                Action.decCooldown();
+                Robot.decCooldown();
                 tryBuyUpgrade();
 
                 boolean isSetupPhase = curRound <= GameConstants.SETUP_ROUNDS;
