@@ -320,7 +320,7 @@ public class Micro {
             MapLocation trapPoint = loc.add(dirsTowards[i]);
             // if explosive, we do not care about adjacency
             if(rc.canBuild(trapType, trapPoint) && (!adjacentToTrap(trapPoint) || trapType == TrapType.EXPLOSIVE)) {
-                Action.build(trapType, trapPoint);
+                Robot.build(trapType, trapPoint);
                 return;
             }
         }
