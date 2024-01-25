@@ -94,7 +94,7 @@ public class Explore {
             Direction dir = Random.nextDir();
             for (int i = 0; i < 8; ++i) {
                 if (shouldFill() && rc.canFill(rc.getLocation().add(dir))) {
-                    Action.fill(rc.getLocation().add(dir));
+                    Robot.fill(rc.getLocation().add(dir));
                 }
                 if (rc.canMove(dir)) {
                     if ((++numMoves) % EXPLORE_MOVES_TO_TRACK_LOCATION == 0) {
@@ -113,7 +113,7 @@ public class Explore {
             RobotInfo [] robots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
             boolean nearbyEnemy = robots.length > 0 ? true : false;
             if (shouldFill() && rc.canFill(rc.getLocation().add(dir))) {
-                Action.fill(rc.getLocation().add(dir));
+                Robot.fill(rc.getLocation().add(dir));
             }
             if (numMoves % EXPLORE_MOVES_TO_TRACK_LOCATION == 0 || !rc.canMove(dir) || nearbyEnemy) {
                 dir = exploreAwayFromLoc(getAvgLocation(prevLocs));

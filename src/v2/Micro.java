@@ -17,7 +17,7 @@ public class Micro {
     private static MapLocation lastLocRun = null;
 
     private static void attack(MapLocation loc) throws GameActionException {
-        Action.attack(loc);
+        Robot.attack(loc);
         senseEnemies();
     }
 
@@ -27,7 +27,7 @@ public class Micro {
     }
 
     private static void heal(MapLocation loc) throws GameActionException {
-        Action.heal(loc);
+        Robot.heal(loc);
         senseFriendlies();
     }
 
@@ -159,7 +159,7 @@ public class Micro {
         MapLocation flagLoc = targetFlag.getLocation();
 
         if (rc.canPickupFlag(flagLoc)) {
-            Action.pickupFlag(flagLoc);
+            Robot.pickupFlag(flagLoc);
             int flagID = targetFlag.getID();
             FlagRecorder.setPickedUp(flagID);
             if (!rc.hasFlag()) FlagRecorder.setCaptured(flagID); // in case you capture by picking up
@@ -307,7 +307,7 @@ public class Micro {
         for(int i = 0; i < 3; ++i) {
             MapLocation trapPoint = loc.add(dirsTowards[i]);
             if(rc.canBuild(trapType, trapPoint) && !adjacentToTrap(trapPoint)) {
-                Action.build(trapType, trapPoint);
+                Robot.build(trapType, trapPoint);
                 return;
             }
         }
@@ -415,7 +415,7 @@ public class Micro {
 
         // if we can place trap and still do something else, try place trap first
         // FIXME: doesnt consider level 6 attack spec, which allows unit to attack twice in 1 turn
-        if (Action.getCooldown() + Action.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
+        if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
         tryAttack();
 
         // TODO: remove from micro?
