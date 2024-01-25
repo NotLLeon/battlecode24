@@ -1,7 +1,7 @@
 package v2.Pathfinding;
 
 import battlecode.common.*;
-import v2.Action;
+import v2.Robot;
 
 import static v2.Constants.rc;
 
@@ -30,7 +30,7 @@ public class Pathfinding {
         if(!BugNav.isTracingObstacle()) {
             dir = BFS.getDir(dest, shouldFill());
             MapLocation nextLoc = curLoc.add(dir);
-            if (rc.canFill(nextLoc)) Action.fill(nextLoc);
+            if (rc.canFill(nextLoc)) Robot.fill(nextLoc);
         }
         if(dir == Direction.CENTER) {
             dir = BugNav.getDir(dest);

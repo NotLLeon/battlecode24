@@ -114,7 +114,7 @@ public class MainPhase extends Robot {
             MapLocation intendedLoc = curLoc.add(intendedDir);
             if (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD && rc.senseRobotAtLocation(intendedLoc) != null) {
                 if (rc.canDropFlag(intendedLoc)) {
-                    Action.dropFlag(intendedLoc);
+                    Robot.dropFlag(intendedLoc);
                     shouldPickUpFlag = false;
                 }
             } else {
