@@ -290,7 +290,8 @@ public class Micro {
     private static void tryPlaceTrap() throws GameActionException {
         if (!rc.isActionReady()) return;
 
-        if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0 || visibleEnemyRobots.length < 6) return;
+        if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0
+                || visibleEnemyRobots.length < 6 || rc.getRoundNum() % 2 == 0) return;
 
         MapLocation[] closeEnemyLocs = Utils.robotInfoToLocArr(closeEnemyRobots);
         MapLocation enemyCentroid = Utils.getCentroid(closeEnemyLocs);
