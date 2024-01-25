@@ -30,7 +30,8 @@ We can now have multiple users calling this script at once without issue!
 Call `queue_games.py` as a console command
 
 
-Usage: `queue_games.py [-m MAPS [MAPS ...] | -mf MAPSFILE] (-b BOTS [BOTS ...] | -r READ) [-a]`
+Usage: `queue_games.py [-m MAPS [MAPS ...] | -mf MAPSFILE | -ma] (-b BOTS [BOTS ...] | -r READ)  [-a]
+`
 
 Example usages:  
 `python3 queue_games.py -m DefaultSmall DefaultLarge -b "Teh Devs" "camel_case" `
@@ -41,12 +42,16 @@ Example usages:
 
 `python3 queue_games.py -mf ./SampleMaps.json -b "Teh Devs" "camel_case" -a`
 
+`python3 queue_games.py -ma -b "Teh Devs"`
+
 
 The arguments are as follows:
 
-`-m` `-mf` are mutually exclusive, and is optional. Either pass in a list of maps (with -m flag) or a path to a json file that contains a list of maps (with -mf flag). See what `SampleMaps.json` looks like for passing in a list of maps 
-If neither argument is used, then it defaults to DEFAULT_MAPS, which is a variable in the constants.py file.
-There is a maximum of 10 maps that can be chosen at once.
+`-m` ,`-mf`, and `-ma` are mutually exclusive, and is optional. Either pass in a list of maps (with -m flag) or a path to a json file that contains a list of maps (with -mf flag), or enable the boolean flag `-ma` for all maps (as defined by `ALL_MAPS` in constant.py).
+
+See what `SampleMaps.json` looks like for passing in a list of maps 
+If none of the arguments are used, then it defaults to DEFAULT_MAPS, which is a variable in the constants.py file.
+There is an unlimited number of maps that can be chosen at once!
 
 `-b` and `-r` are mutually exclusive, and are required. Either pass in a list of bot names (with double quotes), or pass
 in a json file path that contains a list of team names. See `SampleTeams.json` for what this file should look like.

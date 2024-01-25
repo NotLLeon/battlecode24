@@ -16,7 +16,7 @@ public class Micro {
     private static MapLocation lastLocRun = null;
 
     private static void attack(MapLocation loc) throws GameActionException {
-        Action.attack(loc);
+        Robot.attack(loc);
         senseEnemies();
     }
 
@@ -26,7 +26,7 @@ public class Micro {
     }
 
     private static void heal(MapLocation loc) throws GameActionException {
-        Action.heal(loc);
+        Robot.heal(loc);
         senseFriendlies();
     }
 
@@ -240,7 +240,7 @@ public class Micro {
     private static void tryPlaceTrap() throws GameActionException {
         if (!rc.isActionReady()) return;
 
-        if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0) return;
+        if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0 || visibleEnemyRobots.length < 6) return;
 
         MapLocation[] closeEnemyLocs = Utils.robotInfoToLocArr(closeEnemyRobots);
         MapLocation enemyCentroid = Utils.getCentroid(closeEnemyLocs);
@@ -257,7 +257,7 @@ public class Micro {
         for(int i = 0; i < 3; ++i) {
             MapLocation trapPoint = loc.add(dirsTowards[i]);
             if(rc.canBuild(trapType, trapPoint) && !adjacentToTrap(trapPoint)) {
-                Action.build(trapType, trapPoint);
+                Robot.build(trapType, trapPoint);
                 return;
             }
         }
@@ -365,7 +365,7 @@ public class Micro {
 
         // if we can place trap and still do something else, try place trap first
         // FIXME: doesnt consider level 6 attack spec, which allows unit to attack twice in 1 turn
-        if (Action.getCooldown() + Action.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
+        if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
         tryAttack();
 
         // TODO: remove from micro?

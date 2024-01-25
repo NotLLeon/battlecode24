@@ -15,12 +15,12 @@ def printTabulate(data, mapsList):
     print(tabulate(data, headers=mapsList, tablefmt="grid"))
 
 # use this for the grid instead of the table
-# Maps [opposing_bot][map] -> (ResultOnSideA, ResultOnSideB)
+# Maps [map][opposing_bot]-> (ResultOnSideA, ResultOnSideB)
 def transformGameDataAsNestedMap(gamesResList):
     retDict = defaultdict(lambda: defaultdict(list))
 
     for currDict in gamesResList:
-        retDict[currDict['opposingBotName']][currDict['map']].append(currDict)
+        retDict[currDict['map']][currDict['opposingBotName']].append(currDict)
     return retDict
 
 
@@ -62,24 +62,24 @@ def generateGameOutputCode(gameDictList):
     return teamAStr + ', ' + teamBStr
 
 
-def printTabulateAsGrid(nestedMap, mapsList):
-    mapsListIndex = {}
+def printTabulateAsGrid(nestedMap, botsVersusList):
+    oppBotsIndex = {}
     idx = 1
-    for currMap in mapsList:
-        mapsListIndex[currMap] = idx
+    for currOppBot in botsVersusList:
+        oppBotsIndex[currOppBot] = idx
         idx += 1
 
     dataMatrix = []
-    for oppBot in nestedMap:
-        rowOutput = [None] * (len(nestedMap[oppBot]) + 1)
-        rowOutput[0] = oppBot
+    for currMap in nestedMap:
+        rowOutput = [None] * (len(nestedMap[currMap]) + 1)
+        rowOutput[0] = currMap
 
-        for currMap in nestedMap[oppBot]:
-            currOutputCode = generateGameOutputCode(nestedMap[oppBot][currMap])
-            currMapIndex = mapsListIndex[currMap]
-            rowOutput[currMapIndex] = currOutputCode
+        for oppBot in nestedMap[currMap]:
+            currOutputCode = generateGameOutputCode(nestedMap[currMap][oppBot])
+            currBotIndex = oppBotsIndex[oppBot]
+            rowOutput[currBotIndex] = currOutputCode
         dataMatrix.append(rowOutput)
 
 
 
-    print(tabulate(dataMatrix, headers= [' '] + mapsList, tablefmt="grid"))
+    print(tabulate(dataMatrix, headers= [' '] + botsVersusList, tablefmt="grid"))

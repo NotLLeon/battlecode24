@@ -13,8 +13,7 @@ public class MainPhase extends Robot {
     private static final int LONG_TARGET_ROUND_INTERVAL = 100;
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
     private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
-    private static MapLocation curRushLoc = null;
-    private static boolean visitedRushLoc = false;
+    private static boolean shouldExplore = false;
     private static final int FLAG_CONVOY_CONGESTION_THRESHOLD = 4;
     private static boolean shouldPickUpFlag = true;
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
@@ -61,15 +60,13 @@ public class MainPhase extends Robot {
 
         int rushInd = getRushInd();
         MapLocation rushLoc = FlagRecorder.getFlagLoc(getRushInd());
-        if(!rushLoc.equals(curRushLoc)) {
-            curRushLoc = rushLoc;
-            visitedRushLoc = false;
-        }
         MapLocation curLoc = rc.getLocation();
 
+        if (curLoc.distanceSquaredTo(rushLoc) >= GameConstants.FLAG_BROADCAST_NOISE_RADIUS) shouldExplore = false;
+
         if (!FlagRecorder.isExactLoc(rushInd) &&
-                (visitedRushLoc || curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED))) {
-            visitedRushLoc = true;
+                (shouldExplore || curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED))) {
+            shouldExplore = true;
             Explore.exploreNewArea();
         } else {
             // grouping attempt
@@ -256,8 +253,8 @@ public class MainPhase extends Robot {
                 (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD && 
                 (blockingBot != null && blockingBot.getTeam() == rc.getTeam()))) {
                 if (rc.canDropFlag(intendedLoc)) {
-                    Action.dropFlag(intendedLoc);
                     setFlagDropLoc(intendedLoc);
+                    Robot.dropFlag(intendedLoc);
                     shouldPickUpFlag = false;
                 }
             } else {

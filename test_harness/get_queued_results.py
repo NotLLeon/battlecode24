@@ -5,7 +5,8 @@ from collections import defaultdict
 from constants import *
 from datetime import datetime
 from tabulate import tabulate
-import os
+
+from GameResultInfo import GameResultInfo
 
 NUM_RESULTS_PER_PAGE = 10
 EXTRA_PAGES_LOADED = 2  #Used in case other ppl queue some games in the meanwhile
@@ -65,17 +66,22 @@ def getStartingPageNum(gameID, prevStartingPageNum):
         pageNum += 1
 
 
-
-
 def isCreationTimeMatching(dateTime1Str, dateTime2Str):
     dateTime1, dateTime2 = datetime.fromisoformat(dateTime1Str), datetime.fromisoformat(dateTime2Str)
     timeDiff = abs(dateTime1 - dateTime2)
 
     return timeDiff.total_seconds() < ACCEPTED_SECONDS_DELTA
 
+
 def gamesAreMatched(queuedGameResponse, currentGameStatus):
     if not isCreationTimeMatching(queuedGameResponse['creationDateTime'], currentGameStatus['created']):
         return False
+
+    queuedMaps, currGameMaps = queuedGameResponse['mapsList'], currentGameStatus['maps']
+
+    if set(queuedMaps) != set(currGameMaps):
+        return False
+
 
     # oppBotExpectedIndex = 1 if queuedGameResponse['side'] == PlayerOrder.REQUESTER_FIRST else 0 # This has issue, since we need player_index, not just position in list
 
@@ -89,35 +95,68 @@ def gamesAreMatched(queuedGameResponse, currentGameStatus):
 
 
 
-def setGameResultString(gameProgInfo, currentGameStatus, oppBotInfo):
+
+def setGameResultObj(gameProgInfo, currGameResult):
+
+    # Gets the opposite team
+    oppBotInfo = currGameResult['participants'][0] if currGameResult['participants'][0]['team'] != OUR_TEAM_ID else currGameResult['participants'][1]
     oppBotName = oppBotInfo['teamname']
     if oppBotName == "It's A Trap? ":
-        print('got here!')
+        print('This should not happen!')
     oppBotPlayerIndex = oppBotInfo['player_index'] # either 0 or 1
-    gameID = currentGameStatus['id']
+    gameID = currGameResult['id']
 
-    if currentGameStatus['status'] != 'OK!':
-        gameProgInfo[oppBotName][oppBotPlayerIndex] = currentGameStatus['status']
+    if gameID not in gameProgInfo[oppBotName][oppBotPlayerIndex]:
+        newGameResultObj = GameResultInfo()
+        newGameResultObj.setGameID(gameID)
+        gameProgInfo[oppBotName][oppBotPlayerIndex][gameID] = newGameResultObj
+
+    if currGameResult['status'] != 'OK!':
+        gameProgInfo[oppBotName][oppBotPlayerIndex][gameID].setGameStatusStr(currGameResult['status'])
 
     else:
-        numGames = len(currentGameStatus['maps'])
+        numGames = len(currGameResult['maps'])
         numGamesLost = oppBotInfo['score']
         numGamesWon = numGames - numGamesLost
 
+        gameInfoObj: GameResultInfo = gameProgInfo[oppBotName][oppBotPlayerIndex][gameID]
+        gameInfoObj.setIsGameFinished(True)
+        gameInfoObj.setGameStatusStr('OK!')
+        gameInfoObj.setGameInfo(numGamesWon, numGamesLost)
+        gameInfoObj.setReplayURL(currGameResult['replay_url'])
 
-        victoryStatus = 'T' if numGamesWon == numGamesLost else ('W' if numGamesWon > numGamesLost else 'L')
-
-
-        gameProgInfo[oppBotName][oppBotPlayerIndex] = f"{victoryStatus}  {numGamesWon}-{numGamesLost} {gameID}"
-
-# Where gameProgInfo: [oppBot][sideOfOpponent] = ResultString
+# Where gameProgInfo: [oppBot][sideOfOpponent][gameID] = GameResultInfo
+# TODO: reformat the output display here!
+# Go through the output of the games, and get the total number of games won and lost.
+# Have 'IPR' as the game status if only some of the games have been completed.
+# gameProgInfo[oppBotName][oppBotPlayerIndex][gameID] = GameResultInfo(), where gameID is the key to the dict
 def displayGames(gameProgInfo):
+    def getGamesTotalResultStr(gameResultsHM):
+        isAllGamesCompleted = all(gameInfoObj.isGameFinished() for gameID,gameInfoObj  in gameResultsHM.items())
+        if not isAllGamesCompleted:
+            gameStatusList = [currGameResultObj.getGameStatusStr() for currGameResultObj in gameResultsHM.values()]
+            return ','.join(gameStatusList)
+        else:
+            numWins, numLosses = 0,0
+            gameIDList = []
+            for currGameResultObj in gameResultsHM.values():
+                currWinsCount, currLossesCount = currGameResultObj.getGameInfo()
+                numWins += currWinsCount
+                numLosses += currLossesCount
+                gameIDList.append(str(currGameResultObj.getGameID()))
+
+            gameStatusCode = 'T' if numWins == numLosses else ('W' if numWins > numLosses else 'L')
+
+            return f"{gameStatusCode} {numWins}-{numLosses} {','.join(gameIDList)}"
+
+
+
     dataMatrix = []
     for oppBot in gameProgInfo:
-        requesterFirstGameStr = gameProgInfo[oppBot][1]
-        requesterLastGameStr = gameProgInfo[oppBot][0]
+        requesterFirstGamesHM = gameProgInfo[oppBot][1]
+        requesterLastGamesHM = gameProgInfo[oppBot][0]
 
-        rowStr = [oppBot, requesterFirstGameStr, requesterLastGameStr]
+        rowStr = [oppBot, getGamesTotalResultStr(requesterFirstGamesHM), getGamesTotalResultStr(requesterLastGamesHM)]
         dataMatrix.append(rowStr)
 
     print(tabulate(dataMatrix, headers= ['Opponent bots', 'Requester First', 'Requester Last'], tablefmt="grid"))
@@ -128,13 +167,11 @@ def setAndDisplayGameFromHM(currAllGamesStatusHM, gameProgInfo):
     for currGameStatus in currAllGamesStatusHM.values():
         if currGameStatus['status'] == GameStatus.FINISHED.value:
             numGamesCompleted += 1
-        oppTeamInfo= currGameStatus['participants'][1] if currGameStatus['participants'][0]['team'] == OUR_TEAM_ID else currGameStatus['participants'][0]
-        setGameResultString(gameProgInfo, currGameStatus, oppTeamInfo)
+        setGameResultObj(gameProgInfo, currGameStatus)
 
     displayGames(gameProgInfo)
 
     return numGamesCompleted
-
 
 def matchGamesFirstTime(requestedGamesResponse, gameProgInfo):
     def addToIDMaps(requestID, actualID):
@@ -165,11 +202,11 @@ def matchGamesFirstTime(requestedGamesResponse, gameProgInfo):
                 # Match games based on opponent name, player_index, creation time
                 if gamesAreMatched(game1Info, currGameResult):
 
-                    setGameResultString(gameProgInfo,currGameResult, oppTeamInfo)
+                    setGameResultObj(gameProgInfo, currGameResult)
                     addToIDMaps(game1Info['id'], currGameResult['id'])
 
                 elif gamesAreMatched(game2Info, currGameResult):
-                    setGameResultString(gameProgInfo,currGameResult, oppTeamInfo)
+                    setGameResultObj(gameProgInfo, currGameResult)
                     addToIDMaps(game2Info['id'], currGameResult['id'])
 
 
@@ -183,8 +220,8 @@ def setReplaysDict(gameReplaysDict, currAllGamesStatusHM):
 
 def outputMatchGames(requestedGamesResponse, gameReplaysDict):
 
-    # Maps [oppBot][side] = ResultString
-    gameProgInfo = defaultdict(lambda: [None,None])
+    # Maps [oppBot][side][actualGameID] = gameInfoDict
+    gameProgInfo = defaultdict(lambda: [{}, {}])
 
     requestToActualID, actualToRequestID = matchGamesFirstTime(requestedGamesResponse,gameProgInfo)
     lastGameQueued = requestedGamesResponse[-1][1]

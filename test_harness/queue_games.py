@@ -27,7 +27,18 @@ def generateGameReqBody(oppTeamName, mapsList):
     return (reqBodyTeamA, reqBodyTeamB)
 
 def generateGameReqsList(oppBotsList, mapsList):
-    return [generateGameReqBody(oppTeam, mapsList) for oppTeam in oppBotsList]
+    retList = []
+    #Handling queuing > 10 maps at a time
+    for i in range(0, len(mapsList), MAX_MAPS_PER_MATCH):
+        currMapsSubsetList = mapsList[i:i+MAX_MAPS_PER_MATCH]
+
+        for oppTeam in oppBotsList:
+            retList.append(generateGameReqBody(oppTeam, currMapsSubsetList))
+    return retList
+
+def isValidRequest(response):
+    # Check to make sure it's a 200s status code
+    return 200 <= response.status_code < 300
 
 def isValidRequest(response):
     # Check to make sure it's a 200s status code
@@ -51,6 +62,7 @@ def requestGamesCallback(callBackArgs):
                  'responseBody': response1Body,
                  'id': response1Body['id'],
                  'statusCode': game1Response.status_code,
+                 'mapsList':response1Body['maps'],
                  'fullResponse': game1Response}
     responsesList.append(game1Info)
 
@@ -70,6 +82,7 @@ def requestGamesCallback(callBackArgs):
                  'responseBody': response2Body,
                  'id': response2Body['id'],
                  'statusCode': game2Response.status_code,
+                 'mapsList':response2Body['maps'],
                  'fullResponse': game2Response}
     responsesList.append(game2Info)
     return responsesList
@@ -84,6 +97,7 @@ def main():
     mapsGroup = parser.add_mutually_exclusive_group(required=False)
     mapsGroup.add_argument('-m', '--maps', nargs='+', type=str, help='Maps to play on')
     mapsGroup.add_argument('-mf', '--mapsfile', type=str, help='Path to a file containing list of maps to play on')
+    mapsGroup.add_argument('-ma', '--mapsall', action='store_true', help='Select all maps to play on, as defined by ALL_MAPS in constant.py')
 
     # Mandatory args
     oppBotsGroup = parser.add_mutually_exclusive_group(required=True)
@@ -93,6 +107,8 @@ def main():
     args = parser.parse_args()
 
     mapsList = DEFAULT_MAPS
+    if args.mapsall:
+        mapsList = ALL_MAPS
     if args.mapsfile:
         mapsList = loadJSON(args.mapsfile)
     elif args.maps:

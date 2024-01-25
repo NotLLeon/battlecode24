@@ -122,15 +122,14 @@ public class BugNav {
 
         Direction nextDir = null;
         if(!obstacle) {
-            if (isPassable(dir)) {
-                return dir;
-            }
+            if (isPassable(dir)) return dir;
             obstacle = true;
             computeSlope(curLoc, dest);
             traceDir = dir;
             dis = curLoc.distanceSquaredTo(dest);
             collisionLoc = curLoc;
             nextDir = dir;
+            determineTraceSide();
         } else {
             turnsTracingObstacle++;
             int curDis = curLoc.distanceSquaredTo(dest);
@@ -151,8 +150,8 @@ public class BugNav {
         }
 
         Direction prevDir;
-        for(int i = 0; i < 8; ++i) {
-            if(isPassable(nextDir)) {
+        for(int i = 8; --i >= 0;) {
+            if (isPassable(nextDir)) {
                 traceDir = nextDir;
                 if(traceLeft) prevDir = traceDir.rotateRight().rotateRight();
                 else prevDir = traceDir.rotateLeft().rotateLeft();
@@ -168,5 +167,18 @@ public class BugNav {
             }
         }
         return Direction.CENTER;
+    }
+
+    private static void determineTraceSide() throws GameActionException {
+        Direction firstLeft = traceDir.rotateLeft();
+        Direction firstRight = traceDir.rotateRight();
+        for(int i = 8; --i >= 0;) {
+            if (!isPassable(firstLeft)) firstLeft = firstLeft.rotateLeft();
+            if (!isPassable(firstRight)) firstRight = firstRight.rotateRight();
+        }
+        MapLocation curLoc = rc.getLocation();
+        MapLocation leftLoc = curLoc.add(firstLeft);
+        MapLocation rightLoc = curLoc.add(firstRight);
+        traceLeft = leftLoc.distanceSquaredTo(curDest) < rightLoc.distanceSquaredTo(curDest);
     }
 }
