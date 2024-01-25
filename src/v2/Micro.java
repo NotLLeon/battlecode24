@@ -359,22 +359,21 @@ public class Micro {
         MapLocation curLoc = rc.getLocation();
 
         // retreat if low health
-//        if (rc.getHealth() <= RETREAT_HEALTH_THRESHOLD
-//                && rc.senseMapInfo(curLoc).getTeamTerritory() == rc.getTeam().opponent()) {
-//            // FIXME: for testing, not precise
-//            if (closeEnemyRobots.length == 0) return;
-//            MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(closeEnemyRobots));
-//            Direction dirFromCentroid = enemyCentroid.directionTo(curLoc);
-//            moveInDir(dirFromCentroid, 1);
-//            return;
-//        }
+    //    if (rc.getHealth() <= 300) {
+    //        // FIXME: for testing, not precise
+    //        if (closeEnemyRobots.length == 0) return;
+    //        MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(closeEnemyRobots));
+    //        Direction dirFromCentroid = enemyCentroid.directionTo(curLoc);
+    //        moveInDir(dirFromCentroid, 1);
+    //        return;
+    //    }
 
         // retreat if heavily outnumbered
-//        if (visibleEnemyRobots.length > 2 * visibleFriendlyRobots.length) {
-//            // FIXME: for testing, not precise
-//            moveAwayFromEnemy();
-//            return;
-//        }
+       if (2 * closeEnemyRobots.length > 3 * closeFriendlyRobots.length) {
+           // FIXME: for testing, not precise
+           moveAwayFromEnemy();
+           return;
+       }
 
         if (immediateEnemyRobots.length > 0 || !rc.isActionReady()) return;
 
