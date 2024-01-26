@@ -1,8 +1,8 @@
-package v2.Pathfinding;
+package v2old.Pathfinding;
 
 import battlecode.common.*;
 
-import static v2.Constants.rc;
+import static v2old.Constants.rc;
 
 /**
  * "BFS"

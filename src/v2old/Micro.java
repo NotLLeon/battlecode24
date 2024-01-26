@@ -1,9 +1,8 @@
-package v2;
+package v2old;
 
 import battlecode.common.*;
-import v2.fast.FastIterableLocSet;
 
-import static v2.Constants.*;
+import static v2old.Constants.*;
 
 public class Micro {
 
@@ -322,8 +321,10 @@ public class Micro {
         return false;
     }
 
-    private static boolean shouldBeAggressive() {
-        if (immediateEnemyRobots.length > 0) return false;
+    private static void tryAdvance() throws GameActionException {
+        // TODO: allow moving towards stunned enemies
+        if (immediateEnemyRobots.length > 0 || visibleEnemyRobots.length == 0 || !rc.isActionReady()) return;
+
         RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
                 visibleEnemyRobots,
                 (r) -> !isStunned(r.getID())
@@ -334,7 +335,7 @@ public class Micro {
                 (r) -> !isStunned(r.getID())
         );
 
-        if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return false;
+        if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return;
 
         int sumVisibleFriendlyHealth = 0;
         int sumVisibleEnemyHealth = 0;
@@ -349,106 +350,33 @@ public class Micro {
         boolean longRangeCond = visibleFriendlyRobots.length >= 2 * unstunnedVisibleEnemyRobots.length;
         boolean closeRangeCond = closeFriendlyRobots.length >= unstunnedCloseEnemyRobots.length + 2;
 
-        rc.setIndicatorString(healthCond + " " + longRangeCond + " " + closeRangeCond);
-        return longRangeCond || closeRangeCond || healthCond;
-    }
-
-    private static void tryMove() throws GameActionException {
-        if (!rc.isActionReady() || !rc.isMovementReady()) return; // is this correct? We might still want to move
-        if (immediateEnemyRobots.length > 0 || visibleEnemyRobots.length == 0) return;
+        if (!longRangeCond && !closeRangeCond && !healthCond) return;
 
         MapLocation curLoc = rc.getLocation();
-        DirInfo[] dirInfos = new DirInfo[9];
-        for (Direction dir : Direction.allDirections()) {
-            if (!rc.canMove(dir)) continue;
-            dirInfos[dir.ordinal()] = new DirInfo(dir, curLoc, visibleEnemyRobots, visibleFriendlyRobots);
+        Direction[] moveDirs;
+        if (closeEnemyRobots.length > 0) {
+            // if we are moving into attack range, pick the direction that allows us to attack at least 1 enemy
+            //  and minimizes the number of enemies that can attack us
+            moveDirs = Utils.filterDirArr(
+                    DIRECTIONS,
+                    (d) -> {
+                        MapLocation newLoc = curLoc.add(d);
+                        for (RobotInfo enemy : closeEnemyRobots) {
+                            if (newLoc.isWithinDistanceSquared(enemy.getLocation(), GameConstants.ATTACK_RADIUS_SQUARED)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+            );
+        } else {
+            MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(visibleEnemyRobots));
+            Direction dirToCentroid = curLoc.directionTo(enemyCentroid);
+            moveDirs = new Direction[] {dirToCentroid, dirToCentroid.rotateLeft(), dirToCentroid.rotateRight()};
         }
-
-        Direction moveDir = null;
-        boolean aggressive = shouldBeAggressive();
-
-        // try to find direction with attackable enemy, if none then just minimize distance to enemy
-        int maxPrio = -1;
-        for (DirInfo dirInfo : dirInfos) {
-            if (dirInfo == null) continue;
-            if (!aggressive && dirInfo.dir != Direction.CENTER && !dirInfo.isSafe()) continue;
-            if (dirInfo.highestPrio > maxPrio) {
-                moveDir = dirInfo.dir;
-                maxPrio = dirInfo.highestPrio;
-            }
-        }
-
-        if (moveDir == null && aggressive) {
-            int minDis = 99999999;
-            for (DirInfo dirInfo : dirInfos) {
-                if (dirInfo == null) continue;
-                if (dirInfo.minDisToEnemy < minDis) {
-                    moveDir = dirInfo.dir;
-                    minDis = dirInfo.minDisToEnemy;
-                }
-            }
-        }
-
-        if (moveDir != null && rc.canMove(moveDir)) move(moveDir);
+        moveMinEnemies(moveDirs);
     }
-//
-//    private static void tryAdvance() throws GameActionException {
-//        // TODO: allow moving towards stunned enemies
-//        if (immediateEnemyRobots.length > 0 || visibleEnemyRobots.length == 0 || !rc.isActionReady()) return;
-//
-//        RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
-//                visibleEnemyRobots,
-//                (r) -> !isStunned(r.getID())
-//        );
-//
-//        RobotInfo[] unstunnedCloseEnemyRobots = Utils.filterRobotInfoArr(
-//                closeEnemyRobots,
-//                (r) -> !isStunned(r.getID())
-//        );
-//
-//        if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return;
-//
-//        int sumVisibleFriendlyHealth = 0;
-//        int sumVisibleEnemyHealth = 0;
-//        for (RobotInfo friendly : visibleFriendlyRobots) sumVisibleFriendlyHealth += friendly.getHealth();
-//        for (RobotInfo enemy : unstunnedVisibleEnemyRobots) sumVisibleEnemyHealth += enemy.getHealth();
-//
-//        double avgFriendlyHealth = sumVisibleFriendlyHealth / (double) visibleFriendlyRobots.length;
-//        double avgEnemyHealth = sumVisibleEnemyHealth / (double) unstunnedVisibleEnemyRobots.length;
-//
-//        boolean healthCond = visibleFriendlyRobots.length >= unstunnedVisibleEnemyRobots.length
-//                && avgFriendlyHealth >= 2 * avgEnemyHealth;
-//        boolean longRangeCond = visibleFriendlyRobots.length >= 2 * unstunnedVisibleEnemyRobots.length;
-//        boolean closeRangeCond = closeFriendlyRobots.length >= unstunnedCloseEnemyRobots.length + 2;
-//
-//        if (!longRangeCond && !closeRangeCond && !healthCond) return;
-//
-//        MapLocation curLoc = rc.getLocation();
-//        Direction[] moveDirs;
-//        if (closeEnemyRobots.length > 0) {
-//            // if we are moving into attack range, pick the direction that allows us to attack at least 1 enemy
-//            //  and minimizes the number of enemies that can attack us
-//            moveDirs = Utils.filterDirArr(
-//                    DIRECTIONS,
-//                    (d) -> {
-//                        MapLocation newLoc = curLoc.add(d);
-//                        for (RobotInfo enemy : closeEnemyRobots) {
-//                            if (newLoc.isWithinDistanceSquared(enemy.getLocation(), GameConstants.ATTACK_RADIUS_SQUARED)) {
-//                                return true;
-//                            }
-//                        }
-//                        return false;
-//                    }
-//            );
-//        } else {
-//            MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(visibleEnemyRobots));
-//            Direction dirToCentroid = curLoc.directionTo(enemyCentroid);
-//            moveDirs = new Direction[] {dirToCentroid, dirToCentroid.rotateLeft(), dirToCentroid.rotateRight()};
-//        }
-//        moveMinEnemies(moveDirs);
-//    }
 
-    // TODO: rethink this
     public static boolean inCombat() throws GameActionException {
         senseEnemies();
         // can prob add more conditions
@@ -483,7 +411,7 @@ public class Micro {
 
         senseUnits();
 
-        tryMove();
+        tryAdvance();
 
         // if we can place trap and still do something else, try place trap first
         // FIXME: doesnt consider level 6 attack spec, which allows unit to attack twice in 1 turn

@@ -1,9 +1,9 @@
-package v2.Pathfinding;
+package v2old.Pathfinding;
 
 import battlecode.common.*;
-import v2.Robot;
+import v2old.Robot;
 
-import static v2.Constants.rc;
+import static v2old.Constants.rc;
 
 public class Pathfinding {
 
