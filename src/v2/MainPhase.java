@@ -148,6 +148,10 @@ public class MainPhase extends Robot {
     }
 
     public static void run() throws GameActionException {
+        if (RobotPlayer.role == Role.SIGNAL) {
+            SignalBot.run();
+            return;
+        }
         Micro.run();
         runStrat();
         Micro.run();
