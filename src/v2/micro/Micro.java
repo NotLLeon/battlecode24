@@ -355,6 +355,26 @@ public class Micro {
         return false;
     }
 
+    public static void crumbSearch() throws GameActionException {
+        MapLocation[] crumbLocs = rc.senseNearbyCrumbs(2);
+        if (crumbLocs.length == 0) return;
+
+        System.out.println("Crumbs: " + crumbLocs.length);
+
+        MapLocation nearestCrumb = crumbLocs[0];
+        int dist = rc.getLocation().distanceSquaredTo(nearestCrumb);
+
+        for (MapLocation crumb : crumbLocs) {
+            int crumbDist = rc.getLocation().distanceSquaredTo(crumb);
+            if (rc.getLocation().distanceSquaredTo(crumb) < dist) {
+                dist = crumbDist;
+                nearestCrumb = crumb;
+            }
+        }
+
+        Robot.moveTo(nearestCrumb);
+    }
+
     public static void run() throws GameActionException {
         if (rc.hasFlag()) return;
 
@@ -377,6 +397,10 @@ public class Micro {
         // TODO: wtf? clean this up
 
         senseUnits();
+
+        if (visibleEnemyRobots.length == 0) {
+            crumbSearch();
+        }
 
         if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
         tryAttack();
