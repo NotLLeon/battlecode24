@@ -286,7 +286,8 @@ public class Micro {
         return false;
     }
 
-    static boolean shouldBeAggressive() {
+    static boolean aggressive;
+    private static boolean shouldBeAggressive() {
         if (immediateEnemyRobots.length > 0
                 || rc.getHealth() <= RETREAT_HEALTH_THRESHOLD || !rc.isActionReady()) return false;
         RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
@@ -323,7 +324,7 @@ public class Micro {
     private static void tryMove() throws GameActionException {
         if (!rc.isMovementReady()) return; // is this correct? We might still want to move
         if (visibleEnemyRobots.length == 0) return;
-
+        aggressive = shouldBeAggressive();
         MapLocation curLoc = rc.getLocation();
         DirInfo[] dirInfos = new DirInfo[9];
         for (int i = 9; --i >= 0;) {

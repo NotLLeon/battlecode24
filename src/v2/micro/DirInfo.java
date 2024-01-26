@@ -61,7 +61,7 @@ public class DirInfo {
         if (disToFlagCarrier < other.disToFlagCarrier) return true;
         if (disToFlagCarrier > other.disToFlagCarrier) return false;
 
-        if (!Micro.shouldBeAggressive()) {
+        if (!Micro.aggressive) {
             int thisDanger = getDangerScore();
             int otherDanger = other.getDangerScore();
             if (thisDanger < otherDanger) return true;
