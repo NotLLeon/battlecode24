@@ -50,6 +50,28 @@ def getGameInfo(logStr: str):
 
     return retDict
 
+def checkErrorLogForInvalidUserInput(errorLog):
+    playerNotFoundPattern = re.compile(r"Couldn't load player class: (\w+)\.RobotPlayer")
+
+    # Search for the pattern in the log message
+    playerNotFoundMatch = playerNotFoundPattern.search(errorLog)
+
+    # Check if a match is found and extract the player class name
+    if playerNotFoundMatch:
+        player_class_name = playerNotFoundMatch.group(1)
+        print("Player class not found, check spelling for this bot name:", player_class_name)
+
+    # Define the regex pattern to extract the map name
+    mapNotFoundPattern = re.compile(r"Can't load map: (\w+) from dir maps or default maps")
+
+    # Search for the pattern in the log message
+    mapNotFoundMatch = mapNotFoundPattern.search(errorLog)
+
+    # Check if a match is found and extract the map name
+    if mapNotFoundMatch:
+        map_name = mapNotFoundMatch.group(1)
+        print("Map not found:", map_name)
+
 # Expected arguments: (gameMap, teamA, teamB)
 def runGames(args: tuple) -> dict:
     gameMap, teamA, teamB, currBotLabel = args
@@ -59,6 +81,9 @@ def runGames(args: tuple) -> dict:
     # cwd is battlecode24/test-harness, cd to battlecode24/ instead
     process = subprocess.Popen(command, stdout=subprocess.PIPE,stderr=subprocess.PIPE, text=True, cwd=os.pardir)
     output, error = process.communicate()
+
+    checkErrorLogForInvalidUserInput(error)
+
     gameResInfo = getGameInfo(output)
 
     gameResInfo['fullOutput'] = output

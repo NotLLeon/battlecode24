@@ -4,7 +4,15 @@ from table_script import transformGameDataAsNestedMap, printTabulateAsGrid
 
 from constants import *
 from file_operations import *
+from pathlib import Path
 
+def checkBotsExist(botsList):
+    for botName in botsList:
+        botDirPath = Path(f"../src/{botName}")
+        if not botDirPath.exists():
+            print(f"{botName} is not found!")
+            return False
+    return True
 
 
 def main():
@@ -29,7 +37,6 @@ def main():
     # Accessing the values
     currBot = args.curr_bot
     oppBots = args.bots
-
     mapsList = DEFAULT_MAPS
     if args.mapsall:
         mapsList = ALL_MAPS
@@ -38,6 +45,10 @@ def main():
     elif args.maps:
         mapsList = args.maps
 
+    if not checkBotsExist([currBot]):
+        return
+    if not checkBotsExist(oppBots):
+        return
 
 
     # Your script logic here
