@@ -355,7 +355,7 @@ public class Micro {
         return false;
     }
 
-    public static void crumbSearch() throws GameActionException {
+    private static void pickupCrumbs() throws GameActionException {
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(2);
         if (crumbLocs.length == 0) return;
 
@@ -398,9 +398,7 @@ public class Micro {
 
         senseUnits();
 
-        if (visibleEnemyRobots.length == 0) {
-            crumbSearch();
-        }
+        if (visibleEnemyRobots.length == 0) pickupCrumbs();
 
         if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
         tryAttack();
