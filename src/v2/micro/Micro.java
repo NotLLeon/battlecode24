@@ -1,6 +1,7 @@
-package v2;
+package v2.micro;
 
 import battlecode.common.*;
+import v2.*;
 
 import static v2.Constants.*;
 
@@ -15,6 +16,7 @@ public class Micro {
     private static RobotInfo[] closeFriendlyRobots;
     private static int lastRoundRun = 0;
     private static MapLocation lastLocRun = null;
+    private static final int RETREAT_HEALTH_THRESHOLD = 250;
 
     private static void attack(MapLocation loc) throws GameActionException {
         Robot.attack(loc);
@@ -78,45 +80,8 @@ public class Micro {
         else if (rc.canMove(dirRR)) move(dirRR);
     }
 
-    private static boolean isStunned(int id) {
+    static boolean isStunned(int id) {
         return rc.getRoundNum() - TrapTracker.getLastStunnedRound(id) <= 2;
-    }
-
-    private static int getNumAttackableEnemies(MapLocation loc) {
-        int numAttackableEnemies = 0;
-        for (RobotInfo enemy : visibleEnemyRobots) {
-            if (!enemy.getLocation().isWithinDistanceSquared(loc, GameConstants.ATTACK_RADIUS_SQUARED)) continue;
-            if (!isStunned(enemy.getID())) numAttackableEnemies++;
-        }
-        return numAttackableEnemies;
-    }
-
-    // moves in first direction in dirs that minimizes number of attackable enemies
-    private static void moveMinEnemies(Direction[] dirs) throws GameActionException {
-        if (!rc.isMovementReady()) return;
-        Direction bestDir = null;
-        int minAttackableEnemies = 10000;
-        MapLocation curLoc = rc.getLocation();
-        for (Direction dir : dirs) {
-            if(!rc.canMove(dir) && dir != Direction.CENTER) continue;
-            int numAttackableEnemies = getNumAttackableEnemies(curLoc.add(dir));
-            if (bestDir == null || numAttackableEnemies < minAttackableEnemies) {
-                minAttackableEnemies = numAttackableEnemies;
-                bestDir = dir;
-            }
-        }
-        if (bestDir != null && bestDir != Direction.CENTER) move(bestDir);
-    }
-
-    private static Direction[] dirOrder = {Direction.CENTER, Direction.NORTH, Direction.EAST, Direction.SOUTH,
-            Direction.WEST, Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHWEST, Direction.SOUTHEAST};
-    private static void moveAwayFromEnemy() throws GameActionException {
-        moveMinEnemies(dirOrder);
-    }
-
-    private static void moveInDirMinEnemies(Direction dir) throws GameActionException {
-        Direction[] dirs = {dir, dir.rotateLeft(), dir.rotateRight()};
-        moveMinEnemies(dirs);
     }
 
     private static void escortFlag(FlagInfo flag) throws GameActionException {
@@ -262,8 +227,6 @@ public class Micro {
             if (target == null) break;
             attack(target.getLocation());
         }
-
-        if (rc.isMovementReady()) moveAwayFromEnemy();
     }
 
     private static void tryHeal() throws GameActionException {
@@ -321,10 +284,10 @@ public class Micro {
         return false;
     }
 
-    private static void tryAdvance() throws GameActionException {
-        // TODO: allow moving towards stunned enemies
-        if (immediateEnemyRobots.length > 0 || visibleEnemyRobots.length == 0 || !rc.isActionReady()) return;
-
+    static boolean aggressive;
+    private static boolean shouldBeAggressive() {
+        if (immediateEnemyRobots.length > 0
+                || rc.getHealth() <= RETREAT_HEALTH_THRESHOLD || !rc.isActionReady()) return false;
         RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
                 visibleEnemyRobots,
                 (r) -> !isStunned(r.getID())
@@ -335,7 +298,7 @@ public class Micro {
                 (r) -> !isStunned(r.getID())
         );
 
-        if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return;
+        if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return false;
 
         int sumVisibleFriendlyHealth = 0;
         int sumVisibleEnemyHealth = 0;
@@ -350,33 +313,35 @@ public class Micro {
         boolean longRangeCond = visibleFriendlyRobots.length >= 2 * unstunnedVisibleEnemyRobots.length;
         boolean closeRangeCond = closeFriendlyRobots.length >= unstunnedCloseEnemyRobots.length + 2;
 
-        if (!longRangeCond && !closeRangeCond && !healthCond) return;
-
-        MapLocation curLoc = rc.getLocation();
-        Direction[] moveDirs;
-        if (closeEnemyRobots.length > 0) {
-            // if we are moving into attack range, pick the direction that allows us to attack at least 1 enemy
-            //  and minimizes the number of enemies that can attack us
-            moveDirs = Utils.filterDirArr(
-                    DIRECTIONS,
-                    (d) -> {
-                        MapLocation newLoc = curLoc.add(d);
-                        for (RobotInfo enemy : closeEnemyRobots) {
-                            if (newLoc.isWithinDistanceSquared(enemy.getLocation(), GameConstants.ATTACK_RADIUS_SQUARED)) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-            );
-        } else {
-            MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(visibleEnemyRobots));
-            Direction dirToCentroid = curLoc.directionTo(enemyCentroid);
-            moveDirs = new Direction[] {dirToCentroid, dirToCentroid.rotateLeft(), dirToCentroid.rotateRight()};
-        }
-        moveMinEnemies(moveDirs);
+//        rc.setIndicatorString(healthCond + " " + longRangeCond + " " + closeRangeCond);
+        return longRangeCond || closeRangeCond || healthCond;
     }
 
+    private static final Direction[] dirOrder = {Direction.CENTER, Direction.NORTH, Direction.EAST, Direction.SOUTH,
+            Direction.WEST, Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHWEST, Direction.SOUTHEAST};
+    private static void tryMove() throws GameActionException {
+        if (!rc.isMovementReady()) return;
+        if (visibleEnemyRobots.length == 0) return;
+        aggressive = shouldBeAggressive();
+        MapLocation curLoc = rc.getLocation();
+        DirInfo[] dirInfos = new DirInfo[9];
+        for (int i = 9; --i >= 0;) {
+            if (!rc.canMove(dirOrder[i])) continue;
+            dirInfos[i] = new DirInfo(dirOrder[i], curLoc, visibleEnemyRobots, visibleFriendlyRobots);
+        }
+
+        DirInfo bestDirInfo = dirInfos[0];
+        for (DirInfo dirInfo : dirInfos) {
+            if (dirInfo == null) continue;
+            if (bestDirInfo == null || dirInfo.isBetter(bestDirInfo)) bestDirInfo = dirInfo;
+        }
+
+        if (bestDirInfo == null) return;
+        Direction moveDir = bestDirInfo.dir;
+        if (moveDir != null && rc.canMove(moveDir)) move(moveDir);
+    }
+
+    // TODO: rethink this
     public static boolean inCombat() throws GameActionException {
         senseEnemies();
         // can prob add more conditions
@@ -409,20 +374,27 @@ public class Micro {
             return;
         }
 
+        // TODO: wtf? clean this up
+
         senseUnits();
 
-        tryAdvance();
-
-        // if we can place trap and still do something else, try place trap first
-        // FIXME: doesnt consider level 6 attack spec, which allows unit to attack twice in 1 turn
         if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
         tryAttack();
+
+        tryMove();
+
+        if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
+        tryAttack();
+        tryHeal();
+
 
         // TODO: remove from micro?
         if (MainPhase.getShouldPickUpFlag()) tryMoveToFlag();
 
+        if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
         tryAttack();
         tryHeal();
+
         tryPlaceTrap();
 
         TrapTracker.sensePlacedTraps();
