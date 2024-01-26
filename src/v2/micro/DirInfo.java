@@ -1,6 +1,7 @@
-package v2;
+package v2.micro;
 
 import battlecode.common.*;
+import v2.Utils;
 
 // stores info about each valid direction for micro
 // number of attackable enemies, highest prio attackable enemy, info about each attackable enemy

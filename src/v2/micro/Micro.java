@@ -1,7 +1,7 @@
-package v2;
+package v2.micro;
 
 import battlecode.common.*;
-import v2.fast.FastIterableLocSet;
+import v2.*;
 
 import static v2.Constants.*;
 
