@@ -45,7 +45,7 @@ public class Spawner {
     private static boolean distressSpawn() throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             MapLocation loc = Comms.readLoc(COMMS_SIGNAL_BOT_DISTRESS_LOCS + i);
-            if (loc != null && rc.canSpawn(loc)) {
+            if (loc != null) {
                 for(Direction tryDir : Utils.getDirOrdered(Direction.CENTER)) {
                     MapLocation spawnPoint = loc.add(tryDir);
                     if(rc.canSpawn(spawnPoint)) {
