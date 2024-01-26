@@ -320,7 +320,7 @@ public class Micro {
     private static final Direction[] dirOrder = {Direction.CENTER, Direction.NORTH, Direction.EAST, Direction.SOUTH,
             Direction.WEST, Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHWEST, Direction.SOUTHEAST};
     private static void tryMove() throws GameActionException {
-        if (!rc.isMovementReady()) return; // is this correct? We might still want to move
+        if (!rc.isMovementReady()) return;
         if (visibleEnemyRobots.length == 0) return;
         aggressive = shouldBeAggressive();
         MapLocation curLoc = rc.getLocation();
