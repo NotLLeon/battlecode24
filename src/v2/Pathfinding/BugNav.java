@@ -129,7 +129,7 @@ public class BugNav {
 
             if(onLine(curLoc) && curDis < dis - 1) {
                 reset();
-                return getDir(dest, unitPassable);
+                return getDir(dest);
             }
 
             if(curLoc.equals(collisionLoc)) {
@@ -151,7 +151,7 @@ public class BugNav {
                 if(!changeWallTrace && !onTheMap(prevDir)) {
                     changeWallTrace = true;
                     changeTraceDir();
-                    return getDir(dest, unitPassable);
+                    return getDir(dest);
                 }
                 return traceDir;
             } else {
