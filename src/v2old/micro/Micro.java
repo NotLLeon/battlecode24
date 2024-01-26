@@ -1,9 +1,9 @@
-package v2.micro;
+package v2old.micro;
 
 import battlecode.common.*;
-import v2.*;
+import v2old.*;
 
-import static v2.Constants.*;
+import static v2old.Constants.*;
 
 public class Micro {
 
@@ -26,19 +26,11 @@ public class Micro {
     private static void move(Direction dir) throws GameActionException {
         rc.move(dir);
         senseUnits();
-        tryPickupFlag();
     }
 
     private static void heal(MapLocation loc) throws GameActionException {
         Robot.heal(loc);
         senseFriendlies();
-    }
-
-    private static void pickupFlag(FlagInfo flag) throws GameActionException {
-        Robot.pickupFlag(flag.getLocation());
-        int flagID = flag.getID();
-        FlagRecorder.setPickedUp(flagID);
-        if (!rc.hasFlag()) FlagRecorder.setCaptured(flagID); // in case you capture by picking up
     }
 
     private static void senseEnemies() throws GameActionException {
@@ -102,22 +94,6 @@ public class Micro {
         moveInDir(moveDir, 1);
     }
 
-    private static void tryPickupFlag() throws GameActionException {
-        // this only gets called when we move so should be fine
-        FlagInfo[] nearbyEnemyFlags = rc.senseNearbyFlags(
-                GameConstants.INTERACT_RADIUS_SQUARED,
-                rc.getTeam().opponent()
-        );
-        if (!MainPhase.getShouldPickUpFlag()) return;
-        for (FlagInfo enemyFlag : nearbyEnemyFlags) {
-            if (enemyFlag.isPickedUp()) continue;
-            if (rc.canPickupFlag(enemyFlag.getLocation())) {
-                pickupFlag(enemyFlag);
-                return;
-            }
-        }
-    }
-
     private static void tryMoveToFlag() throws GameActionException {
         // move towards dropped enemy flags and picked up friendly flags
         if (!rc.isMovementReady()) return;
@@ -145,8 +121,17 @@ public class Micro {
             return;
         }
 
-        Direction moveDir = rc.getLocation().directionTo(targetFlag.getLocation());
-        if (moveDir != Direction.CENTER) moveInDir(moveDir, 1);
+        MapLocation flagLoc = targetFlag.getLocation();
+
+        if (rc.canPickupFlag(flagLoc)) {
+            Robot.pickupFlag(flagLoc);
+            int flagID = targetFlag.getID();
+            FlagRecorder.setPickedUp(flagID);
+            if (!rc.hasFlag()) FlagRecorder.setCaptured(flagID); // in case you capture by picking up
+        } else {
+            Direction moveDir = rc.getLocation().directionTo(flagLoc);
+            if (moveDir != Direction.CENTER) moveInDir(moveDir, 1);
+        }
     }
 
     private static int getAttackDamage(RobotInfo robot) {
@@ -328,6 +313,7 @@ public class Micro {
         boolean longRangeCond = visibleFriendlyRobots.length >= 2 * unstunnedVisibleEnemyRobots.length;
         boolean closeRangeCond = closeFriendlyRobots.length >= unstunnedCloseEnemyRobots.length + 2;
 
+//        rc.setIndicatorString(healthCond + " " + longRangeCond + " " + closeRangeCond);
         return longRangeCond || closeRangeCond || healthCond;
     }
 
@@ -389,6 +375,7 @@ public class Micro {
         }
 
         // TODO: wtf? clean this up
+
         senseUnits();
 
         if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();

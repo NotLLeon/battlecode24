@@ -1,9 +1,9 @@
-package v2.micro;
+package v2old.micro;
 
 import battlecode.common.*;
-import v2.Utils;
+import v2old.Utils;
 
-import static v2.Constants.rc;
+import static v2old.Constants.rc;
 
 // stores info about each valid direction for micro
 // number of attackable enemies, highest prio attackable enemy, info about each attackable enemy
@@ -53,7 +53,6 @@ public class DirInfo {
     }
 
     public boolean isBetter(DirInfo other) {
-        // move this to seperate method in micro?
         if (disToFlagCarrier < other.disToFlagCarrier) return true;
         if (disToFlagCarrier > other.disToFlagCarrier) return false;
 
@@ -73,6 +72,7 @@ public class DirInfo {
         if (minDisToFriendly < other.minDisToFriendly) return true;
         if (minDisToFriendly > other.minDisToFriendly) return false;
 
-        return minDisToEnemy > other.minDisToEnemy;
+        return minDisToEnemy >= other.minDisToEnemy;
+//        else return minDisToFriendly <= other.minDisToFriendly;
     }
 }
