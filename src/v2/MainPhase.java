@@ -76,7 +76,22 @@ public class MainPhase extends Robot {
     }
 
     private static boolean isGoodFlagPickup(MapLocation flagLoc) throws GameActionException {
-        return true;
+        RobotInfo[] nearbyBots = rc.senseNearbyRobots(4);
+        int numEnemies = 0;
+        for (RobotInfo bot : nearbyBots) {
+            if (bot.getTeam() == rc.getTeam().opponent()) {
+                numEnemies++;
+            }
+        }
+        // TODO: SIMULATD ANNEALING
+        if (0.75 * (nearbyBots.length - numEnemies - 1) < numEnemies || !shouldPickUpFlag) return false;
+        if (!isDroppedFlag(flagLoc)) return true;
+        MapLocation flagDropperLoc = getFlagDropperLoc(flagLoc);
+        if (flagDropperLoc == null) return false;
+        if (Utils.inGeneralDirection(flagDropperLoc.directionTo(flagLoc), flagDropperLoc.directionTo(rc.getLocation()))) {
+            return true;
+        }
+        return false;
         // MapLocation curLoc = rc.getLocation();
         // if (flagBearer == null) return true;
         // Direction flagBearerDir = flagBearer.directionTo(flagLoc);
@@ -92,19 +107,10 @@ public class MainPhase extends Robot {
     }
 
     private static void tryPickupFlag() throws GameActionException {
-        RobotInfo[] nearbyBots = rc.senseNearbyRobots(4);
-        int numEnemies = 0;
-        for (RobotInfo bot : nearbyBots) {
-            if (bot.getTeam() == rc.getTeam().opponent()) {
-                numEnemies++;
-            }
-        }
-        // TODO: SIMULATD ANNEALING
-        if (0.75 * (nearbyBots.length - numEnemies - 1) < numEnemies || !shouldPickUpFlag) return;
         FlagInfo[] nearbyFlags = rc.senseNearbyFlags(4);
         for (FlagInfo flag : nearbyFlags) {
             MapLocation flagLoc = flag.getLocation();
-            if (isDroppedFlag(flagLoc) && !isGoodFlagPickup(flagLoc)) {
+            if (!isGoodFlagPickup(flagLoc)) {
                 continue;
             } else if (flag.getTeam() != rc.getTeam()) {
                 if (!rc.canPickupFlag(flagLoc)) {
@@ -122,16 +128,6 @@ public class MainPhase extends Robot {
         }
     }
 
-    // private static void escortFlag(FlagInfo flag) throws GameActionException {
-    //     MapLocation flagLoc = flag.getLocation();
-    //     MapLocation curLoc = rc.getLocation();
-    //     Direction moveDir;
-    //     if (curLoc.isWithinDistanceSquared(flagLoc, FLAG_ESCORT_RADIUS_SQUARED)) moveDir = flagLoc.directionTo(curLoc);
-    //     else moveDir = curLoc.directionTo(flagLoc);
-
-    //     moveInDir(moveDir, 1);
-    // }
-
     private static int getFlagDropInd(MapLocation loc) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             if (Comms.readLoc(COMMS_FLAG_DROP_LOC + i) == null) {
@@ -144,6 +140,7 @@ public class MainPhase extends Robot {
     private static void setFlagDropLoc(MapLocation loc) throws GameActionException {
         int ind = getFlagDropInd(loc);
         Comms.writeLoc(COMMS_FLAG_DROP_LOC + ind, loc);
+        Comms.writeLoc(COMMS_FLAG_DROPPER_LOC + ind, rc.getLocation());
     }
 
     private static boolean isDroppedFlag(MapLocation flag) throws GameActionException {
@@ -156,11 +153,22 @@ public class MainPhase extends Robot {
         return false;
     }
 
+    private static MapLocation getFlagDropperLoc(MapLocation flag) throws GameActionException {
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            MapLocation loc = Comms.readLoc(COMMS_FLAG_DROP_LOC + i);
+            if (loc != null && loc.equals(flag)) {
+                return Comms.readLoc(COMMS_FLAG_DROPPER_LOC + i);
+            }
+        }
+        return null;
+    }
+
     private static void clearFlagDropLoc(MapLocation flag) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             MapLocation loc = Comms.readLoc(COMMS_FLAG_DROP_LOC + i);
             if (loc != null && loc.equals(flag)) {
                 Comms.write(COMMS_FLAG_DROP_LOC + i, 0);
+                Comms.write(COMMS_FLAG_DROPPER_LOC + i, 0);
             }
         }
     }
@@ -201,15 +209,9 @@ public class MainPhase extends Robot {
         if (targetFlag.getTeam() != rc.getTeam() && targetFlag.isPickedUp()) {
             flagBearer = flagLoc;
             escortFlag(flagLoc);
-        } else if (rc.canPickupFlag(flagLoc)) {
-            if (isDroppedFlag(flagLoc)) {
-                if (isGoodFlagPickup(flagLoc)) {
-                    clearFlagDropLoc(flagLoc);
-                } else {
-                    return;
-                }
-            }
+        } else if (rc.canPickupFlag(flagLoc) && isGoodFlagPickup(flagLoc)) {
             Robot.pickupFlag(flagLoc);
+            if (isDroppedFlag(flagLoc)) clearFlagDropLoc(flagLoc);
             if (!rc.hasFlag()) {
                 FlagRecorder.setCaptured(targetFlag.getID());
             }
@@ -246,8 +248,9 @@ public class MainPhase extends Robot {
             // check if path ahead is congested and drop flag if so
             MapLocation targetLoc = Utils.findClosestLoc(Spawner.getSpawnCenters());
             RobotInfo[] nearbyBots = rc.senseNearbyRobots(16, rc.getTeam()); // TODO: test diff ranges
-            Direction intendedDir = Robot.getNextDirection(targetLoc);
-            
+            // Direction intendedDir = Robot.getNextDirection(targetLoc);
+            Direction intendedDir = curLoc.directionTo(targetLoc);
+
             int numBlockingBots = 0;
 
             for (RobotInfo bot : nearbyBots) {
@@ -255,11 +258,6 @@ public class MainPhase extends Robot {
                     numBlockingBots++;
                 }
             }
-
-            // TODO: test this number and fix this omega condition
-            // if (rc.canDropFlag(curLoc.add(intendedDir)) && (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD ||
-            //         (intendedDir != Direction.CENTER && rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null))) {
-
             MapLocation intendedLoc = curLoc.add(intendedDir);
             RobotInfo blockingBot = rc.senseRobotAtLocation(intendedLoc);
 
@@ -274,8 +272,7 @@ public class MainPhase extends Robot {
                     shouldPickUpFlag = false;
                 }
             } else {
-                if (rc.canMove(intendedDir)) rc.move(intendedDir);
-                else moveTo(targetLoc);
+                moveTo(targetLoc);
                 int flagId = pickedUpFlag.getID();
                 if (!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
                 else FlagRecorder.notifyCarryingFlag(flagId);
