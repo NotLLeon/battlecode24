@@ -41,10 +41,38 @@ public class SignalBot {
         }
     }
 
+    private static boolean adjacentToTrap(MapLocation loc) throws GameActionException {
+        for (Direction dir : DIRECTIONS) {
+            MapLocation adjLoc = loc.add(dir);
+            if (rc.canSenseLocation(adjLoc) && rc.senseMapInfo(adjLoc).getTrapType() != TrapType.NONE) return true;
+        }
+        return false;
+    }
+
+    private static void placeTraps(RobotInfo[] nearbyBots) throws GameActionException {
+        MapLocation[] closeEnemyLocs = Utils.robotInfoToLocArr(nearbyBots);
+        MapLocation enemyCentroid = Utils.getCentroid(closeEnemyLocs);
+        MapLocation loc = rc.getLocation();
+        Direction[] dirsTowards = Utils.getDirOrdered(loc.directionTo(enemyCentroid));
+        TrapType trapType = TrapType.STUN;
+
+        // only consider the 3 directions towards the centroid
+        for(int i = 0; i < 3; ++i) {
+            MapLocation trapPoint = loc.add(dirsTowards[i]);
+            if(rc.canBuild(trapType, trapPoint) && !adjacentToTrap(trapPoint)) {
+                Robot.build(trapType, trapPoint);
+                return;
+            }
+        }
+    }
+
     private static void scanAndSignal() throws GameActionException {
         RobotInfo[] nearbyBots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
         MapLocation curLoc = rc.getLocation();
         if (nearbyBots.length == 0) clearSignal(curLoc);
-        else setSignal(curLoc);
+        else {
+            setSignal(curLoc);
+            placeTraps(nearbyBots);
+        }
     }
 }
