@@ -17,7 +17,6 @@ public class MainPhase extends Robot {
     private static final int FLAG_CONVOY_CONGESTION_THRESHOLD = 4;
     private static boolean shouldPickUpFlag = true;
     private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
-    private static MapLocation flagBearer = null;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -95,8 +94,10 @@ public class MainPhase extends Robot {
     }
 
     private static void tryPickupFlag() throws GameActionException {
+        if (rc.hasFlag()) return;
         FlagInfo[] nearbyFlags = rc.senseNearbyFlags(4);
         for (FlagInfo flag : nearbyFlags) {
+            if (flag.getTeam() != rc.getTeam() && flag.isPickedUp()) continue;
             MapLocation flagLoc = flag.getLocation();
             if (!isGoodFlagPickup(flagLoc)) {
                 continue;
@@ -167,12 +168,12 @@ public class MainPhase extends Robot {
         if (curLoc.isWithinDistanceSquared(flagLoc, FLAG_ESCORT_RADIUS_SQUARED)) moveDir = flagLoc.directionTo(curLoc);
         else moveDir = curLoc.directionTo(flagLoc);
 
-        moveTo(curLoc.add(moveDir));
+        if (rc.canMove(moveDir)) rc.move(moveDir);
     }
 
     private static void tryMoveToFlag() throws GameActionException {
         // move towards dropped enemy flags and picked up friendly flags
-        if (!rc.isMovementReady() || !shouldPickUpFlag) return;
+        if (!rc.isMovementReady() || !shouldPickUpFlag || !rc.hasFlag()) return;
         FlagInfo[] nearbyFlags = rc.senseNearbyFlags(-1);
 
         FlagInfo targetFlag = null;
@@ -195,7 +196,6 @@ public class MainPhase extends Robot {
         MapLocation flagLoc = targetFlag.getLocation();
 
         if (targetFlag.getTeam() != rc.getTeam() && targetFlag.isPickedUp()) {
-            flagBearer = flagLoc;
             escortFlag(flagLoc);
         } else if (rc.canPickupFlag(flagLoc) && isGoodFlagPickup(flagLoc)) {
             Robot.pickupFlag(flagLoc);
