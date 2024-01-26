@@ -3,6 +3,7 @@ package v2;
 import static v2.Constants.*;
 
 import battlecode.common.*;
+import v2.micro.Micro;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
