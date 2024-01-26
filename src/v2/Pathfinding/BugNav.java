@@ -73,11 +73,16 @@ public class BugNav {
         return rc.onTheMap(loc);
     }
 
-
+    private static boolean isUnitPassable;
     private static boolean isPassable(Direction dir) throws GameActionException {
         MapLocation loc = rc.getLocation().add(dir);
         if(!rc.onTheMap(loc)) return false;
-        return rc.canMove(dir);
+        boolean isPassable = rc.canMove(dir);
+        if (isUnitPassable) {
+            RobotInfo robot = rc.senseRobotAtLocation(loc);
+            isPassable |= robot != null && robot.getTeam() == rc.getTeam();
+        }
+        return isPassable;
     }
 
     private static void changeTraceDir() {
@@ -87,7 +92,8 @@ public class BugNav {
     }
 
 
-    public static Direction getDir(MapLocation dest) throws GameActionException {
+    public static Direction getDir(MapLocation dest, boolean unitPassable) throws GameActionException {
+        isUnitPassable = unitPassable;
         MapLocation curLoc = rc.getLocation();
 
         // probably stuck in same place
@@ -130,7 +136,7 @@ public class BugNav {
 
             if(onLine(curLoc) && curDis < dis - 1) {
                 reset();
-                return getDir(dest);
+                return getDir(dest, unitPassable);
             }
 
             if(curLoc.equals(collisionLoc)) {
@@ -152,7 +158,7 @@ public class BugNav {
                 if(!changeWallTrace && !onTheMap(prevDir)) {
                     changeWallTrace = true;
                     changeTraceDir();
-                    return getDir(dest);
+                    return getDir(dest, unitPassable);
                 }
                 return traceDir;
             } else {

@@ -16,7 +16,12 @@ public class Pathfinding {
         return (rc.getID() % FILLERS_RATIO == 0) && (rc.getCrumbs() >= MIN_CRUMBS_TO_FILL);
     }
 
-    public static Direction getNextDir(MapLocation dest, boolean adj, int radius) throws GameActionException {
+    public static Direction getNextDir(
+            MapLocation dest,
+            boolean adj,
+            int radius,
+            boolean isUnitPassable
+    ) throws GameActionException {
         MapLocation curLoc = rc.getLocation();
         if(!rc.isMovementReady()
                 || curLoc.equals(dest)
@@ -33,13 +38,13 @@ public class Pathfinding {
             if (rc.canFill(nextLoc)) Robot.fill(nextLoc);
         }
         if(dir == Direction.CENTER) {
-            dir = BugNav.getDir(dest);
+            dir = BugNav.getDir(dest, isUnitPassable);
         }
         return dir;
     }
 
     public static void moveTo(MapLocation dest, boolean adj, int radius) throws GameActionException {
-        Direction dir = getNextDir(dest, adj, radius);
+        Direction dir = getNextDir(dest, adj, radius, false);
         if(rc.canMove(dir)) rc.move(dir);
     }
 }

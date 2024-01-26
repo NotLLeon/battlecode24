@@ -6,7 +6,6 @@ import static v2.Constants.*;
 
 public class Micro {
 
-    private static final int FLAG_ESCORT_RADIUS_SQUARED = 4;
     private static RobotInfo[] visibleFriendlyRobots;
     private static RobotInfo[] visibleEnemyRobots;
     private static RobotInfo[] immediateEnemyRobots;
@@ -118,56 +117,7 @@ public class Micro {
         Direction[] dirs = {dir, dir.rotateLeft(), dir.rotateRight()};
         moveMinEnemies(dirs);
     }
-
-    private static void escortFlag(FlagInfo flag) throws GameActionException {
-        MapLocation flagLoc = flag.getLocation();
-        MapLocation curLoc = rc.getLocation();
-        Direction moveDir;
-        if (curLoc.isWithinDistanceSquared(flagLoc, FLAG_ESCORT_RADIUS_SQUARED)) moveDir = flagLoc.directionTo(curLoc);
-        else moveDir = curLoc.directionTo(flagLoc);
-
-        moveInDir(moveDir, 1);
-    }
-
-    private static void tryMoveToFlag() throws GameActionException {
-        // move towards dropped enemy flags and picked up friendly flags
-        if (!rc.isMovementReady()) return;
-        FlagInfo[] nearbyFlags = rc.senseNearbyFlags(-1);
-
-        FlagInfo targetFlag = null;
-        for (FlagInfo flag : nearbyFlags) {
-            Team flagTeam = flag.getTeam();
-
-            // chase picked up friendly flags
-            if (flagTeam == rc.getTeam() && flag.isPickedUp()
-                    && rc.getRoundNum() > GameConstants.SETUP_ROUNDS) {
-                targetFlag = flag;
-                break;
-            }
-
-            // move towards enemy flags
-            if (flagTeam != rc.getTeam()) targetFlag = flag;
-        }
-
-        if (targetFlag == null) return;
-
-        if (targetFlag.getTeam() != rc.getTeam() && targetFlag.isPickedUp()) {
-            escortFlag(targetFlag);
-            return;
-        }
-
-        MapLocation flagLoc = targetFlag.getLocation();
-
-        if (rc.canPickupFlag(flagLoc)) {
-            Robot.pickupFlag(flagLoc);
-            int flagID = targetFlag.getID();
-            FlagRecorder.setPickedUp(flagID);
-            if (!rc.hasFlag()) FlagRecorder.setCaptured(flagID); // in case you capture by picking up
-        } else {
-            Direction moveDir = rc.getLocation().directionTo(flagLoc);
-            if (moveDir != Direction.CENTER) moveInDir(moveDir, 1);
-        }
-    }
+    
 
     private static int getAttackDamage(RobotInfo robot) {
         double mult = 1.0;
@@ -419,9 +369,9 @@ public class Micro {
         tryAttack();
 
         // TODO: remove from micro?
-        if (MainPhase.getShouldPickUpFlag()) tryMoveToFlag();
+        // if (MainPhase.getShouldPickUpFlag()) tryMoveToFlag();
 
-        tryAttack();
+        // tryAttack();
         tryHeal();
         tryPlaceTrap();
 
