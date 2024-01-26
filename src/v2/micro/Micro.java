@@ -370,7 +370,7 @@ public class Micro {
             }
         }
 
-        Robot.moveTo(nearestCrumb);
+        moveInDir(rc.getLocation().directionTo(nearestCrumb), 2);
     }
 
     public static void run() throws GameActionException {
