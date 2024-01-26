@@ -79,7 +79,7 @@ public class Micro {
     }
 
     private static boolean isStunned(int id) {
-        return rc.getRoundNum() - TrapTracker.getLastStunnedRound(id) <= 3; // TODO: tune
+        return rc.getRoundNum() - TrapTracker.getLastStunnedRound(id) <= 2; // TODO: tune
     }
 
     private static int getNumAttackableEnemies(MapLocation loc) {
