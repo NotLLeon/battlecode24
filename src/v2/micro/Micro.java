@@ -359,8 +359,6 @@ public class Micro {
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(2);
         if (crumbLocs.length == 0) return;
 
-        System.out.println("Crumbs: " + crumbLocs.length);
-
         MapLocation nearestCrumb = crumbLocs[0];
         int dist = rc.getLocation().distanceSquaredTo(nearestCrumb);
 
