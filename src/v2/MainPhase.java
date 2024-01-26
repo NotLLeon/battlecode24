@@ -92,18 +92,6 @@ public class MainPhase extends Robot {
             return true;
         }
         return false;
-        // MapLocation curLoc = rc.getLocation();
-        // if (flagBearer == null) return true;
-        // Direction flagBearerDir = flagBearer.directionTo(flagLoc);
-        // MapLocation goodSpot = flagLoc.add(flagBearerDir);
-        // RobotInfo bot = rc.senseRobotAtLocation(goodSpot);
-        // rc.setIndicatorString(flagBearerDir + " " + goodSpot + " " + flagBearer + " " + flagLoc);
-        // if (curLoc.equals(goodSpot)) {
-        //     return true;
-        // } else if (bot != null && bot.getTeam() != rc.getTeam()) {
-        //     return false;
-        // }
-        // else return curLoc.equals(flagLoc);
     }
 
     private static void tryPickupFlag() throws GameActionException {
