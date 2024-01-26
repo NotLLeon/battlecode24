@@ -79,7 +79,7 @@ public class Micro {
     }
 
     private static boolean isStunned(int id) {
-        return rc.getRoundNum() - TrapTracker.getLastStunnedRound(id) <= 3; // TODO: tune
+        return rc.getRoundNum() - TrapTracker.getLastStunnedRound(id) <= 2; // TODO: tune
     }
 
     private static int getNumAttackableEnemies(MapLocation loc) {
@@ -268,7 +268,7 @@ public class Micro {
 
     private static void tryHeal() throws GameActionException {
         if (!rc.isActionReady() || immediateEnemyRobots.length > 0) return;
-        if (closeEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
+        if (closeEnemyRobots.length > 0) return;
 
         RobotInfo target = null;
         int minBaseHits = 9999999;
@@ -284,7 +284,10 @@ public class Micro {
         if (target == null) return;
 
         MapLocation targetLoc = target.getLocation();
-        if (rc.canHeal(targetLoc)) heal(targetLoc);
+        if (rc.canHeal(targetLoc)) {
+            heal(targetLoc);
+            moveAwayFromEnemy();
+        }
     }
 
     private static int getVisibleThreshold() {
@@ -348,7 +351,9 @@ public class Micro {
                 (r) -> !isStunned(r.getID())
         );
 
-        if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return;
+        // int numStunnedEnemyRobots = closeEnemyRobots.length - unstunnedCloseEnemyRobots.length;
+
+        // if (unstunnedCloseEnemyRobots.length > 0) return;
 
         int sumVisibleFriendlyHealth = 0;
         int sumVisibleEnemyHealth = 0;
@@ -359,7 +364,7 @@ public class Micro {
         double avgEnemyHealth = sumVisibleEnemyHealth / (double) unstunnedVisibleEnemyRobots.length;
 
         boolean healthCond = visibleFriendlyRobots.length >= unstunnedVisibleEnemyRobots.length
-                && avgFriendlyHealth >= 2 * avgEnemyHealth;
+                && avgFriendlyHealth >= avgEnemyHealth;
         boolean longRangeCond = visibleFriendlyRobots.length >= 2 * unstunnedVisibleEnemyRobots.length;
         boolean closeRangeCond = closeFriendlyRobots.length >= unstunnedCloseEnemyRobots.length + 2;
 
@@ -388,6 +393,36 @@ public class Micro {
             moveDirs = new Direction[] {dirToCentroid, dirToCentroid.rotateLeft(), dirToCentroid.rotateRight()};
         }
         moveMinEnemies(moveDirs);
+    }
+
+    private static void tryRetreat() throws GameActionException {
+        // TODO: allow moving towards stunned enemies
+        if (visibleEnemyRobots.length == 0 || !rc.isActionReady()) return;
+
+        RobotInfo[] unstunnedVisibleEnemyRobots = Utils.filterRobotInfoArr(
+                visibleEnemyRobots,
+                (r) -> !isStunned(r.getID())
+        );
+
+        RobotInfo[] unstunnedCloseEnemyRobots = Utils.filterRobotInfoArr(
+                closeEnemyRobots,
+                (r) -> !isStunned(r.getID())
+        );
+
+        int sumVisibleFriendlyHealth = 0;
+        int sumVisibleEnemyHealth = 0;
+        for (RobotInfo friendly : visibleFriendlyRobots) sumVisibleFriendlyHealth += friendly.getHealth();
+        for (RobotInfo enemy : unstunnedVisibleEnemyRobots) sumVisibleEnemyHealth += enemy.getHealth();
+
+        boolean closeRangeCond = immediateFriendlyRobots.length >= unstunnedCloseEnemyRobots.length;
+
+        if (closeRangeCond) return;
+
+        MapLocation curLoc = rc.getLocation();
+        MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(visibleEnemyRobots));
+        Direction dirToCentroid = curLoc.directionTo(enemyCentroid);
+
+        moveInDir(dirToCentroid.opposite(), 1);
     }
 
     public static boolean inCombat() throws GameActionException {
@@ -425,6 +460,7 @@ public class Micro {
         senseUnits();
 
         tryAdvance();
+        tryRetreat();
 
         // if we can place trap and still do something else, try place trap first
         // FIXME: doesnt consider level 6 attack spec, which allows unit to attack twice in 1 turn
