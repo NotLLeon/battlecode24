@@ -1,8 +1,8 @@
-package v2;
+package v2old;
 
 import battlecode.common.*;
 
-import static v2.Constants.*;
+import static v2old.Constants.*;
 
 public class Micro {
 
@@ -337,41 +337,22 @@ public class Micro {
 
         if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return;
 
-        int numRelevantVisibleFriendlies = 0;
         int sumVisibleFriendlyHealth = 0;
         int sumVisibleEnemyHealth = 0;
-        MapLocation curLoc = rc.getLocation();
-
-        for (RobotInfo friendly : visibleFriendlyRobots) {
-            boolean isRelevant = false;
-            for (RobotInfo enemy : visibleEnemyRobots) {
-                MapLocation enemyLoc = enemy.getLocation();
-                MapLocation friendlyLoc = friendly.getLocation();
-
-                if (friendlyLoc.isWithinDistanceSquared(enemyLoc, ATTACK_RADIUS_PLUS_ONE_SQUARED)
-                    || friendlyLoc.isWithinDistanceSquared(curLoc, GameConstants.ATTACK_RADIUS_SQUARED)) {
-                    isRelevant = true;
-                    break;
-                }
-            }
-            if (isRelevant) {
-                sumVisibleFriendlyHealth += friendly.getHealth();
-                ++numRelevantVisibleFriendlies;
-            }
-        }
+        for (RobotInfo friendly : visibleFriendlyRobots) sumVisibleFriendlyHealth += friendly.getHealth();
         for (RobotInfo enemy : unstunnedVisibleEnemyRobots) sumVisibleEnemyHealth += enemy.getHealth();
 
-        double avgFriendlyHealth = sumVisibleFriendlyHealth / (double) numRelevantVisibleFriendlies;
+        double avgFriendlyHealth = sumVisibleFriendlyHealth / (double) visibleFriendlyRobots.length;
         double avgEnemyHealth = sumVisibleEnemyHealth / (double) unstunnedVisibleEnemyRobots.length;
 
-        boolean healthCond = numRelevantVisibleFriendlies >= unstunnedVisibleEnemyRobots.length
+        boolean healthCond = visibleFriendlyRobots.length >= unstunnedVisibleEnemyRobots.length
                 && avgFriendlyHealth >= 2 * avgEnemyHealth;
-        boolean longRangeCond = numRelevantVisibleFriendlies >= 2 * unstunnedVisibleEnemyRobots.length;
+        boolean longRangeCond = visibleFriendlyRobots.length >= 2 * unstunnedVisibleEnemyRobots.length;
         boolean closeRangeCond = closeFriendlyRobots.length >= unstunnedCloseEnemyRobots.length + 2;
 
         if (!longRangeCond && !closeRangeCond && !healthCond) return;
-        rc.setIndicatorString(longRangeCond + " " + closeRangeCond + " " + healthCond);
 
+        MapLocation curLoc = rc.getLocation();
         Direction[] moveDirs;
         if (closeEnemyRobots.length > 0) {
             // if we are moving into attack range, pick the direction that allows us to attack at least 1 enemy
