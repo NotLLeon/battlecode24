@@ -46,7 +46,11 @@ public class Spawner {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             MapLocation loc = Comms.readLoc(COMMS_SIGNAL_BOT_DISTRESS_LOCS + i);
             if (loc != null) {
-                for(Direction tryDir : Utils.getDirOrdered(Direction.CENTER)) {
+                if(rc.canSpawn(loc)) {
+                    rc.spawn(loc);
+                    return true;
+                }
+                for(Direction tryDir : Utils.getDirOrdered(Direction.NORTH)) {
                     MapLocation spawnPoint = loc.add(tryDir);
                     if(rc.canSpawn(spawnPoint)) {
                         rc.spawn(spawnPoint);
