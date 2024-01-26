@@ -359,18 +359,20 @@ public class Micro {
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(2);
         if (crumbLocs.length == 0) return;
 
+        MapLocation curLoc = rc.getLocation();
+
         MapLocation nearestCrumb = crumbLocs[0];
-        int dist = rc.getLocation().distanceSquaredTo(nearestCrumb);
+        int minDist = curLoc.distanceSquaredTo(nearestCrumb);
 
         for (MapLocation crumb : crumbLocs) {
-            int crumbDist = rc.getLocation().distanceSquaredTo(crumb);
-            if (rc.getLocation().distanceSquaredTo(crumb) < dist) {
-                dist = crumbDist;
+            int crumbDist =curLoc.distanceSquaredTo(crumb);
+            if (crumbDist < minDist) {
+                minDist = crumbDist;
                 nearestCrumb = crumb;
             }
         }
 
-        moveInDir(rc.getLocation().directionTo(nearestCrumb), 2);
+        moveInDir(curLoc.directionTo(nearestCrumb), 1);
     }
 
     public static void run() throws GameActionException {
