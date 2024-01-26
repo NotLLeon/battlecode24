@@ -1,9 +1,7 @@
-package v2.micro;
+package v2s1.micro;
 
 import battlecode.common.*;
-import v2.Utils;
-
-import static v2.Constants.rc;
+import v2s1.Utils;
 
 // stores info about each valid direction for micro
 // number of attackable enemies, highest prio attackable enemy, info about each attackable enemy
@@ -15,7 +13,6 @@ public class DirInfo {
     int highestPrio = -1;
     int minDisToEnemy = 99999999;
     int minDisToFriendly = 99999999;
-    int disToFlagCarrier = 99999999;
 
     public DirInfo(Direction dir, MapLocation curLoc, RobotInfo[] enemies, RobotInfo[] friendlies) {
         dirLoc = curLoc.add(dir);
@@ -28,8 +25,8 @@ public class DirInfo {
         for (int i = attackableEnemies.length; --i >= 0;) {
             attackableEnemies[i] = new EnemyInfo(
                     enemyInfos[i],
-                    friendlies,
-                    Micro.isStunned(enemyInfos[i].getID())
+                    friendlies
+//                    isStunned(enemyInfos[i].getID())
             );
         }
         for (EnemyInfo enemy : attackableEnemies) {
@@ -39,7 +36,6 @@ public class DirInfo {
         for (RobotInfo enemy : enemies) {
             int dis = enemy.getLocation().distanceSquaredTo(dirLoc);
             if (dis < minDisToEnemy) minDisToEnemy = dis;
-            if (enemy.hasFlag()) disToFlagCarrier = dis;
         }
 
         for (RobotInfo friendly : friendlies) {
@@ -48,38 +44,11 @@ public class DirInfo {
         }
     }
 
-    public int getDangerScore() {
-        int score = 0;
+    public boolean isSafe() {
         for (EnemyInfo enemy : attackableEnemies) {
-            // what if you can oneshot the enemy? Also they might be seeing the same friendly
-            if (enemy.numAttackableFriendlies == 0 && !enemy.isStunned) ++score;
+            // what if you can oneshot the enemy?
+            if (enemy.numAttackableFriendlies == 0/* && !enemy.isStunned*/) return false;
         }
-        return score;
-    }
-
-    public boolean isBetter(DirInfo other) {
-        if (disToFlagCarrier < other.disToFlagCarrier) return true;
-        if (disToFlagCarrier > other.disToFlagCarrier) return false;
-
-        if (!Micro.shouldBeAggressive()) {
-            int thisDanger = getDangerScore();
-            int otherDanger = other.getDangerScore();
-            if (thisDanger < otherDanger) return true;
-            if (thisDanger > otherDanger) return false;
-        } else {
-            if (minDisToEnemy < other.minDisToEnemy) return true;
-            if (minDisToEnemy > other.minDisToEnemy) return false;
-        }
-
-        if (rc.isActionReady()) {
-            if (highestPrio > other.highestPrio) return true;
-            if (highestPrio < other.highestPrio) return false;
-        }
-
-        if (minDisToFriendly < other.minDisToFriendly) return true;
-        if (minDisToFriendly > other.minDisToFriendly) return false;
-
-        return minDisToEnemy >= other.minDisToEnemy;
-//        else return minDisToFriendly <= other.minDisToFriendly;
+        return true;
     }
 }
