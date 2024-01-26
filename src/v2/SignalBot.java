@@ -15,6 +15,7 @@ public class SignalBot {
         if (flags.length > 0) {
             RobotPlayer.role = Role.SIGNAL;
         }
+        scanAndSignal();
     }
 
     private static void setSignal(MapLocation loc) throws GameActionException {
