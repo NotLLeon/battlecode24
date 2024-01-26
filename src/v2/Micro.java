@@ -79,7 +79,7 @@ public class Micro {
     }
 
     private static boolean isStunned(int id) {
-        return rc.getRoundNum() - TrapTracker.getLastStunnedRound(id) <= 3; // TODO: tune
+        return rc.getRoundNum() - TrapTracker.getLastStunnedRound(id) <= 2;
     }
 
     private static int getNumAttackableEnemies(MapLocation loc) {
@@ -275,7 +275,7 @@ public class Micro {
         for (RobotInfo friendly : immediateFriendlyRobots) {
             int baseHits = friendly.getHealth() / BASE_ATTACK_DMG;
             if (baseHits < minBaseHits
-                || (baseHits == minBaseHits && getLevelSum(friendly) > getLevelSum(target))) {
+                    || (baseHits == minBaseHits && getLevelSum(friendly) > getLevelSum(target))) {
                 target = friendly;
                 minBaseHits = baseHits;
             }
@@ -358,16 +358,16 @@ public class Micro {
             // if we are moving into attack range, pick the direction that allows us to attack at least 1 enemy
             //  and minimizes the number of enemies that can attack us
             moveDirs = Utils.filterDirArr(
-                DIRECTIONS,
-                (d) -> {
-                    MapLocation newLoc = curLoc.add(d);
-                    for (RobotInfo enemy : closeEnemyRobots) {
-                        if (newLoc.isWithinDistanceSquared(enemy.getLocation(), GameConstants.ATTACK_RADIUS_SQUARED)) {
-                            return true;
+                    DIRECTIONS,
+                    (d) -> {
+                        MapLocation newLoc = curLoc.add(d);
+                        for (RobotInfo enemy : closeEnemyRobots) {
+                            if (newLoc.isWithinDistanceSquared(enemy.getLocation(), GameConstants.ATTACK_RADIUS_SQUARED)) {
+                                return true;
+                            }
                         }
+                        return false;
                     }
-                    return false;
-                }
             );
         } else {
             MapLocation enemyCentroid = Utils.getCentroid(Utils.robotInfoToLocArr(visibleEnemyRobots));
