@@ -227,8 +227,6 @@ public class Micro {
             if (target == null) break;
             attack(target.getLocation());
         }
-
-//        if (rc.isMovementReady()) moveAwayFromEnemy();
     }
 
     private static void tryHeal() throws GameActionException {
@@ -315,7 +313,7 @@ public class Micro {
         boolean longRangeCond = visibleFriendlyRobots.length >= 2 * unstunnedVisibleEnemyRobots.length;
         boolean closeRangeCond = closeFriendlyRobots.length >= unstunnedCloseEnemyRobots.length + 2;
 
-        rc.setIndicatorString(healthCond + " " + longRangeCond + " " + closeRangeCond);
+//        rc.setIndicatorString(healthCond + " " + longRangeCond + " " + closeRangeCond);
         return longRangeCond || closeRangeCond || healthCond;
     }
 
@@ -375,6 +373,8 @@ public class Micro {
             TrapTracker.sensePlacedTraps();
             return;
         }
+
+        // TODO: wtf? clean this up
 
         senseUnits();
 

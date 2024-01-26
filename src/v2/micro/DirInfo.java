@@ -16,6 +16,7 @@ public class DirInfo {
     int minDisToEnemy = 99999999;
     int minDisToFriendly = 99999999;
     int disToFlagCarrier = 99999999;
+    int dangerScore = 0;
 
     public DirInfo(Direction dir, MapLocation curLoc, RobotInfo[] enemies, RobotInfo[] friendlies) {
         dirLoc = curLoc.add(dir);
@@ -34,6 +35,9 @@ public class DirInfo {
         }
         for (EnemyInfo enemy : attackableEnemies) {
             if (enemy.priority > highestPrio) highestPrio = enemy.priority;
+
+            // what if you can oneshot the enemy? Also they might be seeing the same friendly
+            if (enemy.numAttackableFriendlies == 0 && !enemy.isStunned) ++dangerScore;
         }
 
         for (RobotInfo enemy : enemies) {
@@ -48,24 +52,13 @@ public class DirInfo {
         }
     }
 
-    public int getDangerScore() {
-        int score = 0;
-        for (EnemyInfo enemy : attackableEnemies) {
-            // what if you can oneshot the enemy? Also they might be seeing the same friendly
-            if (enemy.numAttackableFriendlies == 0 && !enemy.isStunned) ++score;
-        }
-        return score;
-    }
-
     public boolean isBetter(DirInfo other) {
         if (disToFlagCarrier < other.disToFlagCarrier) return true;
         if (disToFlagCarrier > other.disToFlagCarrier) return false;
 
         if (!Micro.aggressive) {
-            int thisDanger = getDangerScore();
-            int otherDanger = other.getDangerScore();
-            if (thisDanger < otherDanger) return true;
-            if (thisDanger > otherDanger) return false;
+            if (dangerScore < other.dangerScore) return true;
+            if (dangerScore > other.dangerScore) return false;
         } else {
             if (minDisToEnemy < other.minDisToEnemy) return true;
             if (minDisToEnemy > other.minDisToEnemy) return false;
