@@ -5,7 +5,6 @@ import v2.Utils;
 
 // stores info about each valid direction for micro
 // number of attackable enemies, highest prio attackable enemy, info about each attackable enemy
-// info about each attackable enemy: number of attackable friendlies, stunned or not
 
 public class DirInfo {
     Direction dir;

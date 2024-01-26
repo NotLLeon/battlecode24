@@ -367,10 +367,11 @@ public class Micro {
         Direction moveDir = null;
         boolean aggressive = shouldBeAggressive();
 
-        // try to find direction with attackable enemy, if none then just minimize distance to enemy
+        // try to find direction with attackable enemy
         int maxPrio = -1;
         for (DirInfo dirInfo : dirInfos) {
             if (dirInfo == null) continue;
+
             if (!aggressive && dirInfo.dir != Direction.CENTER && !dirInfo.isSafe()) continue;
             if (dirInfo.highestPrio > maxPrio) {
                 moveDir = dirInfo.dir;
@@ -378,6 +379,7 @@ public class Micro {
             }
         }
 
+        // if we cannot move into attack range but we want to be aggressive, minimize dis to enemy
         if (moveDir == null && aggressive) {
             int minDis = 99999999;
             for (DirInfo dirInfo : dirInfos) {
