@@ -38,7 +38,7 @@ public class SetupPhase extends Robot {
                     int distSqNearest = info.getMapLocation().distanceSquaredTo(damMapLocs[0]);
 
                     for (int i = 1; i < damMapLocs.length; ++i) {
-                        distSqNearest = Math.min(info.getMapLocation().distanceSquaredTo(damMapLocs[0]), distSqNearest);
+                        distSqNearest = Math.min(info.getMapLocation().distanceSquaredTo(damMapLocs[i]), distSqNearest);
                     }
 
                     if (info.isWater() && distSqNearest <= 2) {
