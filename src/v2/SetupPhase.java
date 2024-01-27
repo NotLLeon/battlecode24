@@ -1,6 +1,7 @@
 package v2;
 
 import battlecode.common.*;
+import v2.Constants.Role;
 
 import static v2.Constants.rc;
 
@@ -12,6 +13,10 @@ public class SetupPhase extends Robot {
     public static MapLocation setupLoc = null;
 
     public static void run() throws GameActionException {
+        if (RobotPlayer.role == Role.SIGNAL) {
+            SignalBot.run();
+            return;
+        }
         SetupCommunication.init();
         // for now just explore, try to path to crumbs, then if dam found, gather around dam
         // to prepare attack
