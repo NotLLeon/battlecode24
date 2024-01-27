@@ -80,6 +80,9 @@ public class SignalBot {
             placeTraps(nearbyEnemies);
         }
         FlagInfo[] flag = rc.senseNearbyFlags(0);
-        if (flag.length == 0) RobotPlayer.role = Role.GENERAL;
+        if (flag.length == 0) {
+            RobotPlayer.role = Role.GENERAL;
+            clearSignal(curLoc);
+        }
     }
 }
