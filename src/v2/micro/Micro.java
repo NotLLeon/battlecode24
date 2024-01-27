@@ -357,7 +357,6 @@ public class Micro {
         if (moveDir != null && rc.canMove(moveDir)) move(moveDir);
     }
 
-    // TODO: rethink this
     public static boolean inCombat() throws GameActionException {
         senseEnemies();
         // can prob add more conditions
