@@ -367,6 +367,7 @@ public class Micro {
     }
 
     private static void pickupCrumbs() throws GameActionException {
+        if (visibleEnemyRobots.length > 0) return;
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(2);
         if (crumbLocs.length == 0) return;
 
