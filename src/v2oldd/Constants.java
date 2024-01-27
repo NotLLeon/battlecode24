@@ -1,4 +1,4 @@
-package v2;
+package v2oldd;
 
 import battlecode.common.*;
 
@@ -22,8 +22,8 @@ public class Constants {
     public static final int INF = 999999999;
 
     public static final GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ATTACK;
-    public static final GlobalUpgrade SECOND_UPGRADE = GlobalUpgrade.CAPTURING;
-    public static final GlobalUpgrade THIRD_UPGRADE = GlobalUpgrade.HEALING;
+    public static final GlobalUpgrade SECOND_UPGRADE = GlobalUpgrade.HEALING;
+    public static final GlobalUpgrade THIRD_UPGRADE = GlobalUpgrade.CAPTURING;
 
     // weights for explore
     public static final int EXPLORE_HIGH_WEIGHT_DIRECTION = 10;
