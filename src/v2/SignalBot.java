@@ -6,11 +6,25 @@ import v2.Constants.Role;
 import static v2.Constants.*;
 
 public class SignalBot {
+    private static RobotInfo[] nearbyEnemies;
+    private static MapLocation curLoc;
+
     public static void run() throws GameActionException {
         scanAndSignal();
+        RobotInfo target = null;
+        int minHp = 9999999;
+        for (RobotInfo bot : nearbyEnemies) {
+            if (bot.getHealth() < minHp) {
+                target = bot;
+                minHp = bot.getHealth();
+            }
+        }
+        if (target == null) return;
+        if (rc.canAttack(target.getLocation())) Robot.attack(target.getLocation());
     }
 
     public static void tryBecomeSignalBot() throws GameActionException {
+        curLoc = rc.getLocation();
         FlagInfo[] flags = rc.senseNearbyFlags(0);
         if (flags.length > 0) {
             RobotPlayer.role = Role.SIGNAL;
@@ -42,25 +56,16 @@ public class SignalBot {
         }
     }
 
-    private static boolean adjacentToTrap(MapLocation loc) throws GameActionException {
-        for (Direction dir : DIRECTIONS) {
-            MapLocation adjLoc = loc.add(dir);
-            if (rc.canSenseLocation(adjLoc) && rc.senseMapInfo(adjLoc).getTrapType() != TrapType.NONE) return true;
-        }
-        return false;
-    }
-
     private static void placeTraps(RobotInfo[] nearbyBots) throws GameActionException {
         MapLocation[] closeEnemyLocs = Utils.robotInfoToLocArr(nearbyBots);
         MapLocation enemyCentroid = Utils.getCentroid(closeEnemyLocs);
-        MapLocation loc = rc.getLocation();
-        Direction[] dirsTowards = Utils.getDirOrdered(loc.directionTo(enemyCentroid));
+        Direction[] dirsTowards = Utils.getDirOrdered(curLoc.directionTo(enemyCentroid));
         TrapType trapType = TrapType.STUN;
 
         // only consider the 3 directions towards the centroid
         for(int i = 0; i < 3; ++i) {
-            MapLocation trapPoint = loc.add(dirsTowards[i]);
-            if(rc.canBuild(trapType, trapPoint) && !adjacentToTrap(trapPoint)) {
+            MapLocation trapPoint = curLoc.add(dirsTowards[i]);
+            if(rc.canBuild(trapType, trapPoint)) {
                 Robot.build(trapType, trapPoint);
                 return;
             }
@@ -68,12 +73,11 @@ public class SignalBot {
     }
 
     private static void scanAndSignal() throws GameActionException {
-        RobotInfo[] nearbyBots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
-        MapLocation curLoc = rc.getLocation();
-        if (nearbyBots.length == 0) clearSignal(curLoc);
+        nearbyEnemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+        if (nearbyEnemies.length == 0) clearSignal(curLoc);
         else {
             setSignal(curLoc);
-            placeTraps(nearbyBots);
+            placeTraps(nearbyEnemies);
         }
     }
 }
