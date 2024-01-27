@@ -3,6 +3,7 @@ package v2;
 import static v2.Constants.*;
 
 import battlecode.common.*;
+import v2.micro.Micro;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
 public class MainPhase extends Robot {
@@ -45,9 +46,12 @@ public class MainPhase extends Robot {
         // all flags are picked up, just cycle between default locs
         // TODO: escort flags back instead
         if (rushFlagInds.length == 0) {
-            rushFlagInds = FLAG_INDS;
+            rushFlagInds = Utils.filterIntArr(FLAG_INDS, (i) -> !FlagRecorder.isCaptured(i));
             interval = SHORT_TARGET_ROUND_INTERVAL;
         }
+
+        // all flags captured, this is the last round unless something broke
+        if (rushFlagInds.length == 0) return 0;
 
         // TODO: modify so that rushLoc doesnt change prematurely when the array changes
         return rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
