@@ -102,7 +102,7 @@ public class Micro {
         FlagInfo pickupFlag = null;
         for (FlagInfo flag : nearbyFlags) {
             MapLocation flagLoc = flag.getLocation();
-            if (rc.canPickupFlag(flagLoc)) {
+            if (flag.getTeam() != rc.getTeam() && rc.canPickupFlag(flagLoc)) {
                 pickupFlag = flag;
                 break;
             }
@@ -117,6 +117,8 @@ public class Micro {
     private static void tryMoveToFlag() throws GameActionException {
         // move towards dropped enemy flags and picked up friendly flags
         if (!rc.isMovementReady()) return;
+
+        // changing this makes it worse
         FlagInfo[] nearbyFlags = rc.senseNearbyFlags(-1);
 
         FlagInfo targetFlag = null;
