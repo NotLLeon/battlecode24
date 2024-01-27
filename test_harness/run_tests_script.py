@@ -5,6 +5,7 @@ from table_script import transformGameDataAsNestedMap, printTabulateAsGrid
 from constants import *
 from file_operations import *
 from pathlib import Path
+import time
 
 def checkBotsExist(botsList):
     for botName in botsList:
@@ -16,6 +17,11 @@ def checkBotsExist(botsList):
 
 
 def main():
+
+
+
+
+
     parser = argparse.ArgumentParser(description='Runs Battlecode games and prints out the results')
 
 
@@ -50,6 +56,8 @@ def main():
     if not checkBotsExist(oppBots):
         return
 
+    # Record the start time
+    start_time = time.time()
 
     # Your script logic here
     print('Starting games!')
@@ -58,6 +66,13 @@ def main():
                            mapsList=mapsList)
     # gameAnalyticsInfo = getGameAnalytics(gamesResultsList)
     # print(gameAnalyticsInfo)
+    # Record the end time
+    end_time = time.time()
+
+    # Calculate the elapsed time in seconds
+    elapsed_time = end_time - start_time
+
+    print(f"Time taken: {elapsed_time} seconds")
 
     resDictTransformed = transformGameDataAsNestedMap(gamesResultsList)
     printTabulateAsGrid(resDictTransformed, botsVersusList=oppBots)
