@@ -12,6 +12,8 @@ def get_winner_info(input_string, retDict):
     if not match:
         # This should NOT happen
         retDict['Cant determine winner'] = True
+        retDict['winner'] = input_string
+        retDict['round'] = -1
     if match.group(1):
         retDict['winningBot'] = match.group(1)
         retDict['winner'] = 'A'

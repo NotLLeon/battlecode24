@@ -25,13 +25,29 @@ public class SetupPhase extends Robot {
         MapLocation[] crumbLocs = rc.senseNearbyCrumbs(-1);
         if (SetupCommunication.hasMeetup() && rc.getRoundNum() > 100) {
             MapInfo[] adjMap = rc.senseNearbyMapInfos(2);
-            boolean stopMoving = false;
-            for (MapInfo info : adjMap) {
-                if (info.isDam()) {
-                    stopMoving = true;
+
+            MapInfo[] damTiles = Utils.filterMapInfoArr(adjMap, (i) -> i.isDam());
+            boolean stopMoving = damTiles.length > 0;
+
+            if (!stopMoving) moveTo(SetupCommunication.meetLocation);
+            else {
+                MapLocation[] damMapLocs = Utils.mapInfoToLocArr(damTiles);
+
+                if (!rc.isActionReady()) return; 
+                for (MapInfo info : adjMap) {
+                    MapLocation adjMapLoc = info.getMapLocation();
+                    int distSqNearest = adjMapLoc.distanceSquaredTo(damMapLocs[0]);
+
+                    for (int i = 1; i < damMapLocs.length; ++i) {
+                        distSqNearest = Math.min(adjMapLoc.distanceSquaredTo(damMapLocs[i]), distSqNearest);
+                    }
+
+                    if (info.isWater() && distSqNearest <= 2 && rc.canFill(adjMapLoc)) {
+                        Robot.fill(adjMapLoc);
+                        return;
+                    }
                 }
             }
-            if (!stopMoving) moveTo(SetupCommunication.meetLocation);
         } else if (crumbLocs.length > 0) {
             moveTo(crumbLocs[0]);
         } else {

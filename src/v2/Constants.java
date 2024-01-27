@@ -34,6 +34,8 @@ public class Constants {
     // SETUP PHASE Comms indices
     public static final int COMMS_MEETUP_LOCS = 0; // uses 0 - 2
 
+    public static final int RESET_BIT = 63; // uses 63 
+
     // number of indices that we need to reset from 0
     public static final int SETUP_COMMS_INDICES = 3;
     
