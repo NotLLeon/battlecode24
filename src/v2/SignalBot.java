@@ -8,6 +8,7 @@ import static v2.Constants.*;
 public class SignalBot {
     private static RobotInfo[] nearbyEnemies;
     private static MapLocation curLoc;
+    private static final Direction[] diagonals = {Direction.NORTHEAST, Direction.NORTHWEST, Direction.SOUTHEAST, Direction.SOUTHWEST};
 
     public static void run() throws GameActionException {
         scanAndSignal();
@@ -56,11 +57,26 @@ public class SignalBot {
         }
     }
 
+    private static MapLocation getClosestDiagonal(MapLocation loc) throws GameActionException {
+        MapLocation closest = curLoc.add(Direction.NORTHWEST);
+        for (Direction dir : diagonals) {
+            if (curLoc.add(dir).distanceSquaredTo(loc) < closest.distanceSquaredTo(loc)) {
+                closest = curLoc.add(dir);
+            }
+        }
+        return closest;
+    } 
+
     private static void placeTraps(RobotInfo[] nearbyBots) throws GameActionException {
         MapLocation[] closeEnemyLocs = Utils.robotInfoToLocArr(nearbyBots);
         MapLocation enemyCentroid = Utils.getCentroid(closeEnemyLocs);
         Direction[] dirsTowards = Utils.getDirOrdered(curLoc.directionTo(enemyCentroid));
+        
         TrapType trapType = TrapType.STUN;
+
+        // if (rc.canBuild(TrapType.WATER, getClosestDiagonal(enemyCentroid))) {
+        //     Robot.build(TrapType.WATER, getClosestDiagonal(enemyCentroid));
+        // }
 
         // only consider the 3 directions towards the centroid
         for(int i = 0; i < 3; ++i) {

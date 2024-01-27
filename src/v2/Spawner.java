@@ -43,13 +43,20 @@ public class Spawner {
     }
     
     private static boolean distressSpawn() throws GameActionException {
+        MapLocation[] possibleDistress = {null, null, null};
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             MapLocation loc = Comms.readLoc(COMMS_SIGNAL_BOT_DISTRESS_LOCS + i);
             if (loc != null) {
-                if (rc.canSpawn(loc)) {
-                    rc.spawn(loc);
+                possibleDistress[i] = loc;
+            }
+        }
+        MapLocation[] tryOrder = Utils.sort3Locations(possibleDistress, i -> Random.nextInt(1000));
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            if (tryOrder[i] != null) {
+                if (rc.canSpawn(tryOrder[i])) {
+                    rc.spawn(tryOrder[i]);
                     return true;
-                } else if (spawnInDir(loc, loc.directionTo(center))) {
+                } else if (spawnInDir(tryOrder[i], tryOrder[i].directionTo(center))) {
                     return true;
                 }
             }
