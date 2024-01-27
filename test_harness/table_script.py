@@ -51,15 +51,25 @@ def generateGameOutputCode(gameDictList):
 
     teamAStr = '*'
     teamBStr = '*'
+    numWins, numLosses = 0,0
+
 
     for gameDict in gameDictList:
         if gameDict['currBotLabel'] == 'A':
             # Formatted as {W|L} {roundNum} {winningReason}
             teamAStr = f"{winLossStr(gameDict)} {gameDict['round']} {winnerReasonStr(gameDict)}"
+            if winLossStr(gameDict) == 'W':
+                numWins += 1
+            else:
+                numLosses += 1
         if gameDict['currBotLabel'] == 'B':
             teamBStr = f"{winLossStr(gameDict)} {gameDict['round']} {winnerReasonStr(gameDict)}"
+            if winLossStr(gameDict) == 'W':
+                numWins += 1
+            else:
+                numLosses += 1
 
-    return teamAStr + ', ' + teamBStr
+    return (teamAStr + ', ' + teamBStr, numWins,numLosses)
 
 
 def printTabulateAsGrid(nestedMap, botsVersusList):
@@ -70,16 +80,20 @@ def printTabulateAsGrid(nestedMap, botsVersusList):
         idx += 1
 
     dataMatrix = []
+    totalWins, totalLosses = 0,0
     for currMap in nestedMap:
         rowOutput = [None] * (len(nestedMap[currMap]) + 1)
         rowOutput[0] = currMap
 
         for oppBot in nestedMap[currMap]:
-            currOutputCode = generateGameOutputCode(nestedMap[currMap][oppBot])
+            currOutputCode, numWins,numLosses = generateGameOutputCode(nestedMap[currMap][oppBot])
             currBotIndex = oppBotsIndex[oppBot]
             rowOutput[currBotIndex] = currOutputCode
+            totalWins += numWins
+            totalLosses += numLosses
         dataMatrix.append(rowOutput)
 
 
 
     print(tabulate(dataMatrix, headers= [' '] + botsVersusList, tablefmt="grid"))
+    print(f"Num Wins: {totalWins} - Num Losses: {totalLosses}")
