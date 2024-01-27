@@ -11,6 +11,16 @@ public class SignalBot {
 
     public static void run() throws GameActionException {
         scanAndSignal();
+        RobotInfo target = null;
+        int minHp = 9999999;
+        for (RobotInfo bot : nearbyEnemies) {
+            if (bot.getHealth() < minHp) {
+                target = bot;
+                minHp = bot.getHealth();
+            }
+        }
+        if (target == null) return;
+        if (rc.canAttack(target.getLocation())) Robot.attack(target.getLocation());
     }
 
     public static void tryBecomeSignalBot() throws GameActionException {
@@ -46,14 +56,6 @@ public class SignalBot {
         }
     }
 
-    private static boolean adjacentToTrap(MapLocation loc) throws GameActionException {
-        for (Direction dir : DIRECTIONS) {
-            MapLocation adjLoc = loc.add(dir);
-            if (rc.canSenseLocation(adjLoc) && rc.senseMapInfo(adjLoc).getTrapType() != TrapType.NONE) return true;
-        }
-        return false;
-    }
-
     private static void placeTraps(RobotInfo[] nearbyBots) throws GameActionException {
         MapLocation[] closeEnemyLocs = Utils.robotInfoToLocArr(nearbyBots);
         MapLocation enemyCentroid = Utils.getCentroid(closeEnemyLocs);
@@ -63,7 +65,7 @@ public class SignalBot {
         // only consider the 3 directions towards the centroid
         for(int i = 0; i < 3; ++i) {
             MapLocation trapPoint = curLoc.add(dirsTowards[i]);
-            if(rc.canBuild(trapType, trapPoint) && !adjacentToTrap(trapPoint)) {
+            if(rc.canBuild(trapType, trapPoint)) {
                 Robot.build(trapType, trapPoint);
                 return;
             }
