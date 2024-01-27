@@ -404,8 +404,6 @@ public class Micro {
     }
 
     public static void run() throws GameActionException {
-        if (rc.hasFlag()) return;
-
         // if we already ran this round and didnt move, we dont need to run again
         MapLocation mapLoc = rc.getLocation();
         int roundNum = rc.getRoundNum();
@@ -425,6 +423,8 @@ public class Micro {
         // TODO: wtf? clean this up
 
         sense();
+        tryPickupFlag();
+        if (rc.hasFlag()) return;
 
         pickupCrumbs();
 
