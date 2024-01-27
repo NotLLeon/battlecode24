@@ -1,9 +1,9 @@
-package v2.micro;
+package v2_old.micro;
 
 import battlecode.common.*;
-import v2.*;
+import v2_old.*;
 
-import static v2.Constants.*;
+import static v2_old.Constants.*;
 
 public class Micro {
 
@@ -231,7 +231,7 @@ public class Micro {
 
     private static void tryHeal() throws GameActionException {
         if (!rc.isActionReady() || immediateEnemyRobots.length > 0) return;
-        if (closeEnemyRobots.length > 0) return;
+        if (closeEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
 
         RobotInfo target = null;
         int minBaseHits = 9999999;
@@ -247,43 +247,29 @@ public class Micro {
         if (target == null) return;
 
         MapLocation targetLoc = target.getLocation();
-        if (rc.canHeal(targetLoc)) {
-            heal(targetLoc);
-        }
-    }
-
-    private static int getVisibleThreshold() {
-        int breadcrumbs = rc.getCrumbs();
-        if (breadcrumbs < 7500) return 6;
-        else if (breadcrumbs < 10000) return 5;
-        else if (breadcrumbs < 20000) return 3;
-        else return 1;
+        if (rc.canHeal(targetLoc)) heal(targetLoc);
     }
 
     private static void tryPlaceTrap() throws GameActionException {
         if (!rc.isActionReady()) return;
 
-        if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0 || visibleEnemyRobots.length < getVisibleThreshold()) return;
+        if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0 || visibleEnemyRobots.length < 6) return;
 
         MapLocation[] closeEnemyLocs = Utils.robotInfoToLocArr(closeEnemyRobots);
         MapLocation enemyCentroid = Utils.getCentroid(closeEnemyLocs);
 
         MapLocation curLoc = rc.getLocation();
-        if (2 * closeFriendlyRobots.length < closeEnemyRobots.length) {
-            trapInDir(curLoc, curLoc.directionTo(enemyCentroid), TrapType.EXPLOSIVE);
-        } else {
-            trapInDir(curLoc, curLoc.directionTo(enemyCentroid), TrapType.STUN);
-        }
+        trapInDir(curLoc, curLoc.directionTo(enemyCentroid));
     }
 
-    private static void trapInDir(MapLocation loc, Direction dir, TrapType trapType) throws GameActionException {
+    private static void trapInDir(MapLocation loc, Direction dir) throws GameActionException {
         Direction[] dirsTowards = Utils.getDirOrdered(dir);
+        TrapType trapType = TrapType.STUN;
 
         // only consider the 3 directions towards the centroid
         for(int i = 0; i < 3; ++i) {
             MapLocation trapPoint = loc.add(dirsTowards[i]);
-            // if explosive, we do not care about adjacency
-            if(rc.canBuild(trapType, trapPoint) && (!adjacentToTrap(trapPoint) || trapType == TrapType.EXPLOSIVE)) {
+            if(rc.canBuild(trapType, trapPoint) && !adjacentToTrap(trapPoint)) {
                 Robot.build(trapType, trapPoint);
                 return;
             }
@@ -312,9 +298,7 @@ public class Micro {
                 (r) -> !isStunned(r.getID())
         );
 
-        // int numStunnedEnemyRobots = closeEnemyRobots.length - unstunnedCloseEnemyRobots.length;
-
-        // if (unstunnedCloseEnemyRobots.length > 0) return;
+        if (unstunnedCloseEnemyRobots.length > 0 && rc.getRoundNum() % 2 != 0 ) return false;
 
         int sumVisibleFriendlyHealth = 0;
         int sumVisibleEnemyHealth = 0;
@@ -325,7 +309,7 @@ public class Micro {
         double avgEnemyHealth = sumVisibleEnemyHealth / (double) unstunnedVisibleEnemyRobots.length;
 
         boolean healthCond = visibleFriendlyRobots.length >= unstunnedVisibleEnemyRobots.length
-                && avgFriendlyHealth >= avgEnemyHealth;
+                && avgFriendlyHealth >= 2 * avgEnemyHealth;
         boolean longRangeCond = visibleFriendlyRobots.length >= 2 * unstunnedVisibleEnemyRobots.length;
         boolean closeRangeCond = closeFriendlyRobots.length >= unstunnedCloseEnemyRobots.length + 2;
 
@@ -357,6 +341,7 @@ public class Micro {
         if (moveDir != null && rc.canMove(moveDir)) move(moveDir);
     }
 
+    // TODO: rethink this
     public static boolean inCombat() throws GameActionException {
         senseEnemies();
         // can prob add more conditions
