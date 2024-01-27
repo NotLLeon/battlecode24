@@ -254,14 +254,14 @@ public class Micro {
 
     private static int getVisibleThreshold() {
         int breadcrumbs = rc.getCrumbs();
-        if (breadcrumbs < 7500) return 6;
-        else if (breadcrumbs < 10000) return 5;
+        if (breadcrumbs < 7500) return 5;
+        else if (breadcrumbs < 10000) return 4;
         else if (breadcrumbs < 20000) return 3;
-        else return 1;
+        else return 2;
     }
 
     private static void tryPlaceTrap() throws GameActionException {
-        if (!rc.isActionReady()) return;
+        if (!rc.isActionReady() || aggressive) return;
 
         if (closeEnemyRobots.length == 0 || immediateEnemyRobots.length > 0 || visibleEnemyRobots.length < getVisibleThreshold()) return;
 
@@ -269,7 +269,7 @@ public class Micro {
         MapLocation enemyCentroid = Utils.getCentroid(closeEnemyLocs);
 
         MapLocation curLoc = rc.getLocation();
-        if (2 * closeFriendlyRobots.length < closeEnemyRobots.length) {
+        if (closeFriendlyRobots.length < visibleEnemyRobots.length) {
             trapInDir(curLoc, curLoc.directionTo(enemyCentroid), TrapType.EXPLOSIVE);
         } else {
             trapInDir(curLoc, curLoc.directionTo(enemyCentroid), TrapType.STUN);
@@ -415,7 +415,6 @@ public class Micro {
 
         if (visibleEnemyRobots.length == 0) pickupCrumbs();
 
-        if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
         tryAttack();
 
         tryMove();
