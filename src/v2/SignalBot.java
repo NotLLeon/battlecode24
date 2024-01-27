@@ -77,5 +77,7 @@ public class SignalBot {
             setSignal(curLoc);
             placeTraps(nearbyEnemies);
         }
+        FlagInfo[] flag = rc.senseNearbyFlags(0);
+        if (flag.length == 0) RobotPlayer.role = Role.GENERAL;
     }
 }
