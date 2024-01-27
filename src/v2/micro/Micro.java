@@ -372,7 +372,7 @@ public class Micro {
             }
         }
 
-        moveInDir(curLoc.directionTo(nearestCrumb), 1);
+        moveInDir(curLoc.directionTo(nearestCrumb), 2);
     }
 
     public static void run() throws GameActionException {
