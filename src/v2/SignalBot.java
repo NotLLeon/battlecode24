@@ -12,7 +12,7 @@ public class SignalBot {
     public static void run() throws GameActionException {
         scanAndSignal();
         RobotInfo target = null;
-        int minHp = 9999999;
+        int minHp = INF;
         for (RobotInfo bot : nearbyEnemies) {
             if (bot.getHealth() < minHp) {
                 target = bot;

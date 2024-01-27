@@ -19,6 +19,7 @@ public class Constants {
     public static final int FLAG_PICKUP_DIS_SQUARED = 2;
     public static final int ATTACK_RADIUS_PLUS_ONE_SQUARED = 9;
     public static final int BASE_ATTACK_DMG = 150;
+    public static final int INF = 999999999;
 
     public static final GlobalUpgrade FIRST_UPGRADE = GlobalUpgrade.ATTACK;
     public static final GlobalUpgrade SECOND_UPGRADE = GlobalUpgrade.HEALING;
