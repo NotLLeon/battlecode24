@@ -74,9 +74,9 @@ public class SignalBot {
         
         TrapType trapType = TrapType.STUN;
 
-        if (rc.canBuild(TrapType.WATER, getClosestDiagonal(enemyCentroid))) {
-            Robot.build(TrapType.WATER, getClosestDiagonal(enemyCentroid));
-        }
+        // if (rc.canBuild(TrapType.WATER, getClosestDiagonal(enemyCentroid))) {
+        //     Robot.build(TrapType.WATER, getClosestDiagonal(enemyCentroid));
+        // }
 
         // only consider the 3 directions towards the centroid
         for(int i = 0; i < 3; ++i) {
