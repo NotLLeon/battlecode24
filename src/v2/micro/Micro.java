@@ -183,6 +183,7 @@ public class Micro {
         return robot.getAttackLevel() + robot.getHealLevel();
     }
 
+    // TODO: try different algo
     private static RobotInfo selectAttackTarget() {
 
         // pick target we think we can kill in 1 hit,
@@ -191,7 +192,7 @@ public class Micro {
         //  considering position of friendly units and their attack lvl. Break ties with spec again.
         RobotInfo target = null;
         boolean canOneShot = false;
-        int minKillTime = 999999;
+        int minKillTime = INF;
         for (RobotInfo enemy : immediateEnemyRobots) {
             if (enemy.hasFlag()) { // is this correct? Another unit can immediately pick up flag
                 target = enemy;
@@ -222,6 +223,7 @@ public class Micro {
                     numFriendlyRobots++;
                 }
             }
+            // this is wrong but fixing it makes it worse
             int avgDmg = damageSum / numFriendlyRobots;
             int killTime = (enemy.getHealth() + avgDmg - 1) / avgDmg;
             if (killTime < minKillTime || (killTime == minKillTime && getLevelSum(enemy) > getLevelSum(target))) {
@@ -246,7 +248,7 @@ public class Micro {
         if (closeEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
 
         RobotInfo target = null;
-        int minBaseHits = 9999999;
+        int minBaseHits = INF;
         for (RobotInfo friendly : immediateFriendlyRobots) {
             int baseHits = friendly.getHealth() / BASE_ATTACK_DMG;
             if (baseHits < minBaseHits
