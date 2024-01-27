@@ -212,3 +212,5 @@ __pycache__
 
 # Ignoring this since this will store all the match links
 match_links.json
+
+test_harness/gml/

@@ -59,3 +59,13 @@ in a json file path that contains a list of team names. See `SampleTeams.json` f
 `-a` is optional, and is "append-mode", for the replay links. All replays are stored in `match_links.json`,
 and by default this file will be overwritten with each call to this script. Append mode just appends
 new replays to the end of the json, instead of overwriting it.
+
+## Generating random list of maps
+
+Usage: `python3 generate_random_maps.py [num_maps]`
+
+Example: `python3 generate_random_maps.py`
+
+Don't pass in an argument to generate 10 maps, otherwise pass in the number of maps you want generated
+
+The file will be written to `gml/NEW_MAP.json`. 
