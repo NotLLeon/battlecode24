@@ -1,9 +1,9 @@
-package v2.micro;
+package v2old.micro;
 
 import battlecode.common.*;
-import v2.*;
+import v2old.*;
 
-import static v2.Constants.*;
+import static v2old.Constants.*;
 
 public class Micro {
 
@@ -14,7 +14,6 @@ public class Micro {
     private static RobotInfo[] immediateFriendlyRobots;
     private static RobotInfo[] closeEnemyRobots;
     private static RobotInfo[] closeFriendlyRobots;
-    private static FlagInfo[] nearbyFlags;
     private static int lastRoundRun = 0;
     private static MapLocation lastLocRun = null;
     private static final int RETREAT_HEALTH_THRESHOLD = 250;
@@ -26,8 +25,7 @@ public class Micro {
 
     private static void move(Direction dir) throws GameActionException {
         rc.move(dir);
-        sense();
-        tryPickupFlag(); // do we always want to try pick up?
+        senseUnits();
     }
 
     private static void heal(MapLocation loc) throws GameActionException {
@@ -49,11 +47,10 @@ public class Micro {
         immediateFriendlyRobots = rc.senseNearbyRobots(GameConstants.HEAL_RADIUS_SQUARED, ownTeam);
     }
 
-    private static void sense() throws GameActionException {
+    private static void senseUnits() throws GameActionException {
         // TODO only call rc.senseNearbyRobots once
         senseFriendlies();
         senseEnemies();
-        nearbyFlags = rc.senseNearbyFlags(-1);
     }
 
     // TODO: take location as parameter instead and only move laterally if its closer
@@ -97,23 +94,6 @@ public class Micro {
         moveInDir(moveDir, 1);
     }
 
-    private static void tryPickupFlag() throws GameActionException {
-        if (!rc.isActionReady() || !MainPhase.getShouldPickUpFlag()) return;
-        FlagInfo pickupFlag = null;
-        for (FlagInfo flag : nearbyFlags) {
-            MapLocation flagLoc = flag.getLocation();
-            if (rc.canPickupFlag(flagLoc)) {
-                pickupFlag = flag;
-                break;
-            }
-        }
-        if (pickupFlag == null) return;
-        Robot.pickupFlag(pickupFlag.getLocation());
-        int flagID = pickupFlag.getID();
-        FlagRecorder.setPickedUp(flagID);
-        if (!rc.hasFlag()) FlagRecorder.setCaptured(flagID); // in case you capture by picking up
-    }
-
     private static void tryMoveToFlag() throws GameActionException {
         // move towards dropped enemy flags and picked up friendly flags
         if (!rc.isMovementReady()) return;
@@ -142,8 +122,16 @@ public class Micro {
         }
 
         MapLocation flagLoc = targetFlag.getLocation();
-        Direction moveDir = rc.getLocation().directionTo(flagLoc);
-        if (moveDir != Direction.CENTER) moveInDir(moveDir, 1);
+
+        if (rc.canPickupFlag(flagLoc)) {
+            Robot.pickupFlag(flagLoc);
+            int flagID = targetFlag.getID();
+            FlagRecorder.setPickedUp(flagID);
+            if (!rc.hasFlag()) FlagRecorder.setCaptured(flagID); // in case you capture by picking up
+        } else {
+            Direction moveDir = rc.getLocation().directionTo(flagLoc);
+            if (moveDir != Direction.CENTER) moveInDir(moveDir, 1);
+        }
     }
 
     private static int getAttackDamage(RobotInfo robot) {
@@ -325,6 +313,7 @@ public class Micro {
         boolean longRangeCond = visibleFriendlyRobots.length >= 2 * unstunnedVisibleEnemyRobots.length;
         boolean closeRangeCond = closeFriendlyRobots.length >= unstunnedCloseEnemyRobots.length + 2;
 
+//        rc.setIndicatorString(healthCond + " " + longRangeCond + " " + closeRangeCond);
         return longRangeCond || closeRangeCond || healthCond;
     }
 
@@ -386,20 +375,6 @@ public class Micro {
         moveInDir(curLoc.directionTo(nearestCrumb), 2);
     }
 
-    static boolean isDefaultFlagLoc(FlagInfo flag) throws GameActionException {
-        MapLocation flagLoc = flag.getLocation();
-        if (flag.getTeam() == rc.getTeam()) {
-            for (MapLocation spawnCenter : Spawner.getSpawnCenters()) { // assumes we dont move flags
-                if (flagLoc.equals(spawnCenter)) return true;
-            }
-            return false;
-        } else {
-            int flagInd = FlagRecorder.getFlagIdInd(flag.getID());
-            MapLocation defaultLoc = FlagRecorder.getFlagLoc(flagInd);
-            return flagLoc.equals(defaultLoc);
-        }
-    }
-
     public static void run() throws GameActionException {
         if (rc.hasFlag()) return;
 
@@ -421,16 +396,22 @@ public class Micro {
 
         // TODO: wtf? clean this up
 
-        sense();
+        senseUnits();
 
-        pickupCrumbs();
+        if (visibleEnemyRobots.length == 0) pickupCrumbs();
 
         if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
         tryAttack();
 
-        // TODO: seperate the deciding dir and actually moving so we can tell if theres attackable/healable units in new loc
-        tryMoveToFlag();
         tryMove();
+
+        if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
+        tryAttack();
+        tryHeal();
+
+
+        // TODO: remove from micro?
+        if (MainPhase.getShouldPickUpFlag()) tryMoveToFlag();
 
         if (Robot.getCooldown() + Robot.getBuildCooldown() < GameConstants.COOLDOWN_LIMIT) tryPlaceTrap();
         tryAttack();

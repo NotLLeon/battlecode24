@@ -1,9 +1,9 @@
-package v2.micro;
+package v2old.micro;
 
 import battlecode.common.*;
-import v2.Utils;
+import v2old.Utils;
 
-import static v2.Constants.*;
+import static v2old.Constants.rc;
 
 // stores info about each valid direction for micro
 // number of attackable enemies, highest prio attackable enemy, info about each attackable enemy
@@ -13,9 +13,9 @@ public class DirInfo {
     MapLocation dirLoc;
     EnemyInfo[] attackableEnemies;
     int highestPrio = -1;
-    int minDisToEnemy = INF;
-    int minDisToFriendly = INF;
-    int disToFlagCarrier = INF;
+    int minDisToEnemy = 99999999;
+    int minDisToFriendly = 99999999;
+    int disToFlagCarrier = 99999999;
     int dangerScore = 0;
 
     public DirInfo(Direction dir, MapLocation curLoc, RobotInfo[] enemies, RobotInfo[] friendlies) {
@@ -73,5 +73,6 @@ public class DirInfo {
         if (minDisToFriendly > other.minDisToFriendly) return false;
 
         return minDisToEnemy >= other.minDisToEnemy;
+//        else return minDisToFriendly <= other.minDisToFriendly;
     }
 }
