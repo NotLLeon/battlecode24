@@ -44,6 +44,7 @@ public class Constants {
     public static final int COMMS_FLAG_RECORDER = 9; // uses 9
     public static final int COMMS_FLAG_DISTRESS_FLAGS = 10; // uses 10 - 12
     public static final int COMMS_FLAG_DISTRESS_LOCS = 13; // uses 13 - 15
+    public static final int COMMS_SIGNAL_BOT_DISTRESS_LOCS = 16; // uses 16 - 19;
 
     // role enum
     public static enum Role {

@@ -41,6 +41,21 @@ public class Spawner {
         }
         return false;
     }
+    
+    private static boolean distressSpawn() throws GameActionException {
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            MapLocation loc = Comms.readLoc(COMMS_SIGNAL_BOT_DISTRESS_LOCS + i);
+            if (loc != null) {
+                if (rc.canSpawn(loc)) {
+                    rc.spawn(loc);
+                    return true;
+                } else if (spawnInDir(loc, loc.directionTo(center))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public static MapLocation[] getSpawnCenters() {
         return spawnCenters;
@@ -51,8 +66,13 @@ public class Spawner {
     }
 
     public static boolean spawn() throws GameActionException {
+        if (distressSpawn()) return true;
         MapLocation[] tryOrder = Utils.sort3Locations(spawnCenters, i -> Random.nextInt(1000));
         for (MapLocation spawnCenter : tryOrder) {
+            if (rc.canSpawn(spawnCenter)) {
+                rc.spawn(spawnCenter);
+                return true;
+            }
             if (spawnInDir(spawnCenter, spawnCenter.directionTo(center))) {
                 return true;
             }

@@ -13,7 +13,7 @@ public strictfp class RobotPlayer {
 
     static int curRound = 0;
 
-    static Role role = Role.GENERAL;
+    public static Role role = Role.GENERAL;
 
     public static void run(RobotController rc) throws GameActionException {
         
@@ -30,8 +30,10 @@ public strictfp class RobotPlayer {
 
                 boolean isSetupPhase = curRound <= GameConstants.SETUP_ROUNDS;
                 if (!rc.isSpawned()) {
+                    role = Role.GENERAL;
                     boolean isSpawned = Spawner.spawn();
                     if (!isSpawned) continue;
+                    SignalBot.tryBecomeSignalBot();
                 }
 
                 if (isSetupPhase) SetupPhase.run();
