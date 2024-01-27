@@ -4,6 +4,7 @@ import battlecode.common.*;
 import v2.Comms;
 
 import static v2.Constants.COMMS_MEETUP_LOCS;
+import static v2.Constants.RESET_BIT;
 import static v2.Constants.rc;
 
 public class SetupCommunication {
@@ -51,6 +52,8 @@ public class SetupCommunication {
         else {
             System.out.println("Invalid spawn center");
         }
+
+        Comms.write(RESET_BIT, 1);
     }
 
 }
