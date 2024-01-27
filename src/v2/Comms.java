@@ -36,8 +36,13 @@ public class Comms {
     }
 
     public static void clearSetup() throws GameActionException {
+        int dirty = read(RESET_BIT);
+
+        if (dirty == 0) return;
+
         for (int i = 0; i < SETUP_COMMS_INDICES; i++) {
             write(i, 0);
         }
+        write(RESET_BIT, 0);
     }
 }

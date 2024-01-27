@@ -36,10 +36,10 @@ public strictfp class RobotPlayer {
                     SignalBot.tryBecomeSignalBot();
                 }
 
+                if (curRound == GameConstants.SETUP_ROUNDS + 1) Comms.clearSetup();
+
                 if (isSetupPhase) SetupPhase.run();
                 else MainPhase.run();
-
-                if (curRound == GameConstants.SETUP_ROUNDS) Comms.clearSetup();
 
             } catch (GameActionException e) {
                 System.out.println("GameActionException");
