@@ -94,7 +94,7 @@ public class Micro {
         if (curLoc.isWithinDistanceSquared(flagLoc, FLAG_ESCORT_RADIUS_SQUARED)) moveDir = flagLoc.directionTo(curLoc);
         else {
             moveDir = curLoc.directionTo(flagLoc);
-            MapLocation[] fillDirs = {curLoc.add(moveDir), curLoc.add(moveDir.rotateLeft()), curLoc.add(moveDir.rotateRight())};
+            MapLocation[] fillDirs = {curLoc.add(moveDir)};
             for (MapLocation loc : fillDirs) {
                 if (rc.canFill(loc)) rc.fill(loc);
             }

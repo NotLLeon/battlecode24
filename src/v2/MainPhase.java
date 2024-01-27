@@ -131,8 +131,8 @@ public class MainPhase extends Robot {
 
             MapLocation curLoc = rc.getLocation();
             RobotInfo[] visibleBots = rc.senseNearbyRobots(-1, rc.getTeam());
-            if (visibleBots.length < ESCORT_SIZE) setSignal(curLoc, pickedUpFlag, visibleBots.length);
-            else clearSignal(pickedUpFlag);
+            // if (visibleBots.length < ESCORT_SIZE) setSignal(curLoc, pickedUpFlag, visibleBots.length);
+            // else clearSignal(pickedUpFlag);
 
             // check if path ahead is congested and drop flag if so
             MapLocation targetLoc = Utils.findClosestLoc(Spawner.getSpawnCenters());
