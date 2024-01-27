@@ -35,14 +35,15 @@ public class SetupPhase extends Robot {
 
                 if (!rc.isActionReady()) return; 
                 for (MapInfo info : adjMap) {
-                    int distSqNearest = info.getMapLocation().distanceSquaredTo(damMapLocs[0]);
+                    MapLocation adjMapLoc = info.getMapLocation();
+                    int distSqNearest = adjMapLoc.distanceSquaredTo(damMapLocs[0]);
 
                     for (int i = 1; i < damMapLocs.length; ++i) {
-                        distSqNearest = Math.min(info.getMapLocation().distanceSquaredTo(damMapLocs[i]), distSqNearest);
+                        distSqNearest = Math.min(adjMapLoc.distanceSquaredTo(damMapLocs[i]), distSqNearest);
                     }
 
-                    if (info.isWater() && distSqNearest <= 2) {
-                        Robot.fill(info.getMapLocation());
+                    if (info.isWater() && distSqNearest <= 2 && rc.canFill(adjMapLoc)) {
+                        Robot.fill(adjMapLoc);
                         return;
                     }
                 }
