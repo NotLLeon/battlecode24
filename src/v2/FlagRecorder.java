@@ -173,10 +173,13 @@ public class FlagRecorder {
     public static void checkFlagReturned(int ind) throws GameActionException {
         if (isCaptured(ind) || !isPickedUp(ind)) return;
         int lastRoundCarrying = Comms.read(COMMS_ENEMY_FLAG_LAST_ROUND_CARRYING_START_IND + ind);
-        if (lastRoundCarrying < rc.getRoundNum() - GameConstants.FLAG_DROPPED_RESET_ROUNDS - 1) {
+        if (lastRoundCarrying < rc.getRoundNum() - getFlagDroppedResetRounds() - 1) unSetPickedUp(ind);
+    }
 
-            unSetPickedUp(ind);
-        }
+    private static int getFlagDroppedResetRounds() {
+        int rounds = GameConstants.FLAG_DROPPED_RESET_ROUNDS;
+        if (Robot.hasUpgrade(GlobalUpgrade.CAPTURING)) rounds += GlobalUpgrade.CAPTURING.flagReturnDelayChange;
+        return rounds;
     }
 
 }
