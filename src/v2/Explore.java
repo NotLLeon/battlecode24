@@ -15,7 +15,7 @@ public class Explore {
     private static Direction prevDir;
 
     private static boolean shouldFill() {
-        return (rc.getID() % FILLERS_RATIO == 0) && (rc.getCrumbs() >= MIN_CRUMBS_TO_FILL);
+        return (rc.getID() % FILLERS_RATIO == (rc.getRoundNum() / 15) % 3) && (rc.getCrumbs() >= MIN_CRUMBS_TO_FILL);
     }
 
     public static MapLocation [] getAllDetectableWalls() throws GameActionException {
