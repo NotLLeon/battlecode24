@@ -3,6 +3,7 @@ package v2;
 import static v2.Constants.*;
 
 import battlecode.common.*;
+import v2.Constants.Role;
 import v2.micro.Micro;
 
 // MAIN PHASE STRATEGY HERE (TENTATIVE)
@@ -15,8 +16,11 @@ public class MainPhase extends Robot {
     private static final int SHORT_TARGET_ROUND_INTERVAL = 30;
     private static final int DISTRESS_HELP_DISTANCE_SQUARED = 100;
     private static boolean shouldExplore = false;
+    private static boolean distresssFill = false;
     private static final int FLAG_CONVOY_CONGESTION_THRESHOLD = 4;
     private static boolean shouldPickUpFlag = true;
+    private static int ESCORT_SIZE = 5;
+    private static int ESCORT_REQUEST_RANGE = 100;
 
     private static void onBroadcast() throws GameActionException {
         FlagRecorder.setApproxFlagLocs();
@@ -77,6 +81,33 @@ public class MainPhase extends Robot {
         }
     }
 
+    private static void setSignal(MapLocation loc, FlagInfo flag, int numEscorts) throws GameActionException {
+        int ind = FlagRecorder.getFlagIdInd(flag.getID());
+        Comms.writeLoc(COMMS_FLAG_ESCORT_REQUEST + ind, loc);
+        Comms.write(COMMS_FLAG_ESCORT_REQUEST_COUNTER + ind, Math.max(ESCORT_SIZE - numEscorts, 0));
+    }
+
+    public static void clearSignal(FlagInfo flag) throws GameActionException {
+        int ind = FlagRecorder.getFlagIdInd(flag.getID());
+        Comms.write(COMMS_FLAG_ESCORT_REQUEST + ind, 0);
+    }
+
+    private static void checkFlagEscortRequest() throws GameActionException {
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
+            MapLocation flagBearerLoc = Comms.readLoc(COMMS_FLAG_ESCORT_REQUEST + i);
+            if (flagBearerLoc != null && 
+                rc.getLocation().distanceSquaredTo(flagBearerLoc) < ESCORT_REQUEST_RANGE &&
+                Comms.read(COMMS_FLAG_ESCORT_REQUEST_COUNTER + i) > 0) {
+                distresssFill = true;
+                moveTo(flagBearerLoc);
+            }
+        }
+    }
+
+    public static boolean getDistressFill() {
+        return distresssFill;
+    }
+
     private static void runStrat() throws GameActionException {
         if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
@@ -85,6 +116,7 @@ public class MainPhase extends Robot {
         FlagDefense.scanAndSignal();
 
         shouldPickUpFlag = true;
+        distresssFill = false;
 
         if (rc.hasFlag()) {
             FlagInfo[] enemyFlags = rc.senseNearbyFlags(0, rc.getTeam().opponent());
@@ -98,6 +130,9 @@ public class MainPhase extends Robot {
             }
 
             MapLocation curLoc = rc.getLocation();
+            RobotInfo[] visibleBots = rc.senseNearbyRobots(-1, rc.getTeam());
+            if (visibleBots.length < ESCORT_SIZE) setSignal(curLoc, pickedUpFlag, visibleBots.length);
+            else clearSignal(pickedUpFlag);
 
             // check if path ahead is congested and drop flag if so
             MapLocation targetLoc = Utils.findClosestLoc(Spawner.getSpawnCenters());
@@ -124,7 +159,10 @@ public class MainPhase extends Robot {
             } else {
                 moveTo(targetLoc);
                 int flagId = pickedUpFlag.getID();
-                if (!rc.hasFlag()) FlagRecorder.setCaptured(flagId);
+                if (!rc.hasFlag()) {
+                    FlagRecorder.setCaptured(flagId);
+                    clearSignal(pickedUpFlag);
+                }
                 else FlagRecorder.notifyCarryingFlag(flagId);
             }
 
@@ -134,6 +172,8 @@ public class MainPhase extends Robot {
             for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) FlagRecorder.checkFlagReturned(i);
 
             checkDistressSignal();
+
+            checkFlagEscortRequest();
 
             if (!Micro.inCombat()) moveToRushLoc();
         }

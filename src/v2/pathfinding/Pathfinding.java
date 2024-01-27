@@ -1,6 +1,7 @@
 package v2.pathfinding;
 
 import battlecode.common.*;
+import v2.MainPhase;
 import v2.Robot;
 
 import static v2.Constants.rc;
@@ -13,7 +14,7 @@ public class Pathfinding {
 
     private static boolean shouldFill() {
         if (rc.hasFlag()) return false;
-        return (rc.getID() % FILLERS_RATIO == 0) && (rc.getCrumbs() >= MIN_CRUMBS_TO_FILL);
+        return (rc.getID() % FILLERS_RATIO == 0) && (rc.getCrumbs() >= MIN_CRUMBS_TO_FILL) || MainPhase.getDistressFill();
     }
 
     public static Direction getNextDir(MapLocation dest, boolean adj, int radius) throws GameActionException {

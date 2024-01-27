@@ -111,7 +111,10 @@ public class Micro {
         Robot.pickupFlag(pickupFlag.getLocation());
         int flagID = pickupFlag.getID();
         FlagRecorder.setPickedUp(flagID);
-        if (!rc.hasFlag()) FlagRecorder.setCaptured(flagID); // in case you capture by picking up
+        if (!rc.hasFlag()) {
+            FlagRecorder.setCaptured(flagID); // in case you capture by picking up
+            MainPhase.clearSignal(pickupFlag);
+        }
     }
 
     private static void tryMoveToFlag() throws GameActionException {
