@@ -9,7 +9,7 @@ public class Pathfinding {
 
     // 1 out of every FILLERS_RATIO units are allowed to fill
     private static final int FILLERS_RATIO = 5;
-    private static final int MIN_CRUMBS_TO_FILL = GameConstants.FILL_COST;
+    private static final int MIN_CRUMBS_TO_FILL = 4 * GameConstants.FILL_COST;
 
     private static boolean shouldFill() {
         if (rc.hasFlag()) return false;
