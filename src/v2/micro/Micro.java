@@ -92,7 +92,13 @@ public class Micro {
         MapLocation curLoc = rc.getLocation();
         Direction moveDir;
         if (curLoc.isWithinDistanceSquared(flagLoc, FLAG_ESCORT_RADIUS_SQUARED)) moveDir = flagLoc.directionTo(curLoc);
-        else moveDir = curLoc.directionTo(flagLoc);
+        else {
+            moveDir = curLoc.directionTo(flagLoc);
+            MapLocation[] fillDirs = {curLoc.add(moveDir)};
+            for (MapLocation loc : fillDirs) {
+                if (rc.canFill(loc)) rc.fill(loc);
+            }
+        }
 
         moveInDir(moveDir, 1);
     }
@@ -111,7 +117,10 @@ public class Micro {
         Robot.pickupFlag(pickupFlag.getLocation());
         int flagID = pickupFlag.getID();
         FlagRecorder.setPickedUp(flagID);
-        if (!rc.hasFlag()) FlagRecorder.setCaptured(flagID); // in case you capture by picking up
+        if (!rc.hasFlag()) {
+            FlagRecorder.setCaptured(flagID); // in case you capture by picking up
+            MainPhase.clearSignal(pickupFlag);
+        }
     }
 
     private static void tryMoveToFlag() throws GameActionException {
