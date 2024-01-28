@@ -95,10 +95,9 @@ public class SignalBot {
             setSignal(curLoc);
             placeTraps(nearbyEnemies);
         }
-        FlagInfo[] flag = rc.senseNearbyFlags(0);
-        if (flag.length == 0) {
-            RobotPlayer.role = Role.GENERAL;
-            clearSignal(curLoc);
-        }
+        FlagInfo[] flag = rc.senseNearbyFlags(-1, rc.getTeam());
+        FlagInfo[] ontopFlag = rc.senseNearbyFlags(0);
+        if (flag.length == 0) clearSignal(curLoc);
+        if (ontopFlag.length == 0) RobotPlayer.role = Role.GENERAL;
     }
 }
