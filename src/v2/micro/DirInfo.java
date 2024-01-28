@@ -56,13 +56,13 @@ public class DirInfo {
         if (disToFlagCarrier < other.disToFlagCarrier) return true;
         if (disToFlagCarrier > other.disToFlagCarrier) return false;
 
-        if (!Micro.aggressive) {
-            if (dangerScore < other.dangerScore) return true;
-            if (dangerScore > other.dangerScore) return false;
-        } else {
+        if (Micro.aggressive) {
             if (minDisToEnemy < other.minDisToEnemy) return true;
             if (minDisToEnemy > other.minDisToEnemy) return false;
         }
+
+        if (dangerScore < other.dangerScore) return true;
+        if (dangerScore > other.dangerScore) return false;
 
         if (rc.isActionReady()) {
             if (highestPrio > other.highestPrio) return true;
