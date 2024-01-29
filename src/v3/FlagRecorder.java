@@ -17,7 +17,7 @@ public class FlagRecorder {
     private static final int IND_PICKED_UP = 1;
     private static final int IND_EXACT_LOC = 2;
 
-    private static int getFlagId(int ind) throws GameActionException {
+    public static int getFlagId(int ind) throws GameActionException {
         return Comms.read(COMMS_ENEMY_FLAG_IDS_START_IND + ind);
     }
 
@@ -74,7 +74,7 @@ public class FlagRecorder {
 
         // find which approximate location doesnt show up in broadcast
         // if multiple, pick the closest one to the flag
-        int minDis = 99999999;
+        int minDis = INF;
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; ++i) {
             if (isExactLoc(i)) continue;
             MapLocation approxLoc = getFlagLoc(i);
@@ -144,7 +144,7 @@ public class FlagRecorder {
      * @throws GameActionException
      */
     public static void setApproxFlagLocs() throws GameActionException {
-        if (Comms.read(COMMS_ENEMY_FLAG_LOCS_START_IND) != 0) return;
+        if (Comms.readLoc(COMMS_ENEMY_FLAG_LOCS_START_IND) != null) return;
         MapLocation[] approxFlagLocs = rc.senseBroadcastFlagLocations();
         int ind = 0;
         for (; ind < approxFlagLocs.length; ++ind) {

@@ -68,15 +68,22 @@ public class MainPhase extends Robot {
         MapLocation rushLoc = FlagRecorder.getFlagLoc(getRushInd());
         MapLocation curLoc = rc.getLocation();
 
+
         if (curLoc.distanceSquaredTo(rushLoc) >= GameConstants.FLAG_BROADCAST_NOISE_RADIUS) shouldExplore = false;
 
-        if (!FlagRecorder.isExactLoc(rushInd) &&
-                (shouldExplore || curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED))) {
+        boolean isExactLoc = FlagRecorder.isExactLoc(rushInd);
+        boolean isClose = curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED);
+
+        // jank fix for FlagRecorder bug
+        if (isExactLoc && isClose) {
+            FlagInfo[] nearbyFlags = rc.senseNearbyFlags(FLAG_PICKUP_DIS_SQUARED, rc.getTeam().opponent());
+            if (nearbyFlags.length == 0) FlagRecorder.setPickedUp(FlagRecorder.getFlagId(rushInd));
+        }
+
+        if (!isExactLoc && (shouldExplore || isClose)) {
             shouldExplore = true;
             Explore.exploreNewArea();
         } else {
-            // grouping attempt
-//            Micro.tryFollowLeader(rushLoc);
             moveToAdjacent(rushLoc);
         }
     }
