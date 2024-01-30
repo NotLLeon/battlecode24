@@ -1,4 +1,4 @@
-package v3.micro;
+package v3old.micro;
 
 import battlecode.common.*;
 
@@ -12,7 +12,7 @@ public class EnemyInfo {
         this.info = info;
         loc = info.getLocation();
         this.isStunned = isStunned;
-        priority = GameConstants.DEFAULT_HEALTH - info.getHealth();
+        priority = GameConstants.DEFAULT_HEALTH - info.getHealth(); // TODO: consider other factors
         numAttackableFriendlies = 0;
         for (RobotInfo friendly : friendlies) {
             if (friendly.getLocation().isWithinDistanceSquared(this.loc, GameConstants.ATTACK_RADIUS_SQUARED)) {

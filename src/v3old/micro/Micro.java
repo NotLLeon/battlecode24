@@ -1,9 +1,9 @@
-package v3.micro;
+package v3old.micro;
 
 import battlecode.common.*;
-import v3.*;
+import v3old.*;
 
-import static v3.Constants.*;
+import static v3old.Constants.*;
 
 public class Micro {
 
@@ -194,23 +194,55 @@ public class Micro {
         return robot.getAttackLevel() + robot.getHealLevel();
     }
 
-    static int getAttackPrio(RobotInfo robot) {
-        if (robot.hasFlag()) return INF;
-
-        int dmg = rc.getAttackDamage();
-        return -dmg * ((robot.getHealth() - 1) / dmg) + getLevelSum(robot);
-    }
-
+    // TODO: try different algo
     private static RobotInfo selectAttackTarget() {
+
+        // pick target we think we can kill in 1 hit,
+        // if there are multiple, break ties with sum of attack and heal spec
+        // if there are none, pick the enemy that we think we can kill in the fewest turns
+        //  considering position of friendly units and their attack lvl. Break ties with spec again.
         RobotInfo target = null;
-        int maxPrio = -INF;
+        boolean canOneShot = false;
+        int minKillTime = INF;
         for (RobotInfo enemy : immediateEnemyRobots) {
-            int priority = getAttackPrio(enemy);
-            if (priority > maxPrio) {
+            if (enemy.hasFlag()) { // is this correct? Another unit can immediately pick up flag
                 target = enemy;
-                maxPrio = priority;
+                break;
+            }
+            if (target == null) {
+                target = enemy;
+                continue;
+            }
+
+            if (enemy.getHealth() <= rc.getAttackDamage()) {
+                if (canOneShot) {
+                    if (getLevelSum(enemy) > getLevelSum(target)) target = enemy;
+                } else {
+                    target = enemy;
+                    canOneShot = true;
+                }
+            }
+
+            if (canOneShot) continue;
+
+            MapLocation enemyLoc = enemy.getLocation();
+            int damageSum = rc.getAttackDamage();
+            int numFriendlyRobots = 1;
+            for (RobotInfo friendly : visibleFriendlyRobots) {
+                if (enemyLoc.isWithinDistanceSquared(friendly.getLocation(), GameConstants.ATTACK_RADIUS_SQUARED)) {
+                    damageSum += getAttackDamage(friendly);
+                    numFriendlyRobots++;
+                }
+            }
+            // this is wrong but fixing it makes it worse
+            int avgDmg = damageSum / numFriendlyRobots;
+            int killTime = (enemy.getHealth() + avgDmg - 1) / avgDmg;
+            if (killTime < minKillTime || (killTime == minKillTime && getLevelSum(enemy) > getLevelSum(target))) {
+                minKillTime = killTime;
+                target = enemy;
             }
         }
+
         return target;
     }
 
@@ -227,12 +259,13 @@ public class Micro {
         if (closeEnemyRobots.length > 0 && rc.getID() % 3 != 0) return;
 
         RobotInfo target = null;
-        int maxPrio = -INF;
+        int minBaseHits = INF;
         for (RobotInfo friendly : immediateFriendlyRobots) {
-            int priority = -BASE_ATTACK_DMG * (friendly.getHealth() / BASE_ATTACK_DMG) + getLevelSum(friendly);
-            if (priority > maxPrio) {
+            int baseHits = friendly.getHealth() / BASE_ATTACK_DMG;
+            if (baseHits < minBaseHits
+                    || (baseHits == minBaseHits && getLevelSum(friendly) > getLevelSum(target))) {
                 target = friendly;
-                maxPrio = priority;
+                minBaseHits = baseHits;
             }
         }
 
