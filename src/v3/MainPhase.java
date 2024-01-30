@@ -84,7 +84,7 @@ public class MainPhase extends Robot {
             shouldExplore = true;
             Explore.exploreNewArea();
         } else {
-            moveToAdjacent(rushLoc);
+            moveToAdjacent(rushLoc, true);
         }
     }
 
@@ -115,6 +115,29 @@ public class MainPhase extends Robot {
         return distresssFill;
     }
 
+    private static boolean tryDropFlag(MapLocation targetLoc) throws GameActionException {
+        MapLocation curLoc = rc.getLocation();
+        RobotInfo[] nearbyBots = rc.senseNearbyRobots(16, rc.getTeam()); // TODO: test diff ranges
+        Direction intendedDir = curLoc.directionTo(targetLoc);
+        int numBlockingBots = 0;
+
+        for (RobotInfo bot : nearbyBots) {
+            if (Utils.inGeneralDirection(curLoc.directionTo(bot.getLocation()), intendedDir)) {
+                numBlockingBots++;
+            }
+        }
+
+        MapLocation intendedLoc = curLoc.add(intendedDir);
+        if (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD && rc.senseRobotAtLocation(intendedLoc) != null) {
+            if (rc.canDropFlag(intendedLoc)) {
+                Robot.dropFlag(intendedLoc);
+                shouldPickUpFlag = false;
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void runStrat() throws GameActionException {
         if ((rc.getRoundNum() - 1) % GameConstants.FLAG_BROADCAST_UPDATE_INTERVAL == 0) {
             onBroadcast();
@@ -124,6 +147,8 @@ public class MainPhase extends Robot {
 
         shouldPickUpFlag = true;
         distresssFill = false;
+
+        rc.setIndicatorString(v3.pathfinding.Pathfinding.getIndicatorString());
 
         if (rc.hasFlag()) {
             FlagInfo[] enemyFlags = rc.senseNearbyFlags(0, rc.getTeam().opponent());
@@ -141,29 +166,13 @@ public class MainPhase extends Robot {
             // if (visibleBots.length < ESCORT_SIZE) setSignal(curLoc, pickedUpFlag, visibleBots.length);
             // else clearSignal(pickedUpFlag);
 
-            // check if path ahead is congested and drop flag if so
-            MapLocation targetLoc = Utils.findClosestLoc(Spawner.getSpawnCenters());
-            RobotInfo[] nearbyBots = rc.senseNearbyRobots(16, rc.getTeam()); // TODO: test diff ranges
-            Direction intendedDir = curLoc.directionTo(targetLoc);
-            int numBlockingBots = 0;
-
-            for (RobotInfo bot : nearbyBots) {
-                if (Utils.inGeneralDirection(curLoc.directionTo(bot.getLocation()), intendedDir)) {
-                    numBlockingBots++;
-                }
+            // first try backtracking through previous pathfinding locations
+            MapLocation targetLoc = backtrack();
+            if (targetLoc == null ) {
+                targetLoc = Utils.findClosestLoc(Spawner.getSpawnCenters());
             }
-
-            // TODO: test this number and fix this omega condition
-            // if (rc.canDropFlag(curLoc.add(intendedDir)) && (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD ||
-            //         (intendedDir != Direction.CENTER && rc.senseRobotAtLocation(curLoc.add(intendedDir)) != null))) {
-
-            MapLocation intendedLoc = curLoc.add(intendedDir);
-            if (numBlockingBots > FLAG_CONVOY_CONGESTION_THRESHOLD && rc.senseRobotAtLocation(intendedLoc) != null) {
-                if (rc.canDropFlag(intendedLoc)) {
-                    Robot.dropFlag(intendedLoc);
-                    shouldPickUpFlag = false;
-                }
-            } else {
+            // check if path ahead is congested and drop flag if so, else nav
+            if (!tryDropFlag(targetLoc)) {
                 moveTo(targetLoc);
                 int flagId = pickedUpFlag.getID();
                 if (!rc.hasFlag()) {

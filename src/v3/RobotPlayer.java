@@ -11,7 +11,7 @@ import battlecode.common.*;
  */
 public strictfp class RobotPlayer {
 
-    static int curRound = 0;
+    public static int curRound = 0;
 
     public static Role role = Role.GENERAL;
 

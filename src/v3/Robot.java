@@ -19,7 +19,15 @@ public abstract class Robot {
     }
 
     public static void moveTo(MapLocation dest) throws GameActionException {
-        Pathfinding.moveTo(dest, false, -1);
+        Pathfinding.moveTo(dest, false, -1, false);
+    }
+
+    public static void moveTo(MapLocation dest, boolean recordSpots) throws GameActionException {
+        Pathfinding.moveTo(dest, false, -1, recordSpots);
+    }
+
+    public static MapLocation backtrack() throws GameActionException {
+        return Pathfinding.backtrack();
     }
 
     public static Direction getNextDirection(MapLocation dest) throws GameActionException {
@@ -27,11 +35,11 @@ public abstract class Robot {
     }
 
     public static void moveToRadius(MapLocation dest, int radius) throws GameActionException {
-        Pathfinding.moveTo(dest, false, radius);
+        Pathfinding.moveTo(dest, false, radius, false);
     }
 
-    public static void moveToAdjacent(MapLocation dest) throws GameActionException {
-        Pathfinding.moveTo(dest, true, -1);
+    public static void moveToAdjacent(MapLocation dest, boolean recordSpots) throws GameActionException {
+        Pathfinding.moveTo(dest, true, -1, recordSpots);
     }
 
     public static int getCooldown() {
