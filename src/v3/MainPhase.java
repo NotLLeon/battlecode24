@@ -39,7 +39,7 @@ public class MainPhase extends Robot {
         }
     }
 
-    private static int getRushInd() {
+    private static int getRushInd() throws GameActionException {
         // visit a flag that hasn't been picked up
         // if all flags are picked up, patrol default locs
         // switch targets every LONG_TARGET_ROUND_INTERVAL rounds if we are looking for nonpicked up flags
@@ -52,13 +52,23 @@ public class MainPhase extends Robot {
         if (rushFlagInds.length == 0) {
             rushFlagInds = Utils.filterIntArr(FLAG_INDS, (i) -> !FlagRecorder.isCaptured(i));
             interval = SHORT_TARGET_ROUND_INTERVAL;
+            return 0;
         }
 
-        // all flags captured, this is the last round unless something broke
-        if (rushFlagInds.length == 0) return 0;
-
         // TODO: modify so that rushLoc doesnt change prematurely when the array changes
-        return rushFlagInds[(rc.getRoundNum() / interval) % rushFlagInds.length];
+        int id = rushFlagInds[0];
+        int minDist = rc.getLocation().distanceSquaredTo(FlagRecorder.getFlagLoc(id));
+
+        for (int flagId : rushFlagInds) {
+            MapLocation testRushLoc = FlagRecorder.getFlagLoc(flagId);
+            int distSqToTest = testRushLoc.distanceSquaredTo(rc.getLocation());
+            if (distSqToTest < minDist) {
+                minDist = distSqToTest;
+                id = flagId;
+            }
+        }
+
+        return id;
     }
 
     private static void moveToRushLoc() throws GameActionException {
@@ -68,22 +78,15 @@ public class MainPhase extends Robot {
         MapLocation rushLoc = FlagRecorder.getFlagLoc(getRushInd());
         MapLocation curLoc = rc.getLocation();
 
-
         if (curLoc.distanceSquaredTo(rushLoc) >= GameConstants.FLAG_BROADCAST_NOISE_RADIUS) shouldExplore = false;
 
-        boolean isExactLoc = FlagRecorder.isExactLoc(rushInd);
-        boolean isClose = curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED);
-
-        // jank fix for FlagRecorder bug
-        if (isExactLoc && isClose) {
-            FlagInfo[] nearbyFlags = rc.senseNearbyFlags(FLAG_PICKUP_DIS_SQUARED, rc.getTeam().opponent());
-            if (nearbyFlags.length == 0) FlagRecorder.setPickedUp(FlagRecorder.getFlagId(rushInd));
-        }
-
-        if (!isExactLoc && (shouldExplore || isClose)) {
+        if (!FlagRecorder.isExactLoc(rushInd) &&
+                (shouldExplore || curLoc.isWithinDistanceSquared(rushLoc, FLAG_PICKUP_DIS_SQUARED))) {
             shouldExplore = true;
             Explore.exploreNewArea();
         } else {
+            // grouping attempt
+//            Micro.tryFollowLeader(rushLoc);
             moveToAdjacent(rushLoc);
         }
     }

@@ -3,6 +3,7 @@ package v3;
 
 import battlecode.common.*;
 import v3.pathfinding.*;
+
 import static v3.Constants.*;
 
 public abstract class Robot {
