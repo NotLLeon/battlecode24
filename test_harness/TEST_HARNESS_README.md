@@ -69,3 +69,16 @@ Example: `python3 generate_random_maps.py`
 Don't pass in an argument to generate 10 maps, otherwise pass in the number of maps you want generated
 
 The file will be written to `gml/NEW_MAP.json`. 
+
+## Updating team IDs JSON
+
+The testing harness has a cache of the teams that accept unranked scrims, along with their IDs.
+This is stored in `unranked_accepted_teams_id.json`. This is used by the queue script to find the
+IDs of the teams you want to queue against. This may obviously change, if the teams decide to update their
+acceptance of unranked scrims. 
+
+
+To update it, run `python3 update_other_team_info.py`. 
+
+
+Do not pass in any args. This will update `unranked_accepted_teams_id.json`.
