@@ -40,7 +40,10 @@ def setWinningReason(reasonStr, retDict):
 def getGameInfo(logStr: str):
     # Only care about lines that start with `[server]`
     importantLogLines = [line.strip() for line in logStr.split('\n') if line.strip().startswith('[server]')]
-    retDict = {'tieBreaker' : False}
+    retDict = {'tieBreaker' : False,
+               'winner': '*',
+               'round': -1,
+               'winningReason': '?'}
     for line in importantLogLines:
         # Assuming that there is a single instance of the word `wins`
         if 'wins' in line:
@@ -81,8 +84,10 @@ def runGames(args: tuple) -> dict:
     command = ["./gradlew", "--parallel", "run", f"-Pmaps={gameMap}", f"-PteamA={teamA}",
                f"-PteamB={teamB}"]
     # cwd is battlecode24/test-harness, cd to battlecode24/ instead
-    process = subprocess.Popen(command, stdout=subprocess.PIPE,stderr=subprocess.PIPE, text=True, cwd=os.pardir)
-    output, error = process.communicate()
+    # process = subprocess.Popen(command, stdout=subprocess.PIPE,stderr=subprocess.PIPE, text=True, cwd=os.pardir)
+    # output, error = process.communicate()
+    processOutput = subprocess.run(command, capture_output=True, text=True, cwd=os.pardir)
+    output, error = processOutput.stdout, processOutput.stderr
 
     checkErrorLogForInvalidUserInput(error)
 
@@ -123,38 +128,6 @@ def runGamesMain(currBot, botsVersusList, mapsList):
     return results
 
 
-def getGameAnalytics(gamesResList):
-    if not gamesResList:
-        raise ValueError('There are no maps played!')
-
-    mapsWhereSideAltersOutcomeInfo, matchupResDict = [], defaultdict(dict)
-    #matchupResDict maps: [mapName][opposingBotName] -> winningBot
-    numGamesLost, numGamesTotal = 0,len(gamesResList)
-    losingGamesInfo = []
-
-    for currMatchup in gamesResList:
-        currMap = currMatchup['map']
-        opposingBotName = currMatchup['opposingBotName']
-        if opposingBotName not in matchupResDict[currMap]:
-            matchupResDict[currMap][opposingBotName] = (currMatchup['winningBot'], currMatchup['winner'])
-        else:
-            prevWinningBot, prevWinnerLabel = matchupResDict[currMap][opposingBotName]
-            # If the previous winning bot isn't our current bot, or the winning label hasn't switched
-            if prevWinningBot != currMatchup['winningBot'] or prevWinnerLabel == currMatchup['winner']:
-                # Don't know which side cause the currBot to lose, but doesn't matter bc can check the losing games
-                infoStr = f"Inconsistent result on map {currMap}, with one side as {currMatchup['teamA']} and other side as {currMatchup['teamB']}"
-                mapsWhereSideAltersOutcomeInfo.append(infoStr)
-
-        if currMatchup['winner'] != currMatchup['currBotLabel']:
-            losingGamesInfo.append(f"currBot lost to {currMatchup['winningBot']} on map {currMap}")
-            numGamesLost += 1
-
-    numGamesWon = numGamesTotal - numGamesLost
-
-    return {'GamesWonInfo': f"Percentage of games won: {numGamesWon/numGamesTotal}. There are {numGamesWon} games won out of {numGamesTotal} total games.",
-            'losingGamesInfo': losingGamesInfo,
-            'mapsWhereSideAltersOutcomeInfo': mapsWhereSideAltersOutcomeInfo}
-
 
 
 # Example of running the test harness
@@ -165,8 +138,7 @@ if __name__ == '__main__':
                            mapsList=['DefaultSmall'])
 
     print('got here')
-    gamesInfo = getGameAnalytics(retList)
-    print(gamesInfo)
+
 
 
 

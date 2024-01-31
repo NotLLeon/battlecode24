@@ -1,4 +1,4 @@
-from test_harness_internal import runGamesMain, getGameAnalytics
+from test_harness_internal import runGamesMain
 from table_script import transformGameDataAsRows, printTabulate, transformGameDataAsNestedMap, printTabulateAsGrid
 '''
 DONT USE THIS! 
@@ -12,8 +12,7 @@ if __name__ == '__main__':
                            botsVersusList=['v0', 'examplefuncsplayer'],
                            mapsList=['DefaultSmall', 'DefaultMedium', 'DefaultLarge'])
     print('got here')
-    gameAnalyticsInfo = getGameAnalytics(retDict)
-    print(gameAnalyticsInfo)
+
     resDictTransformed = transformGameDataAsNestedMap(retDict)
     print('got here')
     printTabulateAsGrid(resDictTransformed, ['DefaultSmall', 'DefaultMedium', 'DefaultLarge'])
