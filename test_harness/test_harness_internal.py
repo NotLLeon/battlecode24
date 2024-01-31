@@ -55,7 +55,7 @@ def getGameInfo(logStr: str):
 
     return retDict
 
-def checkErrorLogForInvalidUserInput(errorLog):
+def checkErrorLogForInvalidUserInput(errorLog, output):
     playerNotFoundPattern = re.compile(r"Couldn't load player class: (\w+)\.RobotPlayer")
 
     # Search for the pattern in the log message
@@ -63,6 +63,8 @@ def checkErrorLogForInvalidUserInput(errorLog):
 
     # Check if a match is found and extract the player class name
     if playerNotFoundMatch:
+        print(errorLog)
+        print(output)
         player_class_name = playerNotFoundMatch.group(1)
         print("Player class not found, check spelling for this bot name:", player_class_name)
 
@@ -89,7 +91,7 @@ def runGames(args: tuple) -> dict:
     processOutput = subprocess.run(command, capture_output=True, text=True, cwd=os.pardir)
     output, error = processOutput.stdout, processOutput.stderr
 
-    checkErrorLogForInvalidUserInput(error)
+    checkErrorLogForInvalidUserInput(error, output)
 
     gameResInfo = getGameInfo(output)
 
