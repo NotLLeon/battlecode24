@@ -7,7 +7,9 @@ ALL_MAPS = ["DefaultHuge", "DefaultLarge", "DefaultMedium", "DefaultSmall", "Ace
             "BigDucksBigPond", "Canals", "CH3353C4K3F4CT0RY", "Duck", "Fountain", "Hockey", "HungerGames", "MazeRunner",
             "Rivers","Snake", "Soccer", "SteamboatMickey", "Yinyang", "BedWars", "Bunkers", "Checkered","Diagonal", "Divergent",
             "EndAround","FloodGates", "Foxes", "Fusbol", "GaltonBoard", "HeMustBeFreed", "Intercontinental", "Klein",
-            "QueenOfHearts","QuestionableChess", "Racetrack", "Rainbow", "TreeSearch"]
+            "QueenOfHearts","QuestionableChess", "Racetrack", "Rainbow", "TreeSearch", "Asteroids", "Backslash", "Capacitance",
+            "Digging", "EvilGrin", "Funnel", "GravitationalWaves", "Joker", "KingQuacksCastle", "MIT", "OceanFloor", "ORV",
+            "Pancakes", "Puzzle", "StackGame", "Tunnels", "Whirlpool", "YearOfTheDragon"]
 
 JWT_TOKEN = getJWTToken()
 BATTLECODE_URL = "https://api.battlecode.org/api/compete/bc24/request/"
