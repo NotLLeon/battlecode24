@@ -63,7 +63,7 @@ public class Micro {
      * @param strictness between 0 and 2
      * @throws GameActionException
      */
-    private static void moveInDir(Direction dir, int strictness) throws GameActionException {
+    public static void moveInDir(Direction dir, int strictness) throws GameActionException {
         if (rc.canMove(dir)) {
             move(dir);
             return;

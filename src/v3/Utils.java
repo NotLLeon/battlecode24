@@ -85,6 +85,14 @@ public class Utils {
         return mapLocs;
     }
 
+    public static MapLocation[] mapLocArr(MapLocation[] arr, CheckedFunction<MapLocation, MapLocation> fn) {
+        Function<MapLocation, MapLocation> sfn = lambdaExceptionWrapper(fn, null);
+        MapLocation[] mapped = new MapLocation[arr.length];
+        int ind = 0;
+        for (int i = arr.length; --i >= 0;) mapped[ind++] = sfn.apply(arr[i]);
+        return mapped;
+    }
+
     public static MapLocation findClosestLoc(MapLocation[] locs) {
         MapLocation curLoc = rc.getLocation();
         int minDist = 10000;

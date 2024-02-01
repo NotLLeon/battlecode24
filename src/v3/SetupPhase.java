@@ -2,6 +2,7 @@ package v3;
 
 import battlecode.common.*;
 import v3.Constants.Role;
+import v3.micro.Micro;
 
 import static v3.Constants.*;
 
@@ -11,7 +12,12 @@ public class SetupPhase extends Robot {
 
     public static boolean exploring = true;
     public static MapLocation meetLocation;
+    
     private static int spawnIndex = -1;
+    private static int flagIndex = 0;
+
+    private static final int[] FLAG_INDS = {0, 1, 2};
+    private static final int MIN_DIST_SQ = 36;
 
     public static void writeMeetupLoc(MapLocation damLoc) throws GameActionException {
         int writeIndex = COMMS_MEETUP_LOCS + spawnIndex;
@@ -65,8 +71,50 @@ public class SetupPhase extends Robot {
     public static void run() throws GameActionException {
         if (spawnIndex == -1) init();
 
+        Symmetry.init();
+
         if (RobotPlayer.role == Role.SIGNAL) {
             SignalBot.run();
+            return;
+        }
+
+        FlagInfo[] flags = rc.senseNearbyFlags(2);
+        if (flags.length > 0 && rc.getRoundNum() < 150) {
+            if (rc.canPickupFlag(flags[0].getLocation())) {
+                rc.pickupFlag(flags[0].getLocation());
+                while(Comms.read(COMMS_FLAG_CARRIER_LOCS + flagIndex) != 0) {
+                    flagIndex += 1;
+                }
+            }
+        }
+
+        if (rc.hasFlag()) {
+            int symm = Symmetry.getSymmetry();
+            // if the current robots has a flag then we want it to perform only setup
+            int[] otherFlagCarriers = Utils.filterIntArr(FLAG_INDS, (i) -> i != flagIndex);
+            
+            for (int tempFlagInd : otherFlagCarriers) {
+                int test = Comms.read(tempFlagInd + COMMS_FLAG_CARRIER_LOCS);
+                if (test != 0) {
+                    MapLocation flagCarrier = Comms.readLoc(tempFlagInd + COMMS_FLAG_CARRIER_LOCS);
+                    if (flagCarrier.distanceSquaredTo(rc.getLocation()) < MIN_DIST_SQ) {
+                        Micro.moveInDir(rc.getLocation().directionTo(flagCarrier).opposite(), 1);
+                    }
+                }
+            }
+
+            Comms.writeLoc(COMMS_FLAG_CARRIER_LOCS + flagIndex, rc.getLocation());
+            
+            MapLocation enemyCentroid = Symmetry.guessEnemyCentroid();
+            Micro.moveInDir(rc.getLocation().directionTo(enemyCentroid).opposite(), 1);
+
+            if (rc.getRoundNum() > 150) {
+                int minDistSq = rc.getLocation().distanceSquaredTo(enemyCentroid);
+
+                if (rc.canDropFlag(rc.getLocation()) && rc.senseLegalStartingFlagPlacement(rc.getLocation())) {
+                    rc.dropFlag(rc.getLocation());
+                }
+            }
             return;
         }
 
